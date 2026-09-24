@@ -38,6 +38,7 @@ jobs:
         run: python -m pipeline.run
 
       - name: Save this week's state
+        if: ${{ !cancelled() }}   # keep paid-for Jev verdicts even if the thesis step failed
         run: |
           git config user.name "timeline-bot"
           git config user.email "timeline-bot@users.noreply.github.com"

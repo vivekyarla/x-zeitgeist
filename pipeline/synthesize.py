@@ -51,6 +51,20 @@ def synthesize(tweets: list[dict], previous_thesis: str | None) -> dict:
         "previous_thesis": previous_thesis,
         "tweets": _payload(tweets),
     }, ensure_ascii=False)
+    for attempt in range(2):
+        out = _ask(user)
+        if out is not None:
+            break
+    else:
+        raise RuntimeError("writer model didn't return valid JSON twice in a row (see above)")
+    valid = {t["id"] for t in tweets}
+    for theme in out.get("themes", []):
+        theme["tweet_ids"] = [i for i in theme.get("tweet_ids", []) if i in valid]
+    out["themes"] = [th for th in out.get("themes", []) if th["tweet_ids"]]
+    return out
+
+
+def _ask(user: str) -> dict | None:
     r = requests.post(
         ENDPOINT,
         headers={
@@ -62,16 +76,17 @@ def synthesize(tweets: list[dict], previous_thesis: str | None) -> dict:
             "messages": [{"role": "system", "content": SYSTEM},
                          {"role": "user", "content": user}],
             "temperature": 0.4,
-            "max_tokens": 1500,
+            "max_tokens": 3000,
         },
         timeout=120,
     )
+    if r.status_code != 200:
+        print(f"  writer {r.status_code}: {r.text[:300]}")
     r.raise_for_status()
-    text = r.json()["choices"][0]["message"]["content"]
-    text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
-    out = json.loads(text)
-    valid = {t["id"] for t in tweets}
-    for theme in out.get("themes", []):
-        theme["tweet_ids"] = [i for i in theme.get("tweet_ids", []) if i in valid]
-    out["themes"] = [th for th in out.get("themes", []) if th["tweet_ids"]]
-    return out
+    choice = r.json()["choices"][0]
+    text = re.sub(r"^```(?:json)?|```$", "", (choice["message"]["content"] or "").strip(), flags=re.M).strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as e:
+        print(f"  writer returned bad JSON ({e}; finish_reason={choice.get('finish_reason')}): {text[:300]!r}")
+        return None

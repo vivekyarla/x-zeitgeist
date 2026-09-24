@@ -116,9 +116,11 @@ def main() -> None:
         now = datetime.now(timezone.utc)
         state = load_state(week_start(now))
         if not args.build_only:
-            update(state, now)
-            DATA.mkdir(exist_ok=True)
-            STATE.write_text(json.dumps(state, indent=1, ensure_ascii=False))
+            try:
+                update(state, now)
+            finally:  # keep Jev verdicts even if a later step fails
+                DATA.mkdir(exist_ok=True)
+                STATE.write_text(json.dumps(state, indent=1, ensure_ascii=False))
 
     build_site(state, ROOT / "public", demo=args.demo)
     print("built public/index.html")
