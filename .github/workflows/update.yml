@@ -3,7 +3,13 @@ name: Update timeline page
 on:
   schedule:
     - cron: "0 */3 * * *"   # every 3 hours (UTC)
-  workflow_dispatch:         # "Run workflow" button for manual refreshes
+  workflow_dispatch:         # "Run workflow" button, and the page's Settings panel
+    inputs:
+      slack:
+        description: "Slack: auto follows the schedule in settings.json; now posts after this update"
+        type: choice
+        options: [auto, now, skip]
+        default: auto
 
 permissions:
   contents: write            # commit data/week.json back to the repo
@@ -35,7 +41,9 @@ jobs:
           TWITTERAPI_IO_KEY: ${{ secrets.TWITTERAPI_IO_KEY }}
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}   # Jev + Claude via Vercel AI Gateway
           TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}       # optional: Jev direct instead
-        run: python -m pipeline.run
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}     # optional: post the read to Slack
+          PAGE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+        run: python -m pipeline.run --slack ${{ inputs.slack || 'auto' }}
 
       - name: Save this week's state
         if: ${{ !cancelled() }}   # keep paid-for Jev verdicts even if the thesis step failed
@@ -44,6 +52,7 @@ jobs:
           git config user.email "timeline-bot@users.noreply.github.com"
           git add data/
           git diff --cached --quiet || git commit -m "Update timeline $(date -u +'%a %H:%M UTC')"
+          git pull --rebase    # settings may have been saved from the page mid-run
           git push
 
       - uses: actions/upload-pages-artifact@v3

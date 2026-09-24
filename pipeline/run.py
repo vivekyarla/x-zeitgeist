@@ -10,6 +10,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from . import config
+from . import slack
 from .build import build_site
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -52,7 +53,8 @@ def fetch(ws: datetime) -> list[dict]:
     return list(seen.values())
 
 
-def update(state: dict, now: datetime) -> None:
+def update(state: dict, now: datetime) -> bool:
+    """Run one cycle. Returns True if the thesis changed."""
     from .judge import Jev, engagement, passes, rank_score
     from .synthesize import synthesize
 
@@ -90,12 +92,13 @@ def update(state: dict, now: datetime) -> None:
     top = kept[:config.TWEETS_FOR_THESIS]
     if not top:
         print("nothing passed the filter; leaving the page as it was")
-        return
+        return False
 
     prev = state["latest"]["thesis"] if state["latest"] else None
     out = synthesize(top, prev)
 
-    if not state["thesis_history"] or (out.get("thesis_changed", True) and out["thesis"] != prev):
+    changed = not state["thesis_history"] or (out.get("thesis_changed", True) and out["thesis"] != prev)
+    if changed:
         state["thesis_history"].append({"at": now.isoformat(), "thesis": out["thesis"]})
     state["latest"] = {
         "thesis": out["thesis"],
@@ -104,12 +107,15 @@ def update(state: dict, now: datetime) -> None:
         "updated_at": now.isoformat(),
         "stats": {"scanned": len(tweets), "kept": len(kept)},
     }
+    return bool(changed)
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true", help="render sample data, no API calls")
     ap.add_argument("--build-only", action="store_true", help="re-render the page from saved state")
+    ap.add_argument("--slack", choices=["auto", "now", "skip"], default="auto",
+                    help="auto: post if the schedule in settings.json says so; now: post regardless")
     args = ap.parse_args()
 
     if args.demo:
@@ -117,12 +123,16 @@ def main() -> None:
     else:
         now = datetime.now(timezone.utc)
         state = load_state(week_start(now))
-        if not args.build_only:
-            try:
-                update(state, now)
-            finally:  # keep Jev verdicts even if a later step fails
-                DATA.mkdir(exist_ok=True)
-                STATE.write_text(json.dumps(state, indent=1, ensure_ascii=False))
+        changed = False
+        try:
+            if not args.build_only:
+                changed = update(state, now)
+            if args.slack == "now" or (args.slack == "auto" and slack.due(state, now, changed)):
+                if state.get("latest"):
+                    slack.post(state, now)
+        finally:  # keep Jev verdicts even if a later step fails
+            DATA.mkdir(exist_ok=True)
+            STATE.write_text(json.dumps(state, indent=1, ensure_ascii=False))
 
     build_site(state, ROOT / "public", demo=args.demo)
     print("built public/index.html")

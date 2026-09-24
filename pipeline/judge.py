@@ -26,18 +26,17 @@ SIGNAL_LEVELS = [
     "Defining: the thing everyone in tech, AI, and startup culture is talking about this week",
 ]
 
+_care = "; ".join(config.FOCUS["care_about"])
+_skip = "; ".join(config.FOCUS["skip"])
+
 QUESTIONS = {
     "relevant": {
         "type": "noul",
-        "instructions": "Is this tweet about tech culture: AI model or product launches, creative things "
-                        "people built with AI, what GTM and revenue teams are doing, startup and founder "
-                        "culture, or the SF tech scene?",
+        "instructions": f"Is this tweet about something {config.FOCUS['audience']} cares about? "
+                        f"They care about: {_care}.",
         "criteria": {
-            "true": "a launch, a cool or viral AI build, a GTM/sales/revenue move or playbook, a startup or "
-                    "VC culture moment, or SF tech life",
-            "false": "infrastructure or finance (data centers, compute deals, chips, bonds, debt, earnings, "
-                     "stocks, macro), politics, regulation, lawsuits, sports, entertainment, personal life, "
-                     "or a tech word used in passing",
+            "true": f"the substance is one of: {_care}",
+            "false": f"{_skip}; or sports, entertainment, personal life, or a tech word used in passing",
         },
     },
     "topic": {
@@ -47,7 +46,8 @@ QUESTIONS = {
     },
     "signal": {
         "type": "score",
-        "instructions": "How much does this tweet reflect what matters in tech, AI, and B2B sales this week?",
+        "instructions": "How much is this tweet part of what tech, AI, and startup culture is talking "
+                        "about this week?",
         "criteria": SIGNAL_LEVELS,
     },
     "bait": {
@@ -57,9 +57,8 @@ QUESTIONS = {
     },
     "marketing_useful": {
         "type": "noul",
-        "instructions": "Would the marketing team at an AI startup want to see this: something to "
-                        "reference, react to, share, or borrow ideas from (a launch, a viral build, a "
-                        "clever GTM or brand move)?",
+        "instructions": f"Would {config.FOCUS['audience']} want to see this: something to reference, "
+                        "react to, share, or borrow ideas from?",
     },
 }
 

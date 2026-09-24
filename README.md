@@ -14,7 +14,7 @@ Every 3 hours a GitHub Action runs `python -m pipeline.run`:
 ## Setup (about 15 minutes)
 
 1. Push this folder to a new GitHub repo.
-2. Add two repo secrets (Settings → Secrets and variables → Actions):
+2. Add two repo secrets (or add them later from Settings → API keys on the page) (Settings → Secrets and variables → Actions):
    - `TWITTERAPI_IO_KEY` from twitterapi.io/dashboard
    - `AI_GATEWAY_API_KEY` from vercel.com → AI Gateway → API Keys. Used for both Jev and Claude. (Optional: add `TYPESAFE_API_KEY` from console.typesafe.ai to send Jev calls to TypeSafe directly.)
 3. Settings → Pages → Source: **GitHub Actions**.
@@ -32,13 +32,18 @@ python -m pipeline.run --build-only    # re-render from saved state (after templ
 
 ## Tuning
 
-Everything is in `pipeline/config.py`:
+Interests, topics, searches, thresholds, the writer model, and the Slack schedule live in `settings.json`. Edit them from the **Settings** button on the page (connect a fine-grained GitHub token for this repo with read/write on Contents, Secrets, and Actions), or edit the file directly. Saving from the page commits `settings.json` and starts an update; any change to the interests or topics re-judges the week's saved tweets automatically.
 
-- **Too much noise?** Raise `MIN_SIGNAL` (e.g. 2.2) or `MIN_RELEVANCE`, or raise `min_faves` in the queries.
-- **Missing stuff?** Add queries or accounts to `WATCHLIST`, or lower `MIN_SIGNAL`.
-- **Change the focus:** `TOPICS` and `EXCLUDED_TOPICS` decide what Jev keeps (infra/finance and policy are excluded by default); `SYSTEM` in `pipeline/synthesize.py` tells the writer what the team cares about. Bump `JUDGE_VERSION` after editing the Jev questions so saved tweets get re-judged.
+- **Too much noise?** Raise the min signal (e.g. 2.2) or min relevance, or raise `min_faves` in the searches.
+- **Missing stuff?** Add searches or watchlist accounts, or lower the min signal.
+- **Change the focus:** edit "Focus on" and "Skip", and the topics (unchecked topics never make the page).
 - **Pin Jev** once thresholds feel right: set `JEV_MODEL=jev-1.13.0` (or whatever is current), so `jev-latest` updates don't shift scores under you.
-- **Writer model**: set `WRITER_MODEL` to any Vercel AI Gateway model id (e.g. `anthropic/claude-opus-5.5`).
+
+## Slack
+
+1. Create a Slack app (api.slack.com/apps → From scratch), turn on **Incoming Webhooks**, and add one for your channel.
+2. On the page: Settings → API keys → paste the webhook URL as the Slack webhook.
+3. Settings → Slack → turn it on and pick how often: once a day after a set hour (PT), when the thesis changes, or every update. "Send to Slack now" posts after one immediate update.
 
 Every Jev verdict is saved in `data/week.json`, so you can look at what got filtered out and adjust thresholds from real data.
 

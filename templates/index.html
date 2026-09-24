@@ -3,174 +3,557 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="refresh" content="1800">
 <title>{{ title }}, {{ week_label }}</title>
+<meta name="description" content="{{ latest.thesis | plain if latest else title }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #E7EBF2;
-  --surface: #F7F8FB;
-  --ink: #10162A;
-  --muted: #56607A;
-  --rule: #C9D0DD;
-  --accent: #2E43E0;
-  --meter-off: #CDD3E0;
-  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
-  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
-  box-sizing: border-box;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #0E0E0D; --surface: #151514; --raise: #1B1B19; --ink: #EDEBE6; --muted: #97938B;
+  --faint: #5F5C56; --rule: #272624; --accent: #BFA47C; --on-accent: #0E0E0D; --danger: #E08A7A;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --sans: "Inter", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0C1120; --surface: #141B2E; --ink: #E6EAF4; --muted: #8F99B2;
-    --rule: #26304A; --accent: #8D9CFF; --meter-off: #2A3350;
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #F3F1EC; --surface: #FAF9F6; --raise: #FFFFFF; --ink: #161614; --muted: #67645D;
+    --faint: #A19D94; --rule: #DDD9D0; --accent: #7A6344; --on-accent: #FFFFFF; --danger: #B24A36;
+    color-scheme: light;
   }
 }
-:root[data-theme="dark"] {
-  --bg: #0C1120; --surface: #141B2E; --ink: #E6EAF4; --muted: #8F99B2;
-  --rule: #26304A; --accent: #8D9CFF; --meter-off: #2A3350;
+:root[data-theme="light"] {
+  --bg: #F3F1EC; --surface: #FAF9F6; --raise: #FFFFFF; --ink: #161614; --muted: #67645D;
+  --faint: #A19D94; --rule: #DDD9D0; --accent: #7A6344; --on-accent: #FFFFFF; --danger: #B24A36;
+  color-scheme: light;
 }
-*, *::before, *::after { box-sizing: inherit; }
-html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-body {
-  margin: 0; background: var(--bg); color: var(--ink);
-  font-family: var(--display); font-size: 16px; line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased; }
 a { color: inherit; }
-a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+:focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+button, input, select, textarea { font: inherit; color: inherit; }
 
-.page {
-  max-width: 1240px; margin: 0 auto; padding: 40px 24px 64px;
-  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 72px;
-}
-@media (max-width: 900px) { .page { grid-template-columns: 1fr; gap: 48px; padding-top: 28px; } }
+/* Frame: hairlines with small dots at the corners, after the Rox launch creative */
+.frame { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+.rule { position: relative; height: 1px; background: var(--rule); }
+.rule::before, .rule::after { content: ""; position: absolute; top: -2.5px; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--faint); }
+.rule::before { left: -3px; } .rule::after { right: -3px; }
 
-/* ---- Left: the read ---- */
-.read { position: sticky; top: calc(40px + env(safe-area-inset-top, 0px)); align-self: start; }
-@media (max-width: 900px) { .read { position: static; } }
-.masthead { display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
-  font-size: 15px; color: var(--muted); margin-bottom: 40px; }
-.masthead strong { color: var(--ink); font-weight: 650; font-variation-settings: "wdth" 85; font-size: 17px; }
-.thesis {
-  font-size: clamp(30px, 3.6vw, 46px); line-height: 1.12; letter-spacing: -0.02em;
-  font-weight: 560; font-variation-settings: "wdth" 88, "opsz" 96;
-  margin: 0 0 24px; text-wrap: pretty;
-}
-.freshness { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--muted); }
-.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
-@media (prefers-reduced-motion: no-preference) {
-  .pulse { animation: pulse 2.4s ease-in-out infinite; }
-  @keyframes pulse { 50% { opacity: .25; } }
-}
-.history { margin-top: 48px; border-top: 1px solid var(--rule); padding-top: 20px; }
-.history h2 { font-size: 15px; font-weight: 600; margin: 0 0 14px; color: var(--muted); }
-.history ol { list-style: none; margin: 0; padding: 0; }
-.history li { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 8px 0;
-  font-size: 15px; line-height: 1.45; }
-.history time { color: var(--muted); font-variant-numeric: tabular-nums; }
-.history p { margin: 0; color: var(--muted); }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 0; }
+.brand { font: 400 21px/1.2 var(--serif); letter-spacing: -0.01em; margin: 0; }
+.meta { display: flex; align-items: center; gap: 18px; color: var(--muted); font-size: 13px; }
+.meta .live { display: inline-flex; align-items: center; gap: 8px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .dot { animation: breathe 2.6s ease-in-out infinite; }
+  @keyframes breathe { 50% { opacity: .3; } } }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--rule); background: transparent;
+  border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.btn:hover { border-color: var(--faint); }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn.primary:hover { opacity: .88; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+@media (max-width: 640px) { .meta .week { display: none; } }
 
-/* ---- Right: themes ---- */
-.theme { margin-bottom: 64px; }
-.theme h2 { font-size: 26px; line-height: 1.15; letter-spacing: -0.015em; margin: 0 0 8px;
-  font-weight: 650; font-variation-settings: "wdth" 85; }
-.theme > p { margin: 0 0 24px; color: var(--muted); max-width: 62ch; }
+/* The read */
+.hero { padding: 72px 0 64px; }
+.kicker { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 28px; }
+.thesis { font: 300 clamp(32px, 4.6vw, 62px)/1.1 var(--serif); letter-spacing: -0.022em; margin: 0;
+  max-width: 24ch; text-wrap: pretty; font-optical-sizing: auto; }
+.thesis strong { font-weight: 500; text-decoration: underline; text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px; text-underline-offset: .13em; text-decoration-skip-ink: auto; }
+.history { margin-top: 44px; max-width: 72ch; }
+.history summary { cursor: pointer; color: var(--muted); font-size: 13px; list-style: none; display: inline-flex; gap: 8px; }
+.history summary::-webkit-details-marker { display: none; }
+.history summary::before { content: "+"; width: 1em; }
+.history[open] summary::before { content: "−"; }
+.history ol { list-style: none; margin: 16px 0 0; padding: 0; }
+.history li { display: grid; grid-template-columns: 96px 1fr; gap: 16px; padding: 10px 0; border-top: 1px solid var(--rule); }
+.history time { color: var(--faint); font-size: 13px; font-variant-numeric: tabular-nums; padding-top: 2px; }
+.history p { margin: 0; font: 400 17px/1.45 var(--serif); color: var(--muted); }
 
-.tweet { background: var(--surface); border-radius: 14px; padding: 20px 22px; margin-bottom: 12px; }
-.tweet header { display: flex; align-items: center; gap: 10px; font-size: 15px; margin-bottom: 10px; }
-.tweet img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex: none; background: var(--meter-off); }
-.who { min-width: 0; line-height: 1.25; }
-.who b { font-weight: 620; }
-.who span { color: var(--muted); display: block; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tweet blockquote { margin: 0; font-family: var(--serif); font-size: 17.5px; line-height: 1.55;
-  white-space: pre-line; overflow-wrap: anywhere; max-width: 64ch; }
-.tweet footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 14px;
-  font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.tweet footer a { margin-left: auto; color: var(--accent); text-decoration: none; font-weight: 600; }
-.tweet footer a:hover { text-decoration: underline; }
+/* Themes */
+.theme { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 56px; padding: 56px 0; }
+.theme + .theme { border-top: 1px solid var(--rule); }
+.theme-head { position: sticky; top: 24px; align-self: start; }
+.num { font: 400 13px/1 var(--sans); color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: .08em; }
+.theme h2 { font: 400 clamp(28px, 3vw, 38px)/1.1 var(--serif); letter-spacing: -0.018em; margin: 14px 0 14px; text-wrap: balance; }
+.theme-head p { margin: 0; color: var(--muted); max-width: 46ch; }
+.tweets { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+@media (max-width: 900px) { .theme { grid-template-columns: 1fr; gap: 28px; padding: 44px 0; }
+  .theme-head { position: static; } .hero { padding: 48px 0 44px; } }
 
-/* Jev's signal score, 0-4, as five bars */
-.meter { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
-.meter i { width: 4px; border-radius: 1px; background: var(--meter-off); }
-.meter i:nth-child(1) { height: 5px; } .meter i:nth-child(2) { height: 7px; }
-.meter i:nth-child(3) { height: 9px; } .meter i:nth-child(4) { height: 11px; }
-.meter i:nth-child(5) { height: 14px; }
+/* A tweet: official X embed once widgets.js loads; this card until then (or if X is blocked) */
+.tw { margin: 0; max-width: 550px; width: 100%; }
+.tw .twitter-tweet { margin: 0 !important; }
+.tw blockquote.twitter-tweet { background: var(--raise); border: 1px solid var(--rule); border-radius: 14px;
+  padding: 16px 18px 14px; font-family: var(--sans); }
+.tw-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.tw-head img, .tw-head .ph { width: 40px; height: 40px; border-radius: 50%; flex: none; background: var(--rule); object-fit: cover; }
+.tw-who { min-width: 0; line-height: 1.25; flex: 1; }
+.tw-who b { display: block; font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tw-who span { color: var(--muted); font-size: 14px; }
+.tw-x { width: 18px; height: 18px; fill: var(--ink); flex: none; }
+.tw blockquote p { margin: 0 0 12px; font-size: 15.5px; line-height: 1.45; white-space: pre-line; overflow-wrap: anywhere; }
+.tw-foot { font-size: 13.5px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+.tw-foot a { color: var(--muted); text-decoration: none; } .tw-foot a:hover { text-decoration: underline; }
+.tw figcaption { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding-left: 2px;
+  font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.meter { display: inline-flex; align-items: flex-end; gap: 2px; height: 11px; }
+.meter i { width: 3px; border-radius: 1px; background: var(--rule); }
+.meter i:nth-child(1) { height: 4px; } .meter i:nth-child(2) { height: 6px; } .meter i:nth-child(3) { height: 8px; }
+.meter i:nth-child(4) { height: 10px; } .meter i:nth-child(5) { height: 11px; }
 .meter i.on { background: var(--accent); }
-.signal { display: inline-flex; align-items: center; gap: 7px; }
 
-.empty { font-size: 18px; color: var(--muted); max-width: 44ch; }
-.demo { background: var(--accent); color: var(--bg); text-align: center; font-size: 14px; padding: 8px 16px; }
-.colophon { grid-column: 1 / -1; font-size: 14px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 20px; }
+.empty { font: 300 28px/1.3 var(--serif); color: var(--muted); max-width: 30ch; }
+.demo { background: var(--accent); color: var(--on-accent); text-align: center; font-size: 13px; padding: 8px 16px; }
+.colophon { color: var(--faint); font-size: 13px; padding: 24px 0 56px; max-width: 80ch; }
+
+/* Settings */
+dialog { width: min(760px, calc(100vw - 24px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--rule);
+  border-radius: 16px; background: var(--surface); color: var(--ink); }
+dialog::backdrop { background: rgb(0 0 0 / .55); }
+.dlg { display: flex; flex-direction: column; max-height: calc(100vh - 50px); }
+.dlg-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
+.dlg-head h2 { font: 400 26px/1.2 var(--serif); margin: 0; }
+.x-close { border: 0; background: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--muted); padding: 6px; }
+.tabs { display: flex; gap: 4px; padding: 16px 24px 0; border-bottom: 1px solid var(--rule); overflow-x: auto; }
+.tabs button { border: 0; background: none; padding: 10px 12px; font-size: 13.5px; font-weight: 500; color: var(--muted);
+  cursor: pointer; border-bottom: 1.5px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.dlg-body { padding: 22px 24px; overflow-y: auto; }
+.panel[hidden] { display: none; }
+.field { margin-bottom: 20px; }
+.field > label, .field > .lbl { display: block; font-weight: 500; font-size: 13.5px; margin-bottom: 6px; }
+.hint { color: var(--muted); font-size: 12.5px; margin: 4px 0 0; }
+.inp, textarea.inp, select.inp { width: 100%; background: var(--bg); border: 1px solid var(--rule); border-radius: 8px;
+  padding: 9px 11px; font-size: 14px; }
+textarea.inp { resize: vertical; min-height: 96px; line-height: 1.45; font-size: 13.5px; }
+textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; min-height: 180px; }
+.inp:focus { outline: none; border-color: var(--accent); }
+.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 560px) { .row3 { grid-template-columns: 1fr; } }
+.topics { display: flex; flex-direction: column; gap: 8px; }
+.topic { display: grid; grid-template-columns: auto 150px 1fr auto; gap: 8px; align-items: start; }
+.topic input[type="checkbox"] { margin-top: 11px; accent-color: var(--accent); }
+.topic .rm { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 18px; padding: 6px; }
+.topic .rm:hover { color: var(--danger); }
+@media (max-width: 560px) { .topic { grid-template-columns: auto 1fr auto; } .topic .desc { grid-column: 2 / 4; } }
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.check input { accent-color: var(--accent); }
+.key { border: 1px solid var(--rule); border-radius: 10px; padding: 14px; margin-bottom: 12px; background: var(--bg); }
+.key-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 8px; flex-wrap: wrap; }
+.key-top code { font-size: 12.5px; }
+.key-status { font-size: 12.5px; color: var(--muted); }
+.key-status.set { color: var(--accent); }
+.key-row { display: flex; gap: 8px; }
+.key-row .inp { flex: 1; }
+.connect { border: 1px solid var(--rule); border-radius: 10px; padding: 14px; margin-bottom: 22px; background: var(--bg); }
+.connect.ok { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.dlg-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 24px;
+  border-top: 1px solid var(--rule); }
+.status { font-size: 13px; color: var(--muted); min-height: 1.4em; }
+.status.err { color: var(--danger); }
+.status a { color: var(--accent); }
 </style>
 </head>
 <body>
 {% if demo %}<div class="demo">Sample data. Real tweets appear once the pipeline runs with your API keys.</div>{% endif %}
-<div class="page">
-  <section class="read" aria-label="This week's read">
-    <div class="masthead"><strong>{{ title }}</strong><span>{{ week_label }}</span></div>
+<div class="frame">
+  <header class="bar">
+    <p class="brand">{{ title }}</p>
+    <div class="meta">
+      <span class="week">{{ week_label }}</span>
+      {% if latest %}<span class="live"><span class="dot" aria-hidden="true"></span>Updated <time id="updated" datetime="{{ updated_iso }}">{{ updated_label }}</time></span>{% endif %}
+      <button class="btn" id="open-settings" type="button">Settings</button>
+    </div>
+  </header>
+  <div class="rule"></div>
+
+  <section class="hero" aria-label="This week's read">
     {% if latest %}
-      <p class="thesis">{{ latest.thesis }}</p>
-      <div class="freshness"><span class="pulse" aria-hidden="true"></span>
-        <span>Updated <time id="updated" datetime="{{ updated_iso }}">{{ updated_label }}</time></span></div>
+      <p class="kicker">The read</p>
+      <h1 class="thesis">{{ latest.thesis | emphasis }}</h1>
       {% if history %}
-      <div class="history">
-        <h2>Earlier this week</h2>
-        <ol>{% for h in history %}<li><time>{{ h.when }}</time><p>{{ h.thesis }}</p></li>{% endfor %}</ol>
-      </div>
+      <details class="history">
+        <summary>Earlier this week</summary>
+        <ol>{% for h in history %}<li><time>{{ h.when }}</time><p>{{ h.thesis | plain }}</p></li>{% endfor %}</ol>
+      </details>
       {% endif %}
     {% else %}
-      <p class="empty">Nothing yet this week. The first read appears after the next update runs, usually within three hours of Monday morning.</p>
+      <p class="empty">Nothing yet this week. The first read appears after the next update runs.</p>
     {% endif %}
   </section>
+  <div class="rule"></div>
 
   <main>
     {% for th in themes %}
     <section class="theme">
-      <h2>{{ th.name }}</h2>
-      <p>{{ th.summary }}</p>
-      {% for t in th.tweets %}
-      <article class="tweet">
-        <header>
-          {% if t.author.avatar %}<img src="{{ t.author.avatar }}" alt="" loading="lazy" referrerpolicy="no-referrer">{% endif %}
-          <div class="who"><b>{{ t.author.name }}</b><span>@{{ t.author.handle }}, {{ t.author.followers | compact }} followers</span></div>
-        </header>
-        <blockquote>{{ t.text }}</blockquote>
-        <footer>
-          <span>{{ t.likes | compact }} likes</span>
-          <span>{{ t.retweets | compact }} reposts</span>
-          {% set lit = ((t.jev.signal + 0.5) | int) + 1 %}
-          <span class="signal" title="Jev signal score {{ '%.1f' % t.jev.signal }} of 4">
+      <div class="theme-head">
+        <span class="num">{{ '%02d' % loop.index }}</span>
+        <h2>{{ th.name }}</h2>
+        <p>{{ th.summary }}</p>
+      </div>
+      <div class="tweets">
+        {% for t in th.tweets %}
+        {% set lit = ((t.jev.signal + 0.5) | int) + 1 %}
+        <figure class="tw">
+          <blockquote class="twitter-tweet" data-dnt="true" data-conversation="none">
+            <div class="tw-head">
+              {% if t.author.avatar %}<img src="{{ t.author.avatar | replace('_normal.', '_bigger.') }}" alt="" loading="lazy" referrerpolicy="no-referrer">{% else %}<span class="ph"></span>{% endif %}
+              <span class="tw-who"><b>{{ t.author.name }}</b><span>@{{ t.author.handle }}</span></span>
+              <svg class="tw-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </div>
+            <p lang="en" dir="ltr">{{ t.text }}</p>
+            <div class="tw-foot"><span>{{ t.likes | compact }} likes</span><span>{{ t.retweets | compact }} reposts</span>
+              <a href="{{ t.url | replace('https://x.com/', 'https://twitter.com/') }}">{{ t.created_at | tweet_date or 'View on X' }}</a></div>
+          </blockquote>
+          <figcaption title="Jev signal score {{ '%.1f' % t.jev.signal }} of 4">
             <span class="meter" aria-hidden="true">{% for n in range(5) %}<i class="{{ 'on' if n < lit else '' }}"></i>{% endfor %}</span>
-            {{ topic_label(t.jev.topic) }}
-          </span>
-          <a href="{{ t.url }}" target="_blank" rel="noopener">Open on X</a>
-        </footer>
-      </article>
-      {% endfor %}
+            Jev {{ '%.1f' % t.jev.signal }} · {{ topic_label(t.jev.topic) }}
+          </figcaption>
+        </figure>
+        {% endfor %}
+      </div>
     </section>
     {% endfor %}
   </main>
 
+  <div class="rule"></div>
   {% if latest %}
-  <p class="colophon">Scanned {{ latest.stats.scanned }} tweets this week; {{ latest.stats.kept }} passed Jev's relevance and signal filter. The bars show how strongly Jev rated each tweet as reflecting this week's conversation. Refreshes every three hours.</p>
+  <p class="colophon">Scanned {{ latest.stats.scanned }} tweets this week; {{ latest.stats.kept }} passed Jev's relevance and signal filter. The bars under each tweet show Jev's signal score (0–4). Refreshes every three hours.</p>
   {% endif %}
 </div>
+
+<dialog id="settings" aria-labelledby="settings-title">
+  <form class="dlg" method="dialog" onsubmit="return false">
+    <div class="dlg-head"><h2 id="settings-title">Settings</h2><button class="x-close" type="button" data-close aria-label="Close">×</button></div>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" aria-selected="true" data-tab="interests">Interests</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="searches">Searches</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="slack">Slack</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="keys">API keys</button>
+    </div>
+    <div class="dlg-body">
+      <div id="connect" class="connect">
+        <div class="field" style="margin-bottom:10px">
+          <label for="gh-token">GitHub token</label>
+          <div class="key-row"><input class="inp" id="gh-token" type="password" autocomplete="off" placeholder="github_pat_…"><button class="btn primary" type="button" id="gh-connect">Connect</button></div>
+          <p class="hint">Changes are saved to the <span class="repo-name"></span> repo, so they need a
+            <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a>
+            for that repo only, with read and write access to <b>Contents</b>, <b>Secrets</b>, and <b>Actions</b>.
+            The token stays in this browser and is only sent to GitHub.</p>
+        </div>
+        <label class="check"><input type="checkbox" id="gh-remember"> Remember on this device</label>
+      </div>
+
+      <div class="panel" data-panel="interests">
+        <div class="field"><label for="f-audience">Written for</label><input class="inp" id="f-audience"></div>
+        <div class="field"><label for="f-care">Focus on</label><textarea class="inp" id="f-care"></textarea>
+          <p class="hint">One per line, most important first. Jev uses these to decide what's relevant, and Claude to write the read.</p></div>
+        <div class="field"><label for="f-skip">Skip</label><textarea class="inp" id="f-skip" style="min-height:64px"></textarea>
+          <p class="hint">One per line. Tweets about these are filtered out, even when they're popular.</p></div>
+        <div class="field"><span class="lbl">Topics</span>
+          <div class="topics" id="f-topics"></div>
+          <p class="hint">Jev files every tweet under one topic. Unchecked topics never make the page.</p>
+          <button class="btn" type="button" id="add-topic" style="margin-top:10px">Add topic</button></div>
+        <div class="field"><span class="lbl">Filter</span>
+          <div class="row3">
+            <div><input class="inp" id="f-signal" type="number" min="0" max="4" step="0.1"><p class="hint">Min signal, 0–4</p></div>
+            <div><input class="inp" id="f-relevance" type="number" min="0" max="1" step="0.05"><p class="hint">Min relevance, 0–1</p></div>
+            <div><input class="inp" id="f-bait" type="number" min="0" max="1" step="0.05"><p class="hint">Max bait, 0–1</p></div>
+          </div></div>
+        <div class="field"><label for="f-model">Writer model</label><input class="inp" id="f-model">
+          <p class="hint">Any Vercel AI Gateway model id, e.g. anthropic/claude-sonnet-5.</p></div>
+      </div>
+
+      <div class="panel" data-panel="searches" hidden>
+        <div class="field"><label for="f-searches">X searches</label><textarea class="inp mono" id="f-searches" spellcheck="false"></textarea>
+          <p class="hint">One query per line, in X advanced-search syntax (OR, "quotes", min_faves:300, -filter:replies). Each is limited to this week automatically.</p></div>
+        <div class="field"><label for="f-watch">Watchlist</label><textarea class="inp" id="f-watch" style="min-height:64px" spellcheck="false"></textarea>
+          <p class="hint">X handles whose posts are always considered (still filtered by Jev). Separate with commas or new lines.</p></div>
+        <div class="field" style="max-width:220px"><label for="f-watchfaves">Watchlist min likes</label><input class="inp" id="f-watchfaves" type="number" min="0" step="1"></div>
+      </div>
+
+      <div class="panel" data-panel="slack" hidden>
+        <div class="field"><label class="check"><input type="checkbox" id="s-enabled"> Post the read to Slack</label>
+          <p class="hint">Posts the thesis, theme names, and links to the top tweets. Needs a Slack incoming webhook: create a Slack app, turn on Incoming Webhooks, add one for your channel, and paste its URL under API keys as the Slack webhook.</p></div>
+        <div class="row3">
+          <div class="field"><label for="s-freq">How often</label>
+            <select class="inp" id="s-freq"><option value="daily">Once a day</option><option value="on_change">When the thesis changes</option><option value="every_update">Every update (3 hours)</option></select></div>
+          <div class="field" id="s-hour-wrap"><label for="s-hour">After (PT)</label><select class="inp" id="s-hour"></select></div>
+          <div class="field"><label for="s-top">Top tweets</label><input class="inp" id="s-top" type="number" min="0" max="10" step="1"></div>
+        </div>
+        <div class="field" id="s-weekdays-wrap"><label class="check"><input type="checkbox" id="s-weekdays"> Weekdays only</label>
+          <p class="hint">Updates run every three hours, so the daily post goes out with the first update after this hour.</p></div>
+        <button class="btn" type="button" id="slack-now">Send to Slack now</button>
+      </div>
+
+      <div class="panel" data-panel="keys" hidden>
+        <p class="hint" style="margin:0 0 16px">Keys are encrypted in this browser and stored as GitHub Actions secrets. They can be replaced here but never read back.</p>
+        <div id="keys"></div>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <span class="status" id="status" role="status"></span>
+      <button class="btn primary" type="button" id="save">Save and refresh</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="application/json" id="settings-data">{{ settings | tojson }}</script>
 <script>
 (function () {
+  // Relative "updated" time
   var el = document.getElementById("updated");
-  if (!el) return;
-  var then = new Date(el.getAttribute("datetime"));
-  function rel() {
-    var m = Math.round((Date.now() - then) / 60000);
-    var txt = m < 1 ? "just now" : m < 60 ? m + " min ago" : Math.round(m / 60) + (Math.round(m / 60) === 1 ? " hour ago" : " hours ago");
-    el.textContent = txt;
-    el.title = then.toLocaleString();
+  if (el) {
+    var then = new Date(el.getAttribute("datetime"));
+    var rel = function () {
+      var m = Math.round((Date.now() - then) / 60000), h = Math.round(m / 60);
+      el.textContent = m < 1 ? "just now" : m < 60 ? m + " min ago" : h + (h === 1 ? " hour ago" : " hours ago");
+      el.title = then.toLocaleString();
+    };
+    rel(); setInterval(rel, 60000);
   }
-  rel(); setInterval(rel, 60000);
+
+  // Official X embeds, themed to match the page
+  var forced = document.documentElement.dataset.theme;  // the page is dark unless the system asks for light
+  var dark = forced ? forced === "dark" : !matchMedia("(prefers-color-scheme: light)").matches;
+  document.querySelectorAll("blockquote.twitter-tweet").forEach(function (b) { b.setAttribute("data-theme", dark ? "dark" : "light"); });
+  if (document.querySelector("blockquote.twitter-tweet")) {
+    var s = document.createElement("script"); s.async = true; s.src = "https://platform.twitter.com/widgets.js"; s.charset = "utf-8";
+    document.body.appendChild(s);
+  }
+})();
+
+(function () {
+  var REPO = {{ repo | tojson }} || (function () {
+    var owner = location.hostname.split(".")[0], name = location.pathname.split("/").filter(Boolean)[0];
+    return location.hostname.endsWith("github.io") && name ? owner + "/" + name : "";
+  })();
+  var API = "https://api.github.com/repos/" + REPO;
+  var KEYS = [
+    { name: "TWITTERAPI_IO_KEY", label: "twitterapi.io", why: "Fetches tweets. From twitterapi.io/dashboard." },
+    { name: "AI_GATEWAY_API_KEY", label: "Vercel AI Gateway", why: "Runs Jev and Claude. From vercel.com → AI Gateway → API Keys (vck_…)." },
+    { name: "SLACK_WEBHOOK_URL", label: "Slack webhook", why: "Incoming webhook URL for the channel the read is posted to (https://hooks.slack.com/…)." },
+    { name: "TYPESAFE_API_KEY", label: "TypeSafe (optional)", why: "Only if you want Jev calls to go to TypeSafe directly instead of through the gateway." }
+  ];
+  var $ = function (id) { return document.getElementById(id); };
+  var dlg = $("settings"), statusEl = $("status");
+  var settings = JSON.parse($("settings-data").textContent);
+  var token = "", settingsSha = null;
+
+  function store(k, v) { try { v == null ? (localStorage.removeItem(k), sessionStorage.removeItem(k)) : ($("gh-remember").checked ? localStorage : sessionStorage).setItem(k, v); } catch (e) {} }
+  function recall(k) { try { return localStorage.getItem(k) || sessionStorage.getItem(k) || ""; } catch (e) { return ""; } }
+  function say(msg, err) { statusEl.className = "status" + (err ? " err" : ""); statusEl.innerHTML = ""; if (typeof msg === "string") statusEl.textContent = msg; else statusEl.appendChild(msg); }
+  function gh(path, opts) {
+    opts = opts || {};
+    return fetch(API + path, { method: opts.method || "GET", body: opts.body ? JSON.stringify(opts.body) : undefined,
+      headers: { "Accept": "application/vnd.github+json", "Authorization": "Bearer " + token, "X-GitHub-Api-Version": "2022-11-28" } })
+      .then(function (r) {
+        if (r.status === 204) return null;
+        return r.json().catch(function () { return null; }).then(function (j) {
+          if (!r.ok) throw new Error((j && j.message) || ("GitHub returned " + r.status));
+          return j;
+        });
+      });
+  }
+  function b64utf8(s) { return btoa(String.fromCharCode.apply(null, new TextEncoder().encode(s))); }
+  function unb64utf8(s) { var bin = atob(s.replace(/\n/g, "")); return new TextDecoder().decode(Uint8Array.from(bin, function (c) { return c.charCodeAt(0); })); }
+  function lines(v) { return v.split("\n").map(function (x) { return x.trim(); }).filter(Boolean); }
+  function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "topic"; }
+
+  document.querySelectorAll(".repo-name").forEach(function (e) { e.textContent = REPO || "(unknown)"; });
+  for (var h = 0; h < 24; h++) { var o = document.createElement("option"); o.value = h;
+    o.textContent = (h % 12 || 12) + (h < 12 ? " am" : " pm"); $("s-hour").appendChild(o); }
+
+  // Tabs
+  document.querySelectorAll("[data-tab]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
+      document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.dataset.panel !== b.dataset.tab; });
+      $("save").hidden = b.dataset.tab === "keys";
+      if (b.dataset.tab === "keys") loadKeys();
+    });
+  });
+
+  // Form <-> settings
+  function topicRow(t) {
+    var row = document.createElement("div"); row.className = "topic"; row.dataset.key = t.key || "";
+    var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = t.include !== false; cb.title = "Show on the page";
+    var lab = document.createElement("input"); lab.className = "inp"; lab.value = t.label || ""; lab.placeholder = "Label";
+    var desc = document.createElement("input"); desc.className = "inp desc"; desc.value = t.description || ""; desc.placeholder = "What belongs here (Jev reads this)";
+    var rm = document.createElement("button"); rm.type = "button"; rm.className = "rm"; rm.textContent = "×"; rm.setAttribute("aria-label", "Remove topic");
+    rm.onclick = function () { row.remove(); };
+    row.append(cb, lab, desc, rm); return row;
+  }
+  function fill(s) {
+    $("f-audience").value = s.focus.audience;
+    $("f-care").value = s.focus.care_about.join("\n");
+    $("f-skip").value = s.focus.skip.join("\n");
+    var box = $("f-topics"); box.innerHTML = "";
+    s.topics.filter(function (t) { return t.key !== "other"; }).forEach(function (t) { box.appendChild(topicRow(t)); });
+    $("f-signal").value = s.thresholds.min_signal; $("f-relevance").value = s.thresholds.min_relevance; $("f-bait").value = s.thresholds.max_bait;
+    $("f-model").value = s.writer_model || "";
+    $("f-searches").value = s.searches.join("\n");
+    $("f-watch").value = s.watchlist.join(", ");
+    $("f-watchfaves").value = s.watchlist_min_faves;
+    var sl = s.slack || {};
+    $("s-enabled").checked = !!sl.enabled; $("s-freq").value = sl.frequency || "daily"; $("s-hour").value = sl.hour_pt != null ? sl.hour_pt : 8;
+    $("s-weekdays").checked = sl.weekdays_only !== false; $("s-top").value = sl.top_tweets != null ? sl.top_tweets : 5;
+    syncSlack();
+  }
+  function syncSlack() { var d = $("s-freq").value === "daily"; $("s-hour-wrap").style.visibility = d ? "" : "hidden"; $("s-weekdays-wrap").hidden = !d; }
+  $("s-freq").addEventListener("change", syncSlack);
+  $("add-topic").onclick = function () { var r = topicRow({ include: true }); $("f-topics").appendChild(r); r.children[1].focus(); };
+
+  function collect() {
+    var topics = [], seen = {};
+    document.querySelectorAll("#f-topics .topic").forEach(function (r) {
+      var label = r.children[1].value.trim(), desc = r.children[2].value.trim();
+      if (!label && !desc) return;
+      if (!label || !desc) throw new Error("Each topic needs a label and a description.");
+      var key = r.dataset.key || slug(label); while (seen[key]) key += "_2"; seen[key] = 1;
+      topics.push({ key: key, label: label, description: desc, include: r.children[0].checked });
+    });
+    topics.push({ key: "other", label: "Other", description: "Anything else", include: false });
+    if (topics.filter(function (t) { return t.include; }).length < 1) throw new Error("Check at least one topic to show on the page.");
+    var num = function (id, lo, hi, name) { var v = parseFloat($(id).value); if (isNaN(v) || v < lo || v > hi) throw new Error(name + " must be between " + lo + " and " + hi + "."); return v; };
+    var s = JSON.parse(JSON.stringify(settings));
+    s.focus = { audience: $("f-audience").value.trim() || settings.focus.audience, care_about: lines($("f-care").value), skip: lines($("f-skip").value) };
+    if (!s.focus.care_about.length) throw new Error("Add at least one thing to focus on.");
+    s.topics = topics;
+    s.thresholds = { min_signal: num("f-signal", 0, 4, "Min signal"), min_relevance: num("f-relevance", 0, 1, "Min relevance"), max_bait: num("f-bait", 0, 1, "Max bait") };
+    s.writer_model = $("f-model").value.trim() || "anthropic/claude-sonnet-5";
+    s.searches = lines($("f-searches").value);
+    if (!s.searches.length) throw new Error("Add at least one X search.");
+    s.watchlist = $("f-watch").value.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").trim(); }).filter(Boolean);
+    s.watchlist_min_faves = Math.max(0, parseInt($("f-watchfaves").value, 10) || 0);
+    s.slack = { enabled: $("s-enabled").checked, frequency: $("s-freq").value, hour_pt: parseInt($("s-hour").value, 10),
+      weekdays_only: $("s-weekdays").checked, top_tweets: Math.min(10, Math.max(0, parseInt($("s-top").value, 10) || 0)) };
+    return s;
+  }
+
+  // GitHub connection
+  function setConnected(login) {
+    var c = $("connect"); c.className = "connect ok"; c.innerHTML = "";
+    var t = document.createElement("span"); t.className = "hint"; t.style.margin = 0;
+    t.textContent = "Connected to " + REPO + (login ? " as @" + login : "") + ". Saving changes what everyone sees.";
+    var out = document.createElement("button"); out.type = "button"; out.className = "btn"; out.textContent = "Disconnect";
+    out.onclick = function () { token = ""; store("gh_token", null); location.reload(); };
+    c.append(t, out);
+  }
+  function connect(t) {
+    token = t.trim();
+    if (!token) return Promise.reject(new Error("Paste a GitHub token first."));
+    return fetch("https://api.github.com/user", { headers: { "Authorization": "Bearer " + token } })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (u) {
+        return gh("").then(function (repo) {
+          if (!repo.permissions || !repo.permissions.push) throw new Error("This token can't write to " + REPO + ".");
+          return gh("/contents/settings.json");
+        }).then(function (f) {
+          settingsSha = f.sha; settings = JSON.parse(unb64utf8(f.content)); fill(settings);
+          store("gh_token", token); setConnected(u.login); say("");
+        });
+      })
+      .catch(function (e) { token = ""; throw e; });
+  }
+  $("gh-connect").onclick = function () { say("Connecting…"); connect($("gh-token").value).catch(function (e) { say(e.message, true); }); };
+
+  function needToken() { if (!token) { say("Connect a GitHub token first.", true); $("gh-token").focus(); return true; } }
+  function runLink(text) {
+    var span = document.createElement("span"); span.textContent = text + " ";
+    var a = document.createElement("a"); a.href = "https://github.com/" + REPO + "/actions"; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Watch the run";
+    span.appendChild(a); return span;
+  }
+  function dispatch(slackMode) {
+    return gh("/actions/workflows/update.yml/dispatches", { method: "POST", body: { ref: "main", inputs: { slack: slackMode } } });
+  }
+
+  $("save").onclick = function () {
+    if (needToken()) return;
+    var s; try { s = collect(); } catch (e) { say(e.message, true); return; }
+    var btn = this; btn.disabled = true; say("Saving…");
+    gh("/contents/settings.json").then(function (f) {
+      return gh("/contents/settings.json", { method: "PUT", body: {
+        message: "Update settings from the page", sha: f.sha, content: b64utf8(JSON.stringify(s, null, 2) + "\n") } });
+    }).then(function (r) {
+      settings = s; settingsSha = r && r.content && r.content.sha;
+      return dispatch("auto");
+    }).then(function () {
+      say(runLink("Saved. The page refreshes with the new settings in about 3 minutes."));
+    }).catch(function (e) { say(e.message, true); }).finally(function () { btn.disabled = false; });
+  };
+  $("slack-now").onclick = function () {
+    if (needToken()) return;
+    say("Starting…");
+    dispatch("now").then(function () { say(runLink("Posting to Slack after this update, about 3 minutes.")); })
+      .catch(function (e) { say(e.message, true); });
+  };
+
+  // API keys (GitHub Actions secrets, sealed-box encrypted in the browser)
+  var cryptoReady;
+  function loadScript(src, sri) {
+    return new Promise(function (res, rej) { var s = document.createElement("script"); s.src = src; s.integrity = sri; s.crossOrigin = "anonymous";
+      s.onload = res; s.onerror = function () { rej(new Error("Couldn't load " + src)); }; document.head.appendChild(s); });
+  }
+  function loadCrypto() {
+    return cryptoReady || (cryptoReady = loadScript("https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js",
+      "sha384-05+sicyRJQ56XpL4U9HJ8YbtSzFDvAg7apPKOGV6A0JsAJKFM68jp5oLnUjG5mEp")
+      .then(function () { return loadScript("https://cdn.jsdelivr.net/npm/tweetnacl-sealedbox-js@1.2.0/sealedbox.web.js",
+        "sha384-gCr/Ers2SYUTIvvm+iWV5lakrZ/tTqxgYQckm0Znr3blQzNfOPirDZlpvkINLyhv"); }));
+  }
+  function loadKeys() {
+    var box = $("keys"); box.innerHTML = "";
+    var existing = {};
+    var render = function () {
+      box.innerHTML = "";
+      KEYS.forEach(function (k) {
+        var card = document.createElement("div"); card.className = "key";
+        var top = document.createElement("div"); top.className = "key-top";
+        var name = document.createElement("span"); name.innerHTML = "<b></b> <code></code>";
+        name.querySelector("b").textContent = k.label; name.querySelector("code").textContent = k.name;
+        var st = document.createElement("span"); st.className = "key-status" + (existing[k.name] ? " set" : "");
+        st.textContent = !token ? "" : existing[k.name] ? "Set · updated " + new Date(existing[k.name]).toLocaleDateString() : "Not set";
+        top.append(name, st);
+        var why = document.createElement("p"); why.className = "hint"; why.style.margin = "0 0 10px"; why.textContent = k.why;
+        var row = document.createElement("div"); row.className = "key-row";
+        var inp = document.createElement("input"); inp.className = "inp"; inp.type = "password"; inp.autocomplete = "off";
+        inp.placeholder = existing[k.name] ? "Paste a new value to replace it" : "Paste the key";
+        var btn = document.createElement("button"); btn.type = "button"; btn.className = "btn primary"; btn.textContent = "Save";
+        btn.onclick = function () {
+          if (needToken()) return;
+          var v = inp.value.trim(); if (!v) { inp.focus(); return; }
+          btn.disabled = true; say("Encrypting and saving " + k.name + "…");
+          Promise.all([loadCrypto(), gh("/actions/secrets/public-key")]).then(function (r) {
+            var pk = Uint8Array.from(atob(r[1].key), function (c) { return c.charCodeAt(0); });
+            var sealed = window.sealedBox.seal(new TextEncoder().encode(v), pk);
+            var b64 = btoa(String.fromCharCode.apply(null, sealed));
+            return gh("/actions/secrets/" + k.name, { method: "PUT", body: { encrypted_value: b64, key_id: r[1].key_id } });
+          }).then(function () { inp.value = ""; say(k.label + " key saved. The next update uses it."); existing[k.name] = new Date().toISOString(); render(); })
+            .catch(function (e) { say(e.message, true); }).finally(function () { btn.disabled = false; });
+        };
+        row.append(inp, btn); card.append(top, why, row); box.appendChild(card);
+      });
+    };
+    render();
+    if (token) gh("/actions/secrets?per_page=100").then(function (r) {
+      (r.secrets || []).forEach(function (s) { existing[s.name] = s.updated_at; }); render();
+    }).catch(function (e) { say(e.message, true); });
+  }
+
+  // Open / close
+  $("open-settings").onclick = function () { fill(settings); dlg.showModal(); if (!token) $("gh-token").focus(); };
+  dlg.querySelector("[data-close]").onclick = function () { dlg.close(); };
+  dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
+  var saved = recall("gh_token");
+  if (saved) { try { $("gh-remember").checked = !!localStorage.getItem("gh_token"); } catch (e) {}
+    connect(saved).catch(function () { store("gh_token", null); }); }
+  if (!REPO) $("open-settings").hidden = true;
 })();
 </script>
 </body>

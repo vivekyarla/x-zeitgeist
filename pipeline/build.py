@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from markupsafe import Markup, escape
 
 from . import config
 
@@ -19,6 +21,25 @@ def _compact(n: int) -> str:
             v = n / div
             return f"{v:.1f}".rstrip("0").rstrip(".") + suf
     return str(n)
+
+
+def _emphasis(text: str) -> Markup:
+    """Escape, then render the writer's **key phrases** as <strong>."""
+    return Markup(re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", str(escape(text))))
+
+
+def _plain(text: str) -> str:
+    return re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+
+
+def _tweet_date(raw: str) -> str:
+    for fmt in ("%a %b %d %H:%M:%S %z %Y", "%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%S%z"):
+        try:
+            d = datetime.strptime(raw.replace("Z", "+0000"), fmt)
+            return f"{d:%b} {d.day}, {d.year}"
+        except ValueError:
+            continue
+    return ""
 
 
 def _local(iso: str) -> datetime:
@@ -46,6 +67,9 @@ def build_site(state: dict, out_dir: Path, demo: bool = False) -> None:
 
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=select_autoescape())
     env.filters["compact"] = _compact
+    env.filters["emphasis"] = _emphasis
+    env.filters["plain"] = _plain
+    env.filters["tweet_date"] = _tweet_date
     env.globals["topic_label"] = lambda k: config.TOPIC_LABELS.get(k, k)
     html = env.get_template("index.html").render(
         title=config.SITE_TITLE,
@@ -56,6 +80,8 @@ def build_site(state: dict, out_dir: Path, demo: bool = False) -> None:
         themes=themes,
         history=history,
         demo=demo,
+        repo=config.REPO,
+        settings=config.SETTINGS,
     )
     (out_dir / "index.html").write_text(html)
     # Machine-readable copy, handy for a later Notion sync.

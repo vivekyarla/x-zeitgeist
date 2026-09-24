@@ -1,0 +1,108 @@
+{
+  "focus": {
+    "audience": "the marketing team at an AI startup in San Francisco",
+    "care_about": [
+      "AI model and product launches (a new GPT or Claude release, a new model like Jev, a new agent product)",
+      "Creative things people built with AI that are going viral (JavaScript animations made in Claude, vibe-coded games, clever demos)",
+      "What other revenue and GTM teams and tools are doing (Clay, Monaco, AI SDRs, outbound experiments, launch videos, brand stunts, pricing moves)",
+      "Startup, VC, and SF culture moments (a16z starting a school, a hackathon everyone went to, a notable raise people are talking about)"
+    ],
+    "skip": [
+      "Infrastructure and finance: data centers, compute deals, chips, power, bonds, debt, earnings, stock moves",
+      "Macro, politics, regulation, and lawsuits"
+    ]
+  },
+  "topics": [
+    {
+      "key": "launches",
+      "label": "Launches",
+      "description": "New AI models and AI product launches, from big labs or startups (e.g. a GPT or Claude release, a new eval model like Jev, a new agent product)",
+      "include": true
+    },
+    {
+      "key": "creative_viral",
+      "label": "Going viral",
+      "description": "Creative or delightful things people built with AI that are going viral: demos, animations, games, art, vibe-coded apps, clever prompts",
+      "include": true
+    },
+    {
+      "key": "gtm_playbooks",
+      "label": "GTM & revenue",
+      "description": "What sales, GTM, and revenue teams and tools are doing: Clay, Monaco, AI SDRs, outbound experiments, launch videos, brand stunts, pricing moves",
+      "include": true
+    },
+    {
+      "key": "ai_at_work",
+      "label": "AI at work",
+      "description": "How people and teams are actually using AI at work, and takes on where it's going",
+      "include": true
+    },
+    {
+      "key": "startup_culture",
+      "label": "Startup culture",
+      "description": "Startup, founder, and VC culture moves: new programs, schools, hiring, notable raises or acquisitions that people are talking about",
+      "include": true
+    },
+    {
+      "key": "sf_scene",
+      "label": "SF scene",
+      "description": "San Francisco and Bay Area tech culture, events, parties, hackathons, and life",
+      "include": true
+    },
+    {
+      "key": "industry_finance",
+      "label": "Infra & finance",
+      "description": "Infrastructure and finance: data centers, compute buildout, chips supply, power, bonds, debt, earnings, stock moves, macro",
+      "include": false
+    },
+    {
+      "key": "policy",
+      "label": "Policy",
+      "description": "Politics, government, regulation, lawsuits, and AI safety incidents",
+      "include": false
+    },
+    {
+      "key": "other",
+      "label": "Other",
+      "description": "Anything else",
+      "include": false
+    }
+  ],
+  "searches": [
+    "(introducing OR \"just launched\" OR \"just shipped\" OR \"now available\" OR \"new model\" OR \"open source model\") (AI OR model OR agent OR Claude OR GPT OR Gemini OR Grok OR Llama) min_faves:300 lang:en -filter:replies",
+    "(\"AI agent\" OR \"AI agents\" OR \"frontier model\" OR OpenAI OR Anthropic OR Gemini) min_faves:500 lang:en -filter:replies",
+    "(\"made this with\" OR \"built this with\" OR \"vibe coded\" OR \"one prompt\" OR \"one-shot\" OR animation OR shader OR \"three.js\" OR p5js OR \"generative art\" OR \"look what\") (Claude OR GPT OR Gemini OR Cursor OR AI) min_faves:300 lang:en -filter:replies",
+    "(Clay OR Monaco OR \"GTM engineer\" OR \"GTM engineering\" OR \"AI SDR\" OR \"cold email\" OR \"outbound\" OR \"sales playbook\" OR RevOps) min_faves:75 lang:en -filter:replies",
+    "(GTM OR \"go-to-market\" OR \"launch video\" OR \"launch day\" OR billboard OR \"brand campaign\" OR \"marketing stunt\") (AI OR startup OR SaaS) min_faves:150 lang:en -filter:replies",
+    "(ARR OR \"usage-based pricing\" OR \"pricing page\") (AI OR startup) min_faves:150 lang:en -filter:replies",
+    "(\"San Francisco\" OR \"SF tech\" OR \"in SF\" OR \"Bay Area\" OR founders OR a16z OR YC) (AI OR startup OR school OR hackathon OR party OR launch) min_faves:200 lang:en -filter:replies"
+  ],
+  "watchlist": [
+    "ycombinator",
+    "a16z",
+    "paulg",
+    "levie",
+    "jasonlk",
+    "TechCrunch",
+    "OpenAI",
+    "AnthropicAI",
+    "GoogleDeepMind",
+    "sama",
+    "karpathy",
+    "benioff"
+  ],
+  "watchlist_min_faves": 20,
+  "thresholds": {
+    "min_signal": 1.8,
+    "min_relevance": 0.6,
+    "max_bait": 0.5
+  },
+  "writer_model": "anthropic/claude-sonnet-5",
+  "slack": {
+    "enabled": false,
+    "frequency": "daily",
+    "hour_pt": 8,
+    "weekdays_only": true,
+    "top_tweets": 5
+  }
+}
