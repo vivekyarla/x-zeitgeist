@@ -77,6 +77,8 @@ def update(state: dict, now: datetime) -> None:
             t["jev"] = verdicts[t["id"]]
             tweets[t["id"]] = t
     print(f"judged {len(verdicts)} new tweets")
+    if new and not verdicts:
+        raise SystemExit("Jev returned no verdicts for any new tweet; check the API key (see errors above)")
 
     kept = [t for t in tweets.values() if passes(t["jev"])]
     max_log = max((math.log1p(engagement(t)) for t in kept), default=0)

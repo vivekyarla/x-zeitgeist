@@ -54,7 +54,7 @@ def synthesize(tweets: list[dict], previous_thesis: str | None) -> dict:
     r = requests.post(
         ENDPOINT,
         headers={
-            "Authorization": f"Bearer {os.environ['AI_GATEWAY_API_KEY']}",
+            "Authorization": f"Bearer {os.environ['AI_GATEWAY_API_KEY'].strip()}",
             "Content-Type": "application/json",
         },
         json={

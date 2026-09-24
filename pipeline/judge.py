@@ -79,7 +79,7 @@ class Jev:
             self.model = config.JEV_GATEWAY_MODEL
         self.session = requests.Session()
         self.session.headers.update({
-            "Authorization": f"Bearer {key}",
+            "Authorization": f"Bearer {key.strip()}",
             "Content-Type": "application/json",
         })
 
