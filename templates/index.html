@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="refresh" content="1800">
+<title>{{ title }}, {{ week_label }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #E7EBF2;
+  --surface: #F7F8FB;
+  --ink: #10162A;
+  --muted: #56607A;
+  --rule: #C9D0DD;
+  --accent: #2E43E0;
+  --meter-off: #CDD3E0;
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C1120; --surface: #141B2E; --ink: #E6EAF4; --muted: #8F99B2;
+    --rule: #26304A; --accent: #8D9CFF; --meter-off: #2A3350;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C1120; --surface: #141B2E; --ink: #E6EAF4; --muted: #8F99B2;
+  --rule: #26304A; --accent: #8D9CFF; --meter-off: #2A3350;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--display); font-size: 16px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+.page {
+  max-width: 1240px; margin: 0 auto; padding: 40px 24px 64px;
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 72px;
+}
+@media (max-width: 900px) { .page { grid-template-columns: 1fr; gap: 48px; padding-top: 28px; } }
+
+/* ---- Left: the read ---- */
+.read { position: sticky; top: calc(40px + env(safe-area-inset-top, 0px)); align-self: start; }
+@media (max-width: 900px) { .read { position: static; } }
+.masthead { display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+  font-size: 15px; color: var(--muted); margin-bottom: 40px; }
+.masthead strong { color: var(--ink); font-weight: 650; font-variation-settings: "wdth" 85; font-size: 17px; }
+.thesis {
+  font-size: clamp(30px, 3.6vw, 46px); line-height: 1.12; letter-spacing: -0.02em;
+  font-weight: 560; font-variation-settings: "wdth" 88, "opsz" 96;
+  margin: 0 0 24px; text-wrap: pretty;
+}
+.freshness { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--muted); }
+.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .pulse { animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
+}
+.history { margin-top: 48px; border-top: 1px solid var(--rule); padding-top: 20px; }
+.history h2 { font-size: 15px; font-weight: 600; margin: 0 0 14px; color: var(--muted); }
+.history ol { list-style: none; margin: 0; padding: 0; }
+.history li { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 8px 0;
+  font-size: 15px; line-height: 1.45; }
+.history time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.history p { margin: 0; color: var(--muted); }
+
+/* ---- Right: themes ---- */
+.theme { margin-bottom: 64px; }
+.theme h2 { font-size: 26px; line-height: 1.15; letter-spacing: -0.015em; margin: 0 0 8px;
+  font-weight: 650; font-variation-settings: "wdth" 85; }
+.theme > p { margin: 0 0 24px; color: var(--muted); max-width: 62ch; }
+
+.tweet { background: var(--surface); border-radius: 14px; padding: 20px 22px; margin-bottom: 12px; }
+.tweet header { display: flex; align-items: center; gap: 10px; font-size: 15px; margin-bottom: 10px; }
+.tweet img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex: none; background: var(--meter-off); }
+.who { min-width: 0; line-height: 1.25; }
+.who b { font-weight: 620; }
+.who span { color: var(--muted); display: block; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tweet blockquote { margin: 0; font-family: var(--serif); font-size: 17.5px; line-height: 1.55;
+  white-space: pre-line; overflow-wrap: anywhere; max-width: 64ch; }
+.tweet footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 14px;
+  font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tweet footer a { margin-left: auto; color: var(--accent); text-decoration: none; font-weight: 600; }
+.tweet footer a:hover { text-decoration: underline; }
+
+/* Jev's signal score, 0-4, as five bars */
+.meter { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+.meter i { width: 4px; border-radius: 1px; background: var(--meter-off); }
+.meter i:nth-child(1) { height: 5px; } .meter i:nth-child(2) { height: 7px; }
+.meter i:nth-child(3) { height: 9px; } .meter i:nth-child(4) { height: 11px; }
+.meter i:nth-child(5) { height: 14px; }
+.meter i.on { background: var(--accent); }
+.signal { display: inline-flex; align-items: center; gap: 7px; }
+
+.empty { font-size: 18px; color: var(--muted); max-width: 44ch; }
+.demo { background: var(--accent); color: var(--bg); text-align: center; font-size: 14px; padding: 8px 16px; }
+.colophon { grid-column: 1 / -1; font-size: 14px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 20px; }
+</style>
+</head>
+<body>
+{% if demo %}<div class="demo">Sample data. Real tweets appear once the pipeline runs with your API keys.</div>{% endif %}
+<div class="page">
+  <section class="read" aria-label="This week's read">
+    <div class="masthead"><strong>{{ title }}</strong><span>{{ week_label }}</span></div>
+    {% if latest %}
+      <p class="thesis">{{ latest.thesis }}</p>
+      <div class="freshness"><span class="pulse" aria-hidden="true"></span>
+        <span>Updated <time id="updated" datetime="{{ updated_iso }}">{{ updated_label }}</time></span></div>
+      {% if history %}
+      <div class="history">
+        <h2>Earlier this week</h2>
+        <ol>{% for h in history %}<li><time>{{ h.when }}</time><p>{{ h.thesis }}</p></li>{% endfor %}</ol>
+      </div>
+      {% endif %}
+    {% else %}
+      <p class="empty">Nothing yet this week. The first read appears after the next update runs, usually within three hours of Monday morning.</p>
+    {% endif %}
+  </section>
+
+  <main>
+    {% for th in themes %}
+    <section class="theme">
+      <h2>{{ th.name }}</h2>
+      <p>{{ th.summary }}</p>
+      {% for t in th.tweets %}
+      <article class="tweet">
+        <header>
+          {% if t.author.avatar %}<img src="{{ t.author.avatar }}" alt="" loading="lazy" referrerpolicy="no-referrer">{% endif %}
+          <div class="who"><b>{{ t.author.name }}</b><span>@{{ t.author.handle }}, {{ t.author.followers | compact }} followers</span></div>
+        </header>
+        <blockquote>{{ t.text }}</blockquote>
+        <footer>
+          <span>{{ t.likes | compact }} likes</span>
+          <span>{{ t.retweets | compact }} reposts</span>
+          {% set lit = ((t.jev.signal + 0.5) | int) + 1 %}
+          <span class="signal" title="Jev signal score {{ '%.1f' % t.jev.signal }} of 4">
+            <span class="meter" aria-hidden="true">{% for n in range(5) %}<i class="{{ 'on' if n < lit else '' }}"></i>{% endfor %}</span>
+            {{ topic_label(t.jev.topic) }}
+          </span>
+          <a href="{{ t.url }}" target="_blank" rel="noopener">Open on X</a>
+        </footer>
+      </article>
+      {% endfor %}
+    </section>
+    {% endfor %}
+  </main>
+
+  {% if latest %}
+  <p class="colophon">Scanned {{ latest.stats.scanned }} tweets this week; {{ latest.stats.kept }} passed Jev's relevance and signal filter. The bars show how strongly Jev rated each tweet as reflecting this week's conversation. Refreshes every three hours.</p>
+  {% endif %}
+</div>
+<script>
+(function () {
+  var el = document.getElementById("updated");
+  if (!el) return;
+  var then = new Date(el.getAttribute("datetime"));
+  function rel() {
+    var m = Math.round((Date.now() - then) / 60000);
+    var txt = m < 1 ? "just now" : m < 60 ? m + " min ago" : Math.round(m / 60) + (Math.round(m / 60) === 1 ? " hour ago" : " hours ago");
+    el.textContent = txt;
+    el.title = then.toLocaleString();
+  }
+  rel(); setInterval(rel, 60000);
+})();
+</script>
+</body>
+</html>

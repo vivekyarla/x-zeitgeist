@@ -1,0 +1,355 @@
+{
+ "week_start": "2026-09-21T07:00:00+00:00",
+ "tweets": {
+  "1": {
+   "id": "1",
+   "url": "https://x.com/priyabuilds/status/1",
+   "text": "Every SDR team I talk to this week is quietly rebuilding around agents. Not replacing reps. Replacing the 60% of their day that was research and list-building.",
+   "created_at": "",
+   "likes": 4200,
+   "retweets": 610,
+   "replies": 350,
+   "quotes": 152,
+   "views": 168000,
+   "author": {
+    "handle": "priyabuilds",
+    "name": "Priya Raman",
+    "followers": 84000,
+    "verified": false,
+    "avatar": ""
+   },
+   "first_seen": "2026-09-24T17:00:00+00:00",
+   "jev": {
+    "relevant": 0.95,
+    "topic": "sales_gtm",
+    "topic_confidence": 0.9,
+    "signal": 3.3,
+    "bait": 0.03,
+    "marketing_useful": 0.85,
+    "model": "jev-1.13.0"
+   }
+  },
+  "2": {
+   "id": "2",
+   "url": "https://x.com/moyelaran/status/2",
+   "text": "Hot take: the AI SDR category is about to collapse into the CRM. Standalone tools have maybe 12 months.",
+   "created_at": "",
+   "likes": 9800,
+   "retweets": 1400,
+   "replies": 816,
+   "quotes": 350,
+   "views": 392000,
+   "author": {
+    "handle": "moyelaran",
+    "name": "Marcus Oyelaran",
+    "followers": 212000,
+    "verified": false,
+    "avatar": ""
+   },
+   "first_seen": "2026-09-24T17:00:00+00:00",
+   "jev": {
+    "relevant": 0.95,
+    "topic": "sales_gtm",
+    "topic_confidence": 0.9,
+    "signal": 3.5,
+    "bait": 0.03,
+    "marketing_useful": 0.85,
+    "model": "jev-1.13.0"
+   }
+  },
+  "3": {
+   "id": "3",
+   "url": "https://x.com/halcyonlabs/status/3",
+   "text": "Today we're releasing Halcyon 4: a smaller model that beats our previous flagship on agentic tasks at a fifth of the cost. Available now in the API.",
+   "created_at": "",
+   "likes": 38000,
+   "retweets": 7200,
+   "replies": 3166,
+   "quotes": 1800,
+   "views": 1520000,
+   "author": {
+    "handle": "halcyonlabs",
+    "name": "Halcyon Labs",
+    "followers": 530000,
+    "verified": false,
+    "avatar": ""
+   },
+   "first_seen": "2026-09-24T17:00:00+00:00",
+   "jev": {
+    "relevant": 0.95,
+    "topic": "ai_models",
+    "topic_confidence": 0.9,
+    "signal": 3.8,
+    "bait": 0.03,
+    "marketing_useful": 0.85,
+    "model": "jev-1.13.0"
+   }
+  },
+  "4": {
+   "id": "4",
+   "url": "https://x.com/danawhit/status/4",
+   "text": "The Halcyon 4 pricing is the real story. At these prices, running an agent on every inbound lead is basically free.",
+   "created_at": "",
+   "likes": 2600,
+   "retweets": 380,
+   "replies": 216,
+   "quotes": 95,
+   "views": 104000,
+   "author": {
+    "handle": "danawhit",
+    "name": "Dana Whitfield",
+    "followers": 41000,
+    "verified": false,
+    "avatar": ""
+   },
+   "first_seen": "2026-09-24T17:00:00+00:00",
+   "jev": {
+    "relevant": 0.95,
+    "topic": "ai_models",
+    "topic_confidence": 0.9,
+    "signal": 3.0,
+    "bait": 0.03,
+    "marketing_useful": 0.85,
+    "model": "jev-1.13.0"
+   }
+  },
+  "5": {
+   "id": "5",
+   "url": "https://x.com/theopark/status/5",
+   "text": "Went to three AI dinners in SF this week and the only thing anyone wanted to talk about was pricing. Seat-based is dead, and nobody agrees what replaces it.",
+   "created_at": "",
+   "likes": 5100,
+   "retweets": 690,
+   "replies": 425,
+   "quotes": 172,
+   "views": 204000,
+   "author": {
+    "handle": "theopark",
+    "name": "Theo Park",
+    "followers": 97000,
+    "verified": false,
+    "avatar": ""
+   },
+   "first_seen": "2026-09-24T17:00:00+00:00",
+   "jev": {
+    "relevant": 0.95,
+    "topic": "revenue_business",
+    "topic_confidence": 0.9,
+    "signal": 3.2,
+    "bait": 0.03,
+    "marketing_useful": 0.85,
+    "model": "jev-1.13.0"
+   }
+  },
+  "6": {
+   "id": "6",
+   "url": "https://x.com/leenakaur_vc/status/6",
+   "text": "Outcome-based pricing sounds great until your CFO asks you to forecast it. Seeing a lot of founders quietly go back to hybrid.",
+   "created_at": "",
+   "likes": 3400,
+   "retweets": 520,
+   "replies": 283,
+   "quotes": 130,
+   "views": 136000,
+   "author": {
+    "handle": "leenakaur_vc",
+    "name": "Leena Kaur",
+    "followers": 150000,
+    "verified": false,
+    "avatar": ""
+   },
+   "first_seen": "2026-09-24T17:00:00+00:00",
+   "jev": {
+    "relevant": 0.95,
+    "topic": "revenue_business",
+    "topic_confidence": 0.9,
+    "signal": 3.1,
+    "bait": 0.03,
+    "marketing_useful": 0.85,
+    "model": "jev-1.13.0"
+   }
+  },
+  "7": {
+   "id": "7",
+   "url": "https://x.com/cadencehq/status/7",
+   "text": "We just raised a $40M Series B to build the revenue agent for mid-market sales teams.",
+   "created_at": "",
+   "likes": 1900,
+   "retweets": 300,
+   "replies": 158,
+   "quotes": 75,
+   "views": 76000,
+   "author": {
+    "handle": "cadencehq",
+    "name": "Cadence",
+    "followers": 64000,
+    "verified": false,
+    "avatar": ""
+   },
+   "first_seen": "2026-09-24T17:00:00+00:00",
+   "jev": {
+    "relevant": 0.95,
+    "topic": "startups_funding",
+    "topic_confidence": 0.9,
+    "signal": 2.6,
+    "bait": 0.03,
+    "marketing_useful": 0.85,
+    "model": "jev-1.13.0"
+   }
+  },
+  "8": {
+   "id": "8",
+   "url": "https://x.com/samortiz/status/8",
+   "text": "The Mission on a Thursday night is 80% people demoing agents to each other. SF is so back it's getting weird.",
+   "created_at": "",
+   "likes": 7200,
+   "retweets": 540,
+   "replies": 600,
+   "quotes": 135,
+   "views": 288000,
+   "author": {
+    "handle": "samortiz",
+    "name": "Sam Ortiz",
+    "followers": 33000,
+    "verified": false,
+    "avatar": ""
+   },
+   "first_seen": "2026-09-24T17:00:00+00:00",
+   "jev": {
+    "relevant": 0.95,
+    "topic": "sf_scene",
+    "topic_confidence": 0.9,
+    "signal": 2.4,
+    "bait": 0.03,
+    "marketing_useful": 0.85,
+    "model": "jev-1.13.0"
+   }
+  },
+  "9": {
+   "id": "9",
+   "url": "https://x.com/jblake_rev/status/9",
+   "text": "Our reply rates went from 1.8% to 4.1% after we stopped sending AI-written first lines and went back to one real sentence per email. Buyers can tell.",
+   "created_at": "",
+   "likes": 3900,
+   "retweets": 820,
+   "replies": 325,
+   "quotes": 205,
+   "views": 156000,
+   "author": {
+    "handle": "jblake_rev",
+    "name": "Jordan Blake",
+    "followers": 28000,
+    "verified": false,
+    "avatar": ""
+   },
+   "first_seen": "2026-09-24T17:00:00+00:00",
+   "jev": {
+    "relevant": 0.95,
+    "topic": "sales_gtm",
+    "topic_confidence": 0.9,
+    "signal": 3.0,
+    "bait": 0.03,
+    "marketing_useful": 0.85,
+    "model": "jev-1.13.0"
+   }
+  },
+  "10": {
+   "id": "10",
+   "url": "https://x.com/wrenadeyemi/status/10",
+   "text": "Every enterprise buyer I met this week asked the same question: who is accountable when the agent gets it wrong? Vendors without an answer are losing deals.",
+   "created_at": "",
+   "likes": 2800,
+   "retweets": 450,
+   "replies": 233,
+   "quotes": 112,
+   "views": 112000,
+   "author": {
+    "handle": "wrenadeyemi",
+    "name": "Wren Adeyemi",
+    "followers": 120000,
+    "verified": false,
+    "avatar": ""
+   },
+   "first_seen": "2026-09-24T17:00:00+00:00",
+   "jev": {
+    "relevant": 0.95,
+    "topic": "ai_products",
+    "topic_confidence": 0.9,
+    "signal": 3.1,
+    "bait": 0.03,
+    "marketing_useful": 0.85,
+    "model": "jev-1.13.0"
+   }
+  }
+ },
+ "thesis_history": [
+  {
+   "at": "2026-09-22T09:00:00+00:00",
+   "thesis": "The week opened on pricing: founders at SF dinners agree seat-based SaaS is fading but can't agree on what replaces it."
+  },
+  {
+   "at": "2026-09-23T09:00:00+00:00",
+   "thesis": "Halcyon 4's launch at a fifth of the cost reframed the pricing debate: if agents are nearly free to run, the question becomes who owns the workflow."
+  },
+  {
+   "at": "2026-09-24T17:00:00+00:00",
+   "thesis": "Cheap agents are forcing a GTM reckoning: Halcyon 4 made per-lead AI nearly free, and the fight is now over whether AI SDRs survive as tools or get absorbed into the CRM."
+  }
+ ],
+ "latest": {
+  "thesis": "Cheap agents are forcing a GTM reckoning: Halcyon 4 made per-lead AI nearly free, and the fight is now over whether AI SDRs survive as tools or get absorbed into the CRM.",
+  "themes": [
+   {
+    "name": "AI SDRs: tool or feature?",
+    "summary": "Sales leaders are rebuilding teams around agents, but there's a growing bet that standalone AI SDR tools get absorbed into the CRM.",
+    "tweet_ids": [
+     "2",
+     "1",
+     "9",
+     "7"
+    ]
+   },
+   {
+    "name": "Halcyon 4 resets the cost curve",
+    "summary": "A smaller, cheaper model beating last generation's flagship has people recalculating which workflows are worth automating.",
+    "tweet_ids": [
+     "3",
+     "4"
+    ]
+   },
+   {
+    "name": "Nobody knows how to price AI",
+    "summary": "Seat-based pricing is widely called dead; outcome-based pricing is popular in theory and hard to forecast in practice.",
+    "tweet_ids": [
+     "5",
+     "6"
+    ]
+   },
+   {
+    "name": "Buyers want accountability",
+    "summary": "Enterprise buyers keep asking who's responsible when an agent makes a mistake, and it's starting to decide deals.",
+    "tweet_ids": [
+     "10",
+     "8"
+    ]
+   }
+  ],
+  "top_ids": [
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "10"
+  ],
+  "updated_at": "2026-09-24T17:00:00+00:00",
+  "stats": {
+   "scanned": 1847,
+   "kept": 212
+  }
+ }
+}
