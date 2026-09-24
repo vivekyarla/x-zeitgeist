@@ -36,6 +36,7 @@ Everything is in `pipeline/config.py`:
 
 - **Too much noise?** Raise `MIN_SIGNAL` (e.g. 2.2) or `MIN_RELEVANCE`, or raise `min_faves` in the queries.
 - **Missing stuff?** Add queries or accounts to `WATCHLIST`, or lower `MIN_SIGNAL`.
+- **Change the focus:** `TOPICS` and `EXCLUDED_TOPICS` decide what Jev keeps (infra/finance and policy are excluded by default); `SYSTEM` in `pipeline/synthesize.py` tells the writer what the team cares about. Bump `JUDGE_VERSION` after editing the Jev questions so saved tweets get re-judged.
 - **Pin Jev** once thresholds feel right: set `JEV_MODEL=jev-1.13.0` (or whatever is current), so `jev-latest` updates don't shift scores under you.
 - **Writer model**: set `WRITER_MODEL` to any Vercel AI Gateway model id (e.g. `anthropic/claude-opus-5.5`).
 

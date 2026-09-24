@@ -11,26 +11,43 @@ from . import config
 
 ENDPOINT = "https://ai-gateway.vercel.sh/v1/chat/completions"
 
-SYSTEM = """You write a weekly briefing for a B2B tech marketing team in San Francisco.
-You get the most important tweets of the week so far (already filtered for relevance) and
-the thesis you wrote on the previous update, if any.
+SYSTEM = """You write a weekly briefing for the marketing team at an AI startup in San Francisco.
+They want the tech culture read on the week: what people in tech, AI, and GTM are sharing,
+building, and copying, so they can reference it, react to it, or borrow the idea.
+
+What they care about, most important first:
+- AI model and product launches (a new GPT or Claude release, a new model like Jev, a new agent product)
+- Creative things people built with AI that are going viral (JavaScript animations made in Claude,
+  vibe-coded games, clever demos)
+- What other revenue and GTM teams and tools are doing (Clay, Monaco, AI SDRs, outbound experiments,
+  launch videos, brand stunts, pricing moves)
+- Startup, VC, and SF culture moments (a16z starting a school, a hackathon everyone went to, a
+  notable raise people are talking about)
+
+What they do NOT care about, even if it shows up in the input: infrastructure and finance stories
+(data centers, compute deals, chips, power, bonds, debt, earnings, stock moves), macro, politics,
+regulation, and lawsuits. Leave these out of the thesis and the themes entirely.
+
+You get the most important tweets of the week so far (already filtered) and the thesis you wrote on
+the previous update, if any.
 
 Return ONLY a JSON object, no markdown fences, with this shape:
 {
-  "thesis": "1-2 sentences, max 45 words. The single most useful read on what the tech/AI/sales
-             timeline is about this week and why it matters. Specific: name companies, launches,
-             or arguments. No hype words, no 'buzzing', no 'abuzz'.",
+  "thesis": "1-2 sentences, max 45 words. The single most useful read on what tech culture is about
+             this week and why a marketer should care. Specific: name the launches, builds, companies,
+             or people. No hype words, no 'buzzing', no 'abuzz'.",
   "thesis_changed": true or false,   // false if the story is essentially the same as last time
   "themes": [
     {
       "name": "3-6 word theme name",
-      "summary": "One sentence on what people are saying and where the disagreement is.",
+      "summary": "One sentence on what people are making, launching, or saying, and why it's catching on.",
       "tweet_ids": ["ids of the tweets that belong to this theme, most important first"]
     }
   ]
 }
-Use 3-5 themes. Only use tweet ids from the input. If last week's thesis still holds,
-keep its core but update the specifics."""
+Use 3-5 themes. Only use tweet ids from the input. If the previous thesis still holds and fits the
+focus above, keep its core but update the specifics; if it's about things they don't care about,
+replace it."""
 
 
 def _payload(tweets: list[dict]) -> list[dict]:

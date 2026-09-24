@@ -21,19 +21,23 @@ GATEWAY_ENDPOINT = "https://ai-gateway.vercel.sh/typesafe/v1/systemone"
 SIGNAL_LEVELS = [
     "Noise: spam, low-effort, off-topic, or meaningless without context",
     "Minor: a personal update, generic take, or small niche announcement",
-    "Notable: a substantive take or real news a tech marketer might reference",
-    "Significant: widely discussed news or a sharp take shaping the week's conversation",
-    "Defining: a moment much of the tech, AI, and sales world is talking about this week",
+    "Notable: a launch, build, or GTM move a tech marketer might mention in Slack",
+    "Significant: a launch, viral build, or culture moment much of tech Twitter is sharing this week",
+    "Defining: the thing everyone in tech, AI, and startup culture is talking about this week",
 ]
 
 QUESTIONS = {
     "relevant": {
         "type": "noul",
-        "instructions": "Is this tweet about technology, AI, startups, the San Francisco tech scene, "
-                        "or sales, go-to-market, and revenue?",
+        "instructions": "Is this tweet about tech culture: AI model or product launches, creative things "
+                        "people built with AI, what GTM and revenue teams are doing, startup and founder "
+                        "culture, or the SF tech scene?",
         "criteria": {
-            "true": "the substance is tech, AI, startups, SF tech life, sales, GTM, or revenue",
-            "false": "politics, sports, entertainment, personal life, or a tech word used in passing",
+            "true": "a launch, a cool or viral AI build, a GTM/sales/revenue move or playbook, a startup or "
+                    "VC culture moment, or SF tech life",
+            "false": "infrastructure or finance (data centers, compute deals, chips, bonds, debt, earnings, "
+                     "stocks, macro), politics, regulation, lawsuits, sports, entertainment, personal life, "
+                     "or a tech word used in passing",
         },
     },
     "topic": {
@@ -53,7 +57,9 @@ QUESTIONS = {
     },
     "marketing_useful": {
         "type": "noul",
-        "instructions": "Would a B2B tech marketing team benefit from knowing about or reacting to this tweet?",
+        "instructions": "Would the marketing team at an AI startup want to see this: something to "
+                        "reference, react to, share, or borrow ideas from (a launch, a viral build, a "
+                        "clever GTM or brand move)?",
     },
 }
 
@@ -107,6 +113,7 @@ class Jev:
                 "bait": a["bait"]["noul"],
                 "marketing_useful": a["marketing_useful"]["noul"],
                 "model": data.get("model"),
+                "v": config.JUDGE_VERSION,
             }
         return None
 
@@ -124,7 +131,7 @@ def passes(j: dict) -> bool:
     return (j["relevant"] >= config.MIN_RELEVANCE
             and j["bait"] <= config.MAX_BAIT
             and j["signal"] >= config.MIN_SIGNAL
-            and j["topic"] != "other")
+            and j["topic"] not in config.EXCLUDED_TOPICS)
 
 
 def rank_score(t: dict, max_log_eng: float) -> float:

@@ -21,7 +21,7 @@
    "first_seen": "2026-09-24T17:00:00+00:00",
    "jev": {
     "relevant": 0.95,
-    "topic": "sales_gtm",
+    "topic": "gtm_playbooks",
     "topic_confidence": 0.9,
     "signal": 3.3,
     "bait": 0.03,
@@ -49,7 +49,7 @@
    "first_seen": "2026-09-24T17:00:00+00:00",
    "jev": {
     "relevant": 0.95,
-    "topic": "sales_gtm",
+    "topic": "gtm_playbooks",
     "topic_confidence": 0.9,
     "signal": 3.5,
     "bait": 0.03,
@@ -77,7 +77,7 @@
    "first_seen": "2026-09-24T17:00:00+00:00",
    "jev": {
     "relevant": 0.95,
-    "topic": "ai_models",
+    "topic": "launches",
     "topic_confidence": 0.9,
     "signal": 3.8,
     "bait": 0.03,
@@ -105,7 +105,7 @@
    "first_seen": "2026-09-24T17:00:00+00:00",
    "jev": {
     "relevant": 0.95,
-    "topic": "ai_models",
+    "topic": "launches",
     "topic_confidence": 0.9,
     "signal": 3.0,
     "bait": 0.03,
@@ -133,7 +133,7 @@
    "first_seen": "2026-09-24T17:00:00+00:00",
    "jev": {
     "relevant": 0.95,
-    "topic": "revenue_business",
+    "topic": "gtm_playbooks",
     "topic_confidence": 0.9,
     "signal": 3.2,
     "bait": 0.03,
@@ -161,7 +161,7 @@
    "first_seen": "2026-09-24T17:00:00+00:00",
    "jev": {
     "relevant": 0.95,
-    "topic": "revenue_business",
+    "topic": "gtm_playbooks",
     "topic_confidence": 0.9,
     "signal": 3.1,
     "bait": 0.03,
@@ -189,7 +189,7 @@
    "first_seen": "2026-09-24T17:00:00+00:00",
    "jev": {
     "relevant": 0.95,
-    "topic": "startups_funding",
+    "topic": "startup_culture",
     "topic_confidence": 0.9,
     "signal": 2.6,
     "bait": 0.03,
@@ -245,7 +245,7 @@
    "first_seen": "2026-09-24T17:00:00+00:00",
    "jev": {
     "relevant": 0.95,
-    "topic": "sales_gtm",
+    "topic": "gtm_playbooks",
     "topic_confidence": 0.9,
     "signal": 3.0,
     "bait": 0.03,
@@ -273,7 +273,7 @@
    "first_seen": "2026-09-24T17:00:00+00:00",
    "jev": {
     "relevant": 0.95,
-    "topic": "ai_products",
+    "topic": "ai_at_work",
     "topic_confidence": 0.9,
     "signal": 3.1,
     "bait": 0.03,
