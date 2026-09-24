@@ -33,9 +33,8 @@ jobs:
       - name: Fetch, judge with Jev, write thesis, build page
         env:
           TWITTERAPI_IO_KEY: ${{ secrets.TWITTERAPI_IO_KEY }}
-          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}   # Jev via Vercel AI Gateway
-          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}       # or Jev direct
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}   # Jev + Claude via Vercel AI Gateway
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}       # optional: Jev direct instead
         run: python -m pipeline.run
 
       - name: Save this week's state

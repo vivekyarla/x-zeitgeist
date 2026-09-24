@@ -70,9 +70,9 @@ TOPIC_LABELS = {
 }
 
 # ---------------------------------------------------------------------------
-# Thesis writing (OpenRouter)
+# Thesis writing (Vercel AI Gateway)
 # ---------------------------------------------------------------------------
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-5")
+WRITER_MODEL = os.getenv("WRITER_MODEL", "anthropic/claude-sonnet-5")  # any AI Gateway model id
 TWEETS_FOR_THESIS = 40     # top-ranked tweets sent to the writer model
 TWEETS_PER_THEME_SHOWN = 6
 

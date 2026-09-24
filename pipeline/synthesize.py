@@ -1,4 +1,4 @@
-"""Write the thesis and group tweets into themes, via OpenRouter."""
+"""Write the thesis and group tweets into themes, via Vercel AI Gateway."""
 from __future__ import annotations
 
 import json
@@ -9,7 +9,7 @@ import requests
 
 from . import config
 
-ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
+ENDPOINT = "https://ai-gateway.vercel.sh/v1/chat/completions"
 
 SYSTEM = """You write a weekly briefing for a B2B tech marketing team in San Francisco.
 You get the most important tweets of the week so far (already filtered for relevance) and
@@ -54,12 +54,11 @@ def synthesize(tweets: list[dict], previous_thesis: str | None) -> dict:
     r = requests.post(
         ENDPOINT,
         headers={
-            "Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}",
+            "Authorization": f"Bearer {os.environ['AI_GATEWAY_API_KEY']}",
             "Content-Type": "application/json",
-            "X-Title": "Timeline zeitgeist",
         },
         json={
-            "model": config.OPENROUTER_MODEL,
+            "model": config.WRITER_MODEL,
             "messages": [{"role": "system", "content": SYSTEM},
                          {"role": "user", "content": user}],
             "temperature": 0.4,

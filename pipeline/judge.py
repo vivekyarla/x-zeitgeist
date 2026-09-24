@@ -1,8 +1,8 @@
 """Ask Jev which tweets are worth showing.
 
 One POST per tweet to a System One endpoint, with all five questions answered
-in a single pass. Goes through Vercel AI Gateway's TypeSafe-compatible API when
-AI_GATEWAY_API_KEY is set, otherwise straight to TypeSafe.
+in a single pass. Goes through Vercel AI Gateway's TypeSafe-compatible API,
+unless TYPESAFE_API_KEY is set, in which case it calls TypeSafe directly.
 """
 from __future__ import annotations
 
@@ -71,12 +71,12 @@ def _state(t: dict) -> dict:
 
 class Jev:
     def __init__(self):
-        if os.getenv("AI_GATEWAY_API_KEY"):
-            key, self.endpoint = os.environ["AI_GATEWAY_API_KEY"], GATEWAY_ENDPOINT
-            self.model = config.JEV_GATEWAY_MODEL
-        else:
+        if os.getenv("TYPESAFE_API_KEY"):
             key, self.endpoint = os.environ["TYPESAFE_API_KEY"], TYPESAFE_ENDPOINT
             self.model = config.JEV_MODEL
+        else:
+            key, self.endpoint = os.environ["AI_GATEWAY_API_KEY"], GATEWAY_ENDPOINT
+            self.model = config.JEV_GATEWAY_MODEL
         self.session = requests.Session()
         self.session.headers.update({
             "Authorization": f"Bearer {key}",
