@@ -38,7 +38,8 @@ PAGES_PER_QUERY = int(os.getenv("PAGES_PER_QUERY", "2"))  # ~20 tweets per page
 # ---------------------------------------------------------------------------
 # Jev filtering
 # ---------------------------------------------------------------------------
-JEV_MODEL = os.getenv("JEV_MODEL", "jev-latest")  # pin e.g. "jev-1.13.0" once tuned
+JEV_MODEL = os.getenv("JEV_MODEL", "jev-latest")  # direct TypeSafe; pin e.g. "jev-1.13.0" once tuned
+JEV_GATEWAY_MODEL = os.getenv("JEV_GATEWAY_MODEL", "typesafe-ai/jev")  # via Vercel AI Gateway
 JEV_CONCURRENCY = int(os.getenv("JEV_CONCURRENCY", "8"))
 
 # A tweet makes the page only if it clears all of these.

@@ -1,7 +1,8 @@
 """Ask Jev which tweets are worth showing.
 
-One POST per tweet to https://api.typesafe.ai/v1/systemone, with all five
-questions answered in a single pass.
+One POST per tweet to a System One endpoint, with all five questions answered
+in a single pass. Goes through Vercel AI Gateway's TypeSafe-compatible API when
+AI_GATEWAY_API_KEY is set, otherwise straight to TypeSafe.
 """
 from __future__ import annotations
 
@@ -14,7 +15,8 @@ import requests
 
 from . import config
 
-ENDPOINT = "https://api.typesafe.ai/v1/systemone"
+TYPESAFE_ENDPOINT = "https://api.typesafe.ai/v1/systemone"
+GATEWAY_ENDPOINT = "https://ai-gateway.vercel.sh/typesafe/v1/systemone"
 
 SIGNAL_LEVELS = [
     "Noise: spam, low-effort, off-topic, or meaningless without context",
@@ -68,18 +70,24 @@ def _state(t: dict) -> dict:
 
 
 class Jev:
-    def __init__(self, api_key: str | None = None):
+    def __init__(self):
+        if os.getenv("AI_GATEWAY_API_KEY"):
+            key, self.endpoint = os.environ["AI_GATEWAY_API_KEY"], GATEWAY_ENDPOINT
+            self.model = config.JEV_GATEWAY_MODEL
+        else:
+            key, self.endpoint = os.environ["TYPESAFE_API_KEY"], TYPESAFE_ENDPOINT
+            self.model = config.JEV_MODEL
         self.session = requests.Session()
         self.session.headers.update({
-            "Authorization": f"Bearer {api_key or os.environ['TYPESAFE_API_KEY']}",
+            "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
         })
 
     def judge(self, tweet: dict) -> dict | None:
-        body = {"model": config.JEV_MODEL, "state": _state(tweet), "questions": QUESTIONS}
+        body = {"model": self.model, "state": _state(tweet), "questions": QUESTIONS}
         for attempt in range(5):
             try:
-                r = self.session.post(ENDPOINT, json=body, timeout=30)
+                r = self.session.post(self.endpoint, json=body, timeout=30)
             except requests.RequestException:
                 time.sleep(2 ** attempt)
                 continue
@@ -89,15 +97,16 @@ class Jev:
             if r.status_code != 200:
                 print(f"  jev {r.status_code} on {tweet['id']}: {r.text[:200]}")
                 return None
-            a = r.json()["answers"]
+            data = r.json()
+            a = data["answers"]
             return {
                 "relevant": a["relevant"]["noul"],
                 "topic": a["topic"]["choice"],
-                "topic_confidence": a["topic"]["confidence"],
+                "topic_confidence": a["topic"].get("confidence"),
                 "signal": a["signal"]["score"],
                 "bait": a["bait"]["noul"],
                 "marketing_useful": a["marketing_useful"]["noul"],
-                "model": r.json().get("model"),
+                "model": data.get("model"),
             }
         return None
 
