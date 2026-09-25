@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup, escape
 
-from . import config
+from . import config, thesis
 
 TEMPLATES = Path(__file__).resolve().parent.parent / "templates"
 
@@ -23,13 +23,18 @@ def _compact(n: int) -> str:
     return str(n)
 
 
-def _emphasis(text: str) -> Markup:
-    """Escape, then render the writer's **key phrases** as <strong>."""
-    return Markup(re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", str(escape(text))))
-
-
-def _plain(text: str) -> str:
-    return re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+def _thesis_html(text: str, themes: list[dict]) -> Markup:
+    """Escape, then render the writer's key phrases as links that jump to their theme."""
+    parts = []
+    for chunk, key, idx in thesis.segments(text, themes):
+        if not key:
+            parts.append(str(escape(chunk)))
+        elif idx is None:
+            parts.append(f"<strong>{escape(chunk)}</strong>")
+        else:
+            parts.append(f'<a class="jump" href="#theme-{idx + 1}" data-theme="{idx + 1}">'
+                         f"<strong>{escape(chunk)}</strong></a>")
+    return Markup("".join(parts))
 
 
 def _tweet_date(raw: str) -> str:
@@ -67,14 +72,14 @@ def build_site(state: dict, out_dir: Path, demo: bool = False) -> None:
 
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=select_autoescape())
     env.filters["compact"] = _compact
-    env.filters["emphasis"] = _emphasis
-    env.filters["plain"] = _plain
+    env.filters["plain"] = thesis.plain
     env.filters["tweet_date"] = _tweet_date
     env.globals["topic_label"] = lambda k: config.TOPIC_LABELS.get(k, k)
     html = env.get_template("index.html").render(
         title=config.SITE_TITLE,
         week_label=week_label,
         latest=latest,
+        thesis_html=_thesis_html(latest["thesis"], themes) if latest else "",
         updated_iso=latest["updated_at"] if latest else None,
         updated_label=f"{_local(latest['updated_at']):%a %-I:%M %p} PT" if latest else None,
         themes=themes,

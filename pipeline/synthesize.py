@@ -34,7 +34,8 @@ Return ONLY a JSON object, no markdown fences, with this shape:
   "thesis": "1-2 sentences, max 45 words. The single most useful read on what tech culture is about
              this week and why a marketer should care. Specific: name the launches, builds, companies,
              or people. Wrap the 2-4 key phrases (each a few words, e.g. a launch or a company's move)
-             in **double asterisks**; no other markdown. No hype words, no 'buzzing', no 'abuzz'.",
+             in **double asterisks** and follow each with {n}, the 1-based number of the theme
+             below it belongs to, e.g. **reply-based outbound**{1}; no other markdown. No hype words, no 'buzzing', no 'abuzz'.",
   "thesis_changed": true or false,   // false if the story is essentially the same as last time
   "themes": [
     {{

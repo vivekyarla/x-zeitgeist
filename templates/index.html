@@ -65,6 +65,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
   max-width: 24ch; text-wrap: pretty; font-optical-sizing: auto; }
 .thesis strong { font-weight: 500; text-decoration: underline; text-decoration-color: var(--accent);
   text-decoration-thickness: 1.5px; text-underline-offset: .13em; text-decoration-skip-ink: auto; }
+.thesis a.jump { color: inherit; text-decoration: none; border-radius: 4px; transition: color .15s, background-color .15s; }
+.thesis a.jump:hover strong, .thesis a.jump:focus-visible strong { color: var(--accent); text-decoration-thickness: 2.5px; }
+.thesis a.jump::after { content: "\2193"; font: 400 .42em/1 var(--sans); color: var(--accent); vertical-align: .9em; margin-left: .12em; opacity: 0; transition: opacity .15s; }
+.thesis a.jump:hover::after, .thesis a.jump:focus-visible::after { opacity: 1; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.theme { scroll-margin-top: 16px; }
+.theme.flash .theme-head h2 { color: var(--accent); transition: color .3s; }
+.theme .theme-head h2 { transition: color 1.2s; }
 .history { margin-top: 44px; max-width: 72ch; }
 .history summary { cursor: pointer; color: var(--muted); font-size: 13px; list-style: none; display: inline-flex; gap: 8px; }
 .history summary::-webkit-details-marker { display: none; }
@@ -183,7 +192,7 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
   <section class="hero" aria-label="This week's read">
     {% if latest %}
       <p class="kicker">The read</p>
-      <h1 class="thesis">{{ latest.thesis | emphasis }}</h1>
+      <h1 class="thesis">{{ thesis_html }}</h1>
       {% if history %}
       <details class="history">
         <summary>Earlier this week</summary>
@@ -198,7 +207,7 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
 
   <main>
     {% for th in themes %}
-    <section class="theme">
+    <section class="theme" id="theme-{{ loop.index }}">
       <div class="theme-head">
         <span class="num">{{ '%02d' % loop.index }}</span>
         <h2>{{ th.name }}</h2>
@@ -348,6 +357,15 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
     };
     rel(); setInterval(rel, 60000);
   }
+
+  // Thesis phrases jump to their theme and briefly highlight its title
+  document.querySelectorAll(".thesis a.jump").forEach(function (a) {
+    a.addEventListener("click", function () {
+      var t = document.getElementById("theme-" + a.dataset.theme);
+      if (!t) return;
+      t.classList.add("flash"); setTimeout(function () { t.classList.remove("flash"); }, 1400);
+    });
+  });
 
   // Official X embeds, themed to match the page
   var forced = document.documentElement.dataset.theme;  // the page is dark unless the system asks for light

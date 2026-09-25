@@ -15,13 +15,25 @@ from zoneinfo import ZoneInfo
 
 import requests
 
-from . import config
+from . import config, thesis
 
 
 def _mrkdwn(text: str) -> str:
     """Escape for Slack and turn the thesis's **emphasis** into Slack bold."""
     text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     return re.sub(r"\*\*(.+?)\*\*", r"*\1*", text)
+
+
+def _thesis_mrkdwn(text: str, themes: list[dict]) -> str:
+    """Key phrases in bold, linked to their theme on the page when we know the page URL."""
+    out = []
+    for chunk, key, idx in thesis.segments(text, themes):
+        esc = chunk.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        if key and idx is not None and config.PAGE_URL:
+            out.append(f"*<{config.PAGE_URL}#theme-{idx + 1}|{esc.replace('|', '/')}>*")
+        else:
+            out.append(f"*{esc}*" if key else esc)
+    return "".join(out)
 
 
 def _plain(text: str, n: int) -> str:
@@ -50,12 +62,13 @@ def due(state: dict, now: datetime, thesis_changed: bool) -> bool:
 
 def message(state: dict) -> dict:
     latest, tweets = state["latest"], state["tweets"]
+    themes = [{**th, "tweets": [tweets[i] for i in th["tweet_ids"] if i in tweets]} for th in latest.get("themes", [])]
     top = [tweets[i] for i in latest["top_ids"] if i in tweets][:int(config.SLACK["top_tweets"])]
     lines = [f"• <{t['url']}|@{t['author']['handle']}>: {_mrkdwn(_plain(t['text'], 140))}  "
              f"_{t['likes']:,} likes_" for t in top]
     blocks = [
         {"type": "section", "text": {"type": "mrkdwn", "text": f"*{config.SITE_TITLE}*"}},
-        {"type": "section", "text": {"type": "mrkdwn", "text": f">{_mrkdwn(latest['thesis'])}"}},
+        {"type": "section", "text": {"type": "mrkdwn", "text": f">{_thesis_mrkdwn(latest['thesis'], themes)}"}},
     ]
     if latest.get("themes"):
         blocks.append({"type": "context", "elements": [{"type": "mrkdwn", "text": "  ·  ".join(
@@ -65,7 +78,7 @@ def message(state: dict) -> dict:
     if config.PAGE_URL:
         blocks.append({"type": "actions", "elements": [{"type": "button", "url": config.PAGE_URL,
                                                         "text": {"type": "plain_text", "text": "Open the page"}}]})
-    return {"text": re.sub(r"\*\*(.+?)\*\*", r"\1", latest["thesis"]), "blocks": blocks, "unfurl_links": False}
+    return {"text": thesis.plain(latest["thesis"]), "blocks": blocks, "unfurl_links": False}
 
 
 def post(state: dict, now: datetime) -> bool:
