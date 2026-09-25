@@ -55,7 +55,13 @@ class TwitterApiIo:
 
     def _get(self, params: dict) -> dict:
         for attempt in range(4):
-            r = self.session.get(self.BASE, params=params, timeout=30)
+            try:
+                r = self.session.get(self.BASE, params=params, timeout=45)
+            except requests.RequestException:
+                if attempt == 3:
+                    raise
+                time.sleep(2 ** attempt)
+                continue
             if r.status_code == 429 or r.status_code >= 500:
                 time.sleep(2 ** attempt)
                 continue
