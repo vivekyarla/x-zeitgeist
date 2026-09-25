@@ -38,7 +38,7 @@ if "other" not in TOPICS:
     TOPICS["other"], TOPIC_LABELS["other"] = "Anything else", "Other"
 
 # Saved tweets are re-judged whenever anything Jev is asked about changes.
-_JUDGE_QUESTIONS_REV = 4  # bump when the question wording in judge.py changes
+_JUDGE_QUESTIONS_REV = 5  # bump when the question wording in judge.py changes
 JUDGE_VERSION = hashlib.sha1(json.dumps(
     [_JUDGE_QUESTIONS_REV, FOCUS, TOPICS], sort_keys=True).encode()).hexdigest()[:10]
 
@@ -55,13 +55,16 @@ _rk = {"per_author_max": 2, "breakout_weight": 0.5, "mainstream_penalty": 0.5, *
 PER_AUTHOR_MAX = int(_rk["per_author_max"])          # max tweets per account sent to the writer
 BREAKOUT_WEIGHT = float(_rk["breakout_weight"])      # 0 = raw engagement, 1 = engagement vs follower count
 MAINSTREAM_PENALTY = float(_rk["mainstream_penalty"])  # how much big-lab news is ranked down (0-1)
+# Accounts that count as one for the per-account cap (e.g. @OpenAI, @OpenAIDevs, @sama).
+ACCOUNT_GROUP = {h.lower(): g for g, hs in _rk.get("account_groups", {}).items() for h in hs}
 
 # Company accounts held to their own bar: a tweet counts if it beats that account's
 # usual (median) likes by this factor, instead of needing to go broadly viral.
-_tr = {"accounts": [], "beat_baseline_by": 1.5, "min_signal": 1.0, **SETTINGS.get("tracked", {})}
+_tr = {"accounts": [], "beat_baseline_by": 3.0, "min_likes": 25, "min_signal": 1.0, **SETTINGS.get("tracked", {})}
 TRACKED = [h.lstrip("@") for h in _tr["accounts"] if h.strip()]
 TRACKED_LOWER = {h.lower() for h in TRACKED}
 TRACKED_BEAT_BY = float(_tr["beat_baseline_by"])
+TRACKED_MIN_LIKES = int(_tr["min_likes"])
 TRACKED_MIN_SIGNAL = float(_tr["min_signal"])
 
 # ---------------------------------------------------------------------------

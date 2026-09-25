@@ -295,6 +295,7 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
           <p class="hint">Company accounts (Clay, Monaco, Gong, …) held to their own bar: a post counts when it does clearly better than that account usually does, instead of needing to go broadly viral. X handles, separated by commas or new lines.</p></div>
         <div class="row3">
           <div class="field"><label for="t-beat">Beat their usual by</label><input class="inp" id="t-beat" type="number" min="1" max="10" step="0.1"><p class="hint">× their median likes over recent posts</p></div>
+          <div class="field"><label for="t-min">And at least</label><input class="inp" id="t-min" type="number" min="0" step="1"><p class="hint">likes, so tiny accounts don't slip through</p></div>
           <div class="field"><label for="t-signal">Min signal for them</label><input class="inp" id="t-signal" type="number" min="0" max="4" step="0.1"><p class="hint">0–4, usually lower than the main bar</p></div>
         </div>
       </div>
@@ -435,7 +436,7 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
     $("r-mainstream").value = rk.mainstream_penalty != null ? rk.mainstream_penalty : 0.5;
     $("r-author").value = rk.per_author_max || 2;
     $("t-accounts").value = (tr.accounts || []).join(", ");
-    $("t-beat").value = tr.beat_baseline_by || 1.5; $("t-signal").value = tr.min_signal != null ? tr.min_signal : 1.0;
+    $("t-beat").value = tr.beat_baseline_by || 3; $("t-min").value = tr.min_likes != null ? tr.min_likes : 25; $("t-signal").value = tr.min_signal != null ? tr.min_signal : 1.0;
     $("f-searches").value = s.searches.join("\n");
     $("f-watch").value = s.watchlist.join(", ");
     $("f-watchfaves").value = s.watchlist_min_faves;
@@ -463,16 +464,16 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
     if (total > 0) topics.forEach(function (t) { t.share = t.include ? Math.round(t.share / total * 1000) / 1000 : 0; });
     if (topics.filter(function (t) { return t.include; }).length < 1) throw new Error("Check at least one topic to show on the page.");
     var num = function (id, lo, hi, name) { var v = parseFloat($(id).value); if (isNaN(v) || v < lo || v > hi) throw new Error(name + " must be between " + lo + " and " + hi + "."); return v; };
-    var s = JSON.parse(JSON.stringify(settings));
+    var s = JSON.parse(JSON.stringify(settings));  // keeps fields the form doesn't show (e.g. account groups)
     s.focus = { audience: $("f-audience").value.trim() || settings.focus.audience, care_about: lines($("f-care").value), skip: lines($("f-skip").value) };
     if (!s.focus.care_about.length) throw new Error("Add at least one thing to focus on.");
     s.topics = topics;
     s.thresholds = { min_signal: num("f-signal", 0, 4, "Min signal"), min_relevance: num("f-relevance", 0, 1, "Min relevance"), max_bait: num("f-bait", 0, 1, "Max bait") };
     s.writer_model = $("f-model").value.trim() || "anthropic/claude-sonnet-5";
-    s.ranking = { breakout_weight: num("r-breakout", 0, 1, "Breakout weight"), mainstream_penalty: num("r-mainstream", 0, 1, "Big-lab penalty"),
+    s.ranking = { account_groups: (settings.ranking || {}).account_groups || {}, breakout_weight: num("r-breakout", 0, 1, "Breakout weight"), mainstream_penalty: num("r-mainstream", 0, 1, "Big-lab penalty"),
       per_author_max: Math.round(num("r-author", 1, 10, "Max tweets per account")) };
     s.tracked = { accounts: $("t-accounts").value.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").trim(); }).filter(Boolean),
-      beat_baseline_by: num("t-beat", 1, 10, "Beat their usual by"), min_signal: num("t-signal", 0, 4, "Min signal for tracked companies") };
+      beat_baseline_by: num("t-beat", 1, 10, "Beat their usual by"), min_likes: Math.max(0, parseInt($("t-min").value, 10) || 0), min_signal: num("t-signal", 0, 4, "Min signal for tracked companies") };
     s.searches = lines($("f-searches").value);
     if (!s.searches.length) throw new Error("Add at least one X search.");
     s.watchlist = $("f-watch").value.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").trim(); }).filter(Boolean);

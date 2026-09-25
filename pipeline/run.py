@@ -215,9 +215,16 @@ def compare(before: dict, before_top: list[dict], state: dict) -> dict:
         }
     after = state["latest"] or {}
     after_top = [state["tweets"][i] for i in after.get("top_ids", []) if i in state["tweets"]]
+    from .judge import why_not
     tracked = {h: state.get("baselines", {}).get(h.lower()) for h in config.TRACKED}
+    company_posts = sorted((t for t in state["tweets"].values()
+                            if "jev" in t and t["author"]["handle"].lower() in config.TRACKED_LOWER),
+                           key=lambda t: -t["likes"])
+    tracked_posts = [f"{'IN ' if t['id'] in after.get('top_ids', []) else 'ok ' if not why_not(t, state.get('baselines', {})) else 'no '}"
+                     f"{t['likes']:>5} likes @{t['author']['handle']}: {(why_not(t, state.get('baselines', {})) or '')[:50]:<50} "
+                     f"{t['text'][:60]}" for t in company_posts]
     return {"before": side(before, before_top), "after": side(after, after_top),
-            "tracked_baselines": tracked,
+            "tracked_baselines": tracked, "tracked_posts": tracked_posts,
             "near_misses": [f"{m['reason']:<44} @{state['tweets'][m['id']]['author']['handle']}: "
                             f"{state['tweets'][m['id']]['text'][:70]}" for m in after.get("near_misses", [])]}
 

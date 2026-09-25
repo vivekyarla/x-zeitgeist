@@ -56,8 +56,10 @@ QUESTIONS = {
     },
     "bait": {
         "type": "noul",
-        "instructions": "Is this engagement bait, spam, a giveaway, a crypto or token shill, "
-                        "or a 'like and reply for the link' growth hack?",
+        "instructions": "Is this engagement bait, spam, a giveaway, a crypto or token shill, a 'like "
+                        "and reply for the link' growth hack, or a generic advice or listicle thread "
+                        "written mainly to farm followers (e.g. 'the playbook to $100M ARR', '7 lessons "
+                        "from advising startups') with no specific result, data, or real example?",
     },
     "mainstream": {
         "type": "noul",
@@ -157,9 +159,9 @@ def why_not(t: dict, baselines: dict) -> str | None:
         return f"relevance {j['relevant']:.2f}"
     base = _tracked_baseline(t, baselines)
     if base is not None:  # company accounts: beat their own usual, not the global bar
-        need = max(5, config.TRACKED_BEAT_BY * base)
+        need = max(config.TRACKED_MIN_LIKES, config.TRACKED_BEAT_BY * base)
         if t["likes"] < need:
-            return f"{t['likes']:,} likes, under {config.TRACKED_BEAT_BY:g}x its usual {base:,.0f}"
+            return f"{t['likes']:,} likes, under {need:,.0f} ({config.TRACKED_BEAT_BY:g}x its usual {base:,.0f})"
         if j["signal"] < config.TRACKED_MIN_SIGNAL:
             return f"signal {j['signal']:.2f}"
         return None
@@ -197,13 +199,17 @@ def select(kept: list[dict], n: int) -> list[dict]:
     cap = {k: max(2, round(q * 1.5)) for k, q in quota.items()}
     per_author, per_topic, chosen, ids = {}, {}, [], set()
 
+    def account(t: dict) -> str:
+        h = t["author"]["handle"].lower()
+        return config.ACCOUNT_GROUP.get(h, h)
+
     def take(t: dict) -> None:
-        a, k = t["author"]["handle"].lower(), t["jev"]["topic"]
+        a, k = account(t), t["jev"]["topic"]
         per_author[a] = per_author.get(a, 0) + 1
         per_topic[k] = per_topic.get(k, 0) + 1
         chosen.append(t); ids.add(t["id"])
 
-    ok_author = lambda t: per_author.get(t["author"]["handle"].lower(), 0) < config.PER_AUTHOR_MAX
+    ok_author = lambda t: per_author.get(account(t), 0) < config.PER_AUTHOR_MAX
     for k, q in quota.items():  # each topic's best, up to its share
         for t in ranked:
             if per_topic.get(k, 0) >= q or len(chosen) >= n:
