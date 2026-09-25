@@ -45,11 +45,12 @@ Return ONLY a JSON object, no markdown fences, with this shape:
     }}
   ]
 }}
-Use 3-5 themes. Only use tweet ids from the input. At most ONE theme may be about AI model or
-product launches from big labs; fold the rest of the launch news into it or leave it out. If the
-input has GTM, sales, or marketing tweets, at least one theme must be about them, and lead with
-what's working (a playbook that's paying off, a campaign that took off, a company post that
-outperformed). Tweets marked "company_post_outperforming" are posts from GTM companies (Clay,
+Use 3-5 themes. Only use tweet ids from the input. The thesis should capture the biggest
+conversation on tech Twitter this week, then what's most useful for this team. As a rough guide,
+about three quarters of the read is general tech, AI, startup, and SF culture, and about a quarter
+is GTM and marketing: when the input has good GTM or marketing tweets, give them one theme (lead
+with what's working), but don't force one. Don't let model launches take more than about a third
+of the themes. Tweets marked "company_post_outperforming" are posts from GTM companies (Clay,
 Monaco, Gong, ...) that did much better than that company usually does; treat them as signs of
 what's working in GTM, not as ads. If the previous thesis still holds and fits the
 focus above, keep its core but update the specifics; if it's about things they don't care about,
