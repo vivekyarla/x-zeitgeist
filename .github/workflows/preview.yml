@@ -1,0 +1,50 @@
+name: Preview a tuning change
+
+# Push to a branch named preview/... to try settings or code changes against real data.
+# Runs a full update (real searches, Jev, writer) but saves nothing, posts nothing, and
+# doesn't deploy. Download the "preview" artifact for the built page and compare.json.
+on:
+  push:
+    branches: ["preview/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: timeline-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Use the live week's data
+        run: |
+          git fetch --depth=1 origin main
+          git checkout origin/main -- data/
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Dry run
+        env:
+          TWITTERAPI_IO_KEY: ${{ secrets.TWITTERAPI_IO_KEY }}
+          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python -m pipeline.run --dry-run
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preview
+          path: public
+          retention-days: 7

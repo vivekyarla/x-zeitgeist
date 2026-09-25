@@ -27,6 +27,8 @@ def normalize(raw: dict) -> dict:
         "replies": int(raw.get("replyCount") or 0),
         "quotes": int(raw.get("quoteCount") or 0),
         "views": int(raw.get("viewCount") or 0),
+        "is_retweet": bool(raw.get("retweeted_tweet")),
+        "is_reply": bool(raw.get("isReply")),
         "author": {
             "handle": handle,
             "name": author.get("name") or handle,
@@ -61,6 +63,17 @@ class TwitterApiIo:
             return r.json()
         r.raise_for_status()
         return {}
+
+    def last_tweets(self, handle: str) -> list[dict]:
+        """An account's ~20 most recent original tweets (no replies or retweets)."""
+        r = self.session.get("https://api.twitterapi.io/twitter/user/last_tweets",
+                             params={"userName": handle, "includeReplies": "false"}, timeout=30)
+        r.raise_for_status()
+        data = r.json()
+        if data.get("status") == "error":
+            raise RuntimeError(data.get("message") or "error")
+        raw = data.get("tweets") or (data.get("data") or {}).get("tweets") or []
+        return [t for t in map(normalize, raw) if t["id"] and not t["is_retweet"] and not t["is_reply"]]
 
     def search(self, query: str, query_type: str = "Top", pages: int = 2):
         cursor = ""

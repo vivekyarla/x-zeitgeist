@@ -137,11 +137,18 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
 .row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 560px) { .row3 { grid-template-columns: 1fr; } }
 .topics { display: flex; flex-direction: column; gap: 8px; }
-.topic { display: grid; grid-template-columns: auto 150px 1fr auto; gap: 8px; align-items: start; }
+.topic { display: grid; grid-template-columns: auto 140px 1fr 72px auto; gap: 8px; align-items: start; }
+.topic .share { text-align: right; }
+.topics-head { display: grid; grid-template-columns: auto 140px 1fr 72px auto; gap: 8px; font-size: 12px; color: var(--faint); padding: 0 0 2px; }
+.topics-head span:first-child { width: 13px; }
+.miss { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 10px 0; border-top: 1px solid var(--rule); font-size: 13.5px; }
+.miss a { color: var(--ink); text-decoration: none; } .miss a:hover { text-decoration: underline; }
+.miss .why { color: var(--accent); font-size: 12.5px; white-space: nowrap; }
+.miss p { grid-column: 1 / -1; margin: 0; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .topic input[type="checkbox"] { margin-top: 11px; accent-color: var(--accent); }
 .topic .rm { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 18px; padding: 6px; }
 .topic .rm:hover { color: var(--danger); }
-@media (max-width: 560px) { .topic { grid-template-columns: auto 1fr auto; } .topic .desc { grid-column: 2 / 4; } }
+@media (max-width: 560px) { .topic { grid-template-columns: auto 1fr 64px auto; } .topic .desc { grid-column: 2 / 5; grid-row: 2; } .topics-head { display: none; } }
 .check { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 .check input { accent-color: var(--accent); }
 .key { border: 1px solid var(--rule); border-radius: 10px; padding: 14px; margin-bottom: 12px; background: var(--bg); }
@@ -234,6 +241,7 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
     <div class="tabs" role="tablist">
       <button type="button" role="tab" aria-selected="true" data-tab="interests">Interests</button>
       <button type="button" role="tab" aria-selected="false" data-tab="searches">Searches</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="missed">Filtered out</button>
       <button type="button" role="tab" aria-selected="false" data-tab="slack">Slack</button>
       <button type="button" role="tab" aria-selected="false" data-tab="keys">API keys</button>
     </div>
@@ -257,14 +265,21 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
         <div class="field"><label for="f-skip">Skip</label><textarea class="inp" id="f-skip" style="min-height:64px"></textarea>
           <p class="hint">One per line. Tweets about these are filtered out, even when they're popular.</p></div>
         <div class="field"><span class="lbl">Topics</span>
+          <div class="topics-head"><span></span><span>Label</span><span>What belongs here</span><span>Share %</span><span></span></div>
           <div class="topics" id="f-topics"></div>
-          <p class="hint">Jev files every tweet under one topic. Unchecked topics never make the page.</p>
+          <p class="hint">Jev files every tweet under one topic. Unchecked topics never make the page. Share is roughly how much of the read each topic gets when there's enough good material; a topic can go up to 1.5× its share if others come up short.</p>
           <button class="btn" type="button" id="add-topic" style="margin-top:10px">Add topic</button></div>
         <div class="field"><span class="lbl">Filter</span>
           <div class="row3">
             <div><input class="inp" id="f-signal" type="number" min="0" max="4" step="0.1"><p class="hint">Min signal, 0–4</p></div>
             <div><input class="inp" id="f-relevance" type="number" min="0" max="1" step="0.05"><p class="hint">Min relevance, 0–1</p></div>
             <div><input class="inp" id="f-bait" type="number" min="0" max="1" step="0.05"><p class="hint">Max bait, 0–1</p></div>
+          </div></div>
+        <div class="field"><span class="lbl">Ranking</span>
+          <div class="row3">
+            <div><input class="inp" id="r-breakout" type="number" min="0" max="1" step="0.1"><p class="hint">Breakout weight, 0–1: how much likes relative to follower count count, versus raw likes</p></div>
+            <div><input class="inp" id="r-mainstream" type="number" min="0" max="1" step="0.1"><p class="hint">Big-lab penalty, 0–1: how far news everyone sees anyway is ranked down</p></div>
+            <div><input class="inp" id="r-author" type="number" min="1" max="10" step="1"><p class="hint">Max tweets per account</p></div>
           </div></div>
         <div class="field"><label for="f-model">Writer model</label><input class="inp" id="f-model">
           <p class="hint">Any Vercel AI Gateway model id, e.g. anthropic/claude-sonnet-5.</p></div>
@@ -276,6 +291,20 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
         <div class="field"><label for="f-watch">Watchlist</label><textarea class="inp" id="f-watch" style="min-height:64px" spellcheck="false"></textarea>
           <p class="hint">X handles whose posts are always considered (still filtered by Jev). Separate with commas or new lines.</p></div>
         <div class="field" style="max-width:220px"><label for="f-watchfaves">Watchlist min likes</label><input class="inp" id="f-watchfaves" type="number" min="0" step="1"></div>
+        <div class="field"><label for="t-accounts">Tracked companies</label><textarea class="inp" id="t-accounts" style="min-height:64px" spellcheck="false"></textarea>
+          <p class="hint">Company accounts (Clay, Monaco, Gong, …) held to their own bar: a post counts when it does clearly better than that account usually does, instead of needing to go broadly viral. X handles, separated by commas or new lines.</p></div>
+        <div class="row3">
+          <div class="field"><label for="t-beat">Beat their usual by</label><input class="inp" id="t-beat" type="number" min="1" max="10" step="0.1"><p class="hint">× their median likes over recent posts</p></div>
+          <div class="field"><label for="t-signal">Min signal for them</label><input class="inp" id="t-signal" type="number" min="0" max="4" step="0.1"><p class="hint">0–4, usually lower than the main bar</p></div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="missed" hidden>
+        <p class="hint" style="margin:0 0 8px">The best-ranked tweets from the last update that didn't make it into the read, and why. Use this to decide what to loosen or tighten.</p>
+        {% for m in near_misses %}
+        <div class="miss"><a href="{{ m.tweet.url }}" target="_blank" rel="noopener">@{{ m.tweet.author.handle }} · {{ m.tweet.likes | compact }} likes · {{ topic_label(m.tweet.jev.topic) }}</a>
+          <span class="why">{{ m.reason }}</span><p>{{ m.tweet.text }}</p></div>
+        {% else %}<p class="hint">Nothing yet. This fills in after the next update.</p>{% endfor %}
       </div>
 
       <div class="panel" data-panel="slack" hidden>
@@ -375,7 +404,8 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
     b.addEventListener("click", function () {
       document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
       document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.dataset.panel !== b.dataset.tab; });
-      $("save").hidden = b.dataset.tab === "keys";
+      $("save").hidden = b.dataset.tab === "keys" || b.dataset.tab === "missed";
+      $("connect").hidden = b.dataset.tab === "missed";
       if (b.dataset.tab === "keys") loadKeys();
     });
   });
@@ -386,9 +416,11 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
     var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = t.include !== false; cb.title = "Show on the page";
     var lab = document.createElement("input"); lab.className = "inp"; lab.value = t.label || ""; lab.placeholder = "Label";
     var desc = document.createElement("input"); desc.className = "inp desc"; desc.value = t.description || ""; desc.placeholder = "What belongs here (Jev reads this)";
+    var share = document.createElement("input"); share.className = "inp share"; share.type = "number"; share.min = 0; share.max = 100; share.step = 1;
+    share.value = Math.round((t.share || 0) * 100); share.setAttribute("aria-label", "Share of the read, percent");
     var rm = document.createElement("button"); rm.type = "button"; rm.className = "rm"; rm.textContent = "×"; rm.setAttribute("aria-label", "Remove topic");
     rm.onclick = function () { row.remove(); };
-    row.append(cb, lab, desc, rm); return row;
+    row.append(cb, lab, desc, share, rm); return row;
   }
   function fill(s) {
     $("f-audience").value = s.focus.audience;
@@ -398,6 +430,12 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
     s.topics.filter(function (t) { return t.key !== "other"; }).forEach(function (t) { box.appendChild(topicRow(t)); });
     $("f-signal").value = s.thresholds.min_signal; $("f-relevance").value = s.thresholds.min_relevance; $("f-bait").value = s.thresholds.max_bait;
     $("f-model").value = s.writer_model || "";
+    var rk = s.ranking || {}, tr = s.tracked || {};
+    $("r-breakout").value = rk.breakout_weight != null ? rk.breakout_weight : 0.5;
+    $("r-mainstream").value = rk.mainstream_penalty != null ? rk.mainstream_penalty : 0.5;
+    $("r-author").value = rk.per_author_max || 2;
+    $("t-accounts").value = (tr.accounts || []).join(", ");
+    $("t-beat").value = tr.beat_baseline_by || 1.5; $("t-signal").value = tr.min_signal != null ? tr.min_signal : 1.0;
     $("f-searches").value = s.searches.join("\n");
     $("f-watch").value = s.watchlist.join(", ");
     $("f-watchfaves").value = s.watchlist_min_faves;
@@ -417,9 +455,12 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
       if (!label && !desc) return;
       if (!label || !desc) throw new Error("Each topic needs a label and a description.");
       var key = r.dataset.key || slug(label); while (seen[key]) key += "_2"; seen[key] = 1;
-      topics.push({ key: key, label: label, description: desc, include: r.children[0].checked });
+      topics.push({ key: key, label: label, description: desc, include: r.children[0].checked,
+        share: Math.max(0, Math.min(100, parseFloat(r.children[3].value) || 0)) / 100 });
     });
-    topics.push({ key: "other", label: "Other", description: "Anything else", include: false });
+    topics.push({ key: "other", label: "Other", description: "Anything else", include: false, share: 0 });
+    var total = topics.reduce(function (a, t) { return a + (t.include ? t.share : 0); }, 0);
+    if (total > 0) topics.forEach(function (t) { t.share = t.include ? Math.round(t.share / total * 1000) / 1000 : 0; });
     if (topics.filter(function (t) { return t.include; }).length < 1) throw new Error("Check at least one topic to show on the page.");
     var num = function (id, lo, hi, name) { var v = parseFloat($(id).value); if (isNaN(v) || v < lo || v > hi) throw new Error(name + " must be between " + lo + " and " + hi + "."); return v; };
     var s = JSON.parse(JSON.stringify(settings));
@@ -428,6 +469,10 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
     s.topics = topics;
     s.thresholds = { min_signal: num("f-signal", 0, 4, "Min signal"), min_relevance: num("f-relevance", 0, 1, "Min relevance"), max_bait: num("f-bait", 0, 1, "Max bait") };
     s.writer_model = $("f-model").value.trim() || "anthropic/claude-sonnet-5";
+    s.ranking = { breakout_weight: num("r-breakout", 0, 1, "Breakout weight"), mainstream_penalty: num("r-mainstream", 0, 1, "Big-lab penalty"),
+      per_author_max: Math.round(num("r-author", 1, 10, "Max tweets per account")) };
+    s.tracked = { accounts: $("t-accounts").value.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").trim(); }).filter(Boolean),
+      beat_baseline_by: num("t-beat", 1, 10, "Beat their usual by"), min_signal: num("t-signal", 0, 4, "Min signal for tracked companies") };
     s.searches = lines($("f-searches").value);
     if (!s.searches.length) throw new Error("Add at least one X search.");
     s.watchlist = $("f-watch").value.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").trim(); }).filter(Boolean);

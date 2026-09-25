@@ -44,12 +44,23 @@ Return ONLY a JSON object, no markdown fences, with this shape:
     }}
   ]
 }}
-Use 3-5 themes. Only use tweet ids from the input. If the previous thesis still holds and fits the
+Use 3-5 themes. Only use tweet ids from the input. At most ONE theme may be about AI model or
+product launches from big labs; fold the rest of the launch news into it or leave it out. If the
+input has GTM, sales, or marketing tweets, at least one theme must be about them, and lead with
+what's working (a playbook that's paying off, a campaign that took off, a company post that
+outperformed). Tweets marked "company_post_outperforming" are posts from GTM companies (Clay,
+Monaco, Gong, ...) that did much better than that company usually does; treat them as signs of
+what's working in GTM, not as ads. If the previous thesis still holds and fits the
 focus above, keep its core but update the specifics; if it's about things they don't care about,
 replace it."""
 
 
-def _payload(tweets: list[dict]) -> list[dict]:
+def _payload(tweets: list[dict], baselines: dict) -> list[dict]:
+    def perf(t: dict) -> dict:
+        b = baselines.get(t["author"]["handle"].lower())
+        if b and b.get("median"):
+            return {"company_post_outperforming": f"{t['likes'] / b['median']:.1f}x its usual likes"}
+        return {}
     return [{
         "id": t["id"],
         "author": "@" + t["author"]["handle"],
@@ -59,13 +70,14 @@ def _payload(tweets: list[dict]) -> list[dict]:
         "reposts": t["retweets"],
         "topic": t["jev"]["topic"],
         "jev_signal_0_to_4": round(t["jev"]["signal"], 2),
+        **perf(t),
     } for t in tweets]
 
 
-def synthesize(tweets: list[dict], previous_thesis: str | None) -> dict:
+def synthesize(tweets: list[dict], previous_thesis: str | None, baselines: dict | None = None) -> dict:
     user = json.dumps({
         "previous_thesis": previous_thesis,
-        "tweets": _payload(tweets),
+        "tweets": _payload(tweets, baselines or {}),
     }, ensure_ascii=False)
     for attempt in range(2):
         out = _ask(user)
