@@ -2,10 +2,11 @@
   "focus": {
     "audience": "the marketing team at an AI startup in San Francisco",
     "care_about": [
-      "AI model and product launches (a new GPT or Claude release, a new model like Jev, a new agent product)",
-      "Creative things people built with AI that are going viral (JavaScript animations made in Claude, vibe-coded games, clever demos)",
-      "What other revenue and GTM teams and tools are doing (Clay, Monaco, AI SDRs, outbound experiments, launch videos, brand stunts, pricing moves)",
-      "Startup, VC, and SF culture moments (a16z starting a school, a hackathon everyone went to, a notable raise people are talking about)"
+      "What GTM, sales, and revenue teams and tools are doing that's working: playbooks, outbound and signal-based experiments, GTM engineering, what companies like Clay, Monaco, and Gong are shipping or posting",
+      "Marketing and brand moves in tech: launch videos, campaigns, positioning, landing pages, content that took off, rebrands, clever stunts",
+      "Creative or delightful things people built with AI that are going viral, and how people actually use AI at work",
+      "Startup, founder, VC, and SF culture moments people are talking about",
+      "AI model and product launches, but only the ones that change what GTM and marketing teams can do"
     ],
     "skip": [
       "Infrastructure and finance: data centers, compute deals, chips, power, bonds, debt, earnings, stock moves",
@@ -14,68 +15,84 @@
   },
   "topics": [
     {
-      "key": "launches",
-      "label": "Launches",
-      "description": "New AI models and AI product launches, from big labs or startups (e.g. a GPT or Claude release, a new eval model like Jev, a new agent product)",
-      "include": true
+      "key": "gtm_sales",
+      "label": "GTM & sales",
+      "description": "What sales, GTM, and revenue teams and tools are doing: playbooks, outbound, signal-based selling, GTM engineering, AI SDRs, sales tools like Clay, Monaco, Gong, and pricing moves",
+      "include": true,
+      "share": 0.2
+    },
+    {
+      "key": "marketing_brand",
+      "label": "Marketing & brand",
+      "description": "Marketing and brand in tech: launch videos, ad campaigns, billboards, positioning, landing pages, content and social strategy, rebrands, and stunts",
+      "include": true,
+      "share": 0.2
     },
     {
       "key": "creative_viral",
       "label": "Going viral",
       "description": "Creative or delightful things people built with AI that are going viral: demos, animations, games, art, vibe-coded apps, clever prompts",
-      "include": true
-    },
-    {
-      "key": "gtm_playbooks",
-      "label": "GTM & revenue",
-      "description": "What sales, GTM, and revenue teams and tools are doing: Clay, Monaco, AI SDRs, outbound experiments, launch videos, brand stunts, pricing moves",
-      "include": true
+      "include": true,
+      "share": 0.15
     },
     {
       "key": "ai_at_work",
       "label": "AI at work",
       "description": "How people and teams are actually using AI at work, and takes on where it's going",
-      "include": true
+      "include": true,
+      "share": 0.1
     },
     {
       "key": "startup_culture",
       "label": "Startup culture",
       "description": "Startup, founder, and VC culture moves: new programs, schools, hiring, notable raises or acquisitions that people are talking about",
-      "include": true
+      "include": true,
+      "share": 0.15
     },
     {
       "key": "sf_scene",
       "label": "SF scene",
       "description": "San Francisco and Bay Area tech culture, events, parties, hackathons, and life",
-      "include": true
+      "include": true,
+      "share": 0.05
+    },
+    {
+      "key": "launches",
+      "label": "Launches",
+      "description": "New AI models and AI product launches, from big labs or startups",
+      "include": true,
+      "share": 0.15
     },
     {
       "key": "industry_finance",
       "label": "Infra & finance",
       "description": "Infrastructure and finance: data centers, compute buildout, chips supply, power, bonds, debt, earnings, stock moves, macro",
-      "include": false
+      "include": false,
+      "share": 0
     },
     {
       "key": "policy",
       "label": "Policy",
       "description": "Politics, government, regulation, lawsuits, and AI safety incidents",
-      "include": false
+      "include": false,
+      "share": 0
     },
     {
       "key": "other",
       "label": "Other",
       "description": "Anything else",
-      "include": false
+      "include": false,
+      "share": 0
     }
   ],
   "searches": [
-    "(introducing OR \"just launched\" OR \"just shipped\" OR \"now available\" OR \"new model\" OR \"open source model\") (AI OR model OR agent OR Claude OR GPT OR Gemini OR Grok OR Llama) min_faves:300 lang:en -filter:replies",
-    "(\"AI agent\" OR \"AI agents\" OR \"frontier model\" OR OpenAI OR Anthropic OR Gemini) min_faves:500 lang:en -filter:replies",
-    "(\"made this with\" OR \"built this with\" OR \"vibe coded\" OR \"one prompt\" OR \"one-shot\" OR animation OR shader OR \"three.js\" OR p5js OR \"generative art\" OR \"look what\") (Claude OR GPT OR Gemini OR Cursor OR AI) min_faves:300 lang:en -filter:replies",
-    "(Clay OR Monaco OR \"GTM engineer\" OR \"GTM engineering\" OR \"AI SDR\" OR \"cold email\" OR \"outbound\" OR \"sales playbook\" OR RevOps) min_faves:75 lang:en -filter:replies",
-    "(GTM OR \"go-to-market\" OR \"launch video\" OR \"launch day\" OR billboard OR \"brand campaign\" OR \"marketing stunt\") (AI OR startup OR SaaS) min_faves:150 lang:en -filter:replies",
-    "(ARR OR \"usage-based pricing\" OR \"pricing page\") (AI OR startup) min_faves:150 lang:en -filter:replies",
-    "(\"San Francisco\" OR \"SF tech\" OR \"in SF\" OR \"Bay Area\" OR founders OR a16z OR YC) (AI OR startup OR school OR hackathon OR party OR launch) min_faves:200 lang:en -filter:replies"
+    "(\"just launched\" OR \"just shipped\" OR introducing OR \"new model\") (AI OR model OR agent) min_faves:1000 lang:en -filter:replies -from:OpenAI -from:AnthropicAI -from:claudeai -from:GoogleDeepMind -from:Google -from:sama -from:OpenAIDevs -from:ClaudeDevs",
+    "(\"made this with\" OR \"built this with\" OR \"vibe coded\" OR \"one prompt\" OR \"one-shot\" OR animation OR \"generative art\" OR \"look what\") (Claude OR GPT OR Gemini OR Cursor OR AI) min_faves:300 lang:en -filter:replies",
+    "(positioning OR \"landing page\" OR \"launch video\" OR rebrand OR \"ad campaign\" OR billboard OR \"demand gen\" OR \"B2B marketing\" OR \"brand campaign\" OR \"marketing stunt\") (AI OR startup OR SaaS OR B2B) min_faves:50 lang:en -filter:replies",
+    "(\"founder-led sales\" OR \"signal-based\" OR \"GTM engineer\" OR \"GTM engineering\" OR ICP OR \"reply rate\" OR \"LinkedIn outreach\" OR \"cold email\" OR outbound OR \"AI SDR\") min_faves:40 lang:en -filter:replies",
+    "(Clay OR Apollo OR HeyReach OR Unify OR \"Common Room\" OR Instantly OR Gong OR Monaco OR Attio) (GTM OR sales OR outbound OR pipeline OR CRM OR workflow) min_faves:30 lang:en -filter:replies",
+    "(GTM OR \"go-to-market\" OR RevOps OR \"sales team\" OR \"sales playbook\" OR ARR OR \"usage-based pricing\" OR \"pricing page\") (AI OR startup OR SaaS) min_faves:100 lang:en -filter:replies",
+    "(\"San Francisco\" OR \"SF tech\" OR \"in SF\" OR \"Bay Area\" OR founders OR a16z OR YC) (AI OR startup OR school OR hackathon OR party OR launch) min_faves:300 lang:en -filter:replies"
   ],
   "watchlist": [
     "ycombinator",
@@ -84,12 +101,13 @@
     "levie",
     "jasonlk",
     "TechCrunch",
-    "OpenAI",
-    "AnthropicAI",
-    "GoogleDeepMind",
-    "sama",
     "karpathy",
-    "benioff"
+    "codyschneider",
+    "samdblond",
+    "RobHoffman_",
+    "antinertia",
+    "fivosaresti",
+    "kristaletz"
   ],
   "watchlist_min_faves": 20,
   "thresholds": {
@@ -104,5 +122,70 @@
     "hour_pt": 8,
     "weekdays_only": true,
     "top_tweets": 5
+  },
+  "ranking": {
+    "per_author_max": 2,
+    "breakout_weight": 0.5,
+    "mainstream_penalty": 0.5,
+    "account_groups": {
+      "OpenAI": [
+        "OpenAI",
+        "OpenAIDevs",
+        "ChatGPTapp",
+        "sama",
+        "OpenAINewsroom"
+      ],
+      "Anthropic": [
+        "AnthropicAI",
+        "claudeai",
+        "ClaudeDevs",
+        "DarioAmodei"
+      ],
+      "Google": [
+        "Google",
+        "GoogleDeepMind",
+        "GoogleAIStudio",
+        "GeminiApp",
+        "GoogleAI",
+        "sundarpichai"
+      ],
+      "Meta": [
+        "Meta",
+        "AIatMeta",
+        "finkd"
+      ],
+      "xAI": [
+        "xai",
+        "grok",
+        "elonmusk"
+      ],
+      "Microsoft": [
+        "Microsoft",
+        "satyanadella",
+        "code",
+        "GitHub"
+      ],
+      "Nvidia": [
+        "nvidia",
+        "NVIDIAAI"
+      ]
+    }
+  },
+  "tracked": {
+    "accounts": [
+      "clay",
+      "MonacoGTM",
+      "gong_io",
+      "attio",
+      "unifygtm",
+      "CommonRoomHQ",
+      "useapolloio",
+      "heyreach_io",
+      "InstantlyAI",
+      "outreach_io"
+    ],
+    "beat_baseline_by": 3.0,
+    "min_signal": 1.0,
+    "min_likes": 25
   }
 }

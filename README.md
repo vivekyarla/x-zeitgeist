@@ -39,6 +39,10 @@ Interests, topics, searches, thresholds, the writer model, and the Slack schedul
 - **Change the focus:** edit "Focus on" and "Skip", and the topics (unchecked topics never make the page).
 - **Pin Jev** once thresholds feel right: set `JEV_MODEL=jev-1.13.0` (or whatever is current), so `jev-latest` updates don't shift scores under you.
 
+- **Company accounts** (Clay, Monaco, Gong, …): add them under Settings → Searches → Tracked companies. Their posts count when they beat that account's usual likes (3× its median and at least 25 likes by default), instead of needing to go broadly viral.
+- **Topic mix:** each topic's share sets roughly how much of the read it gets; the Filtered out tab shows the best tweets that just missed, and why.
+- **Try a change safely:** push it to a branch named `preview/...`. The "Preview a tuning change" workflow does a full dry run against this week's data and uploads the built page plus `compare.json` (before vs after) as an artifact, without saving or deploying anything.
+
 ## Slack
 
 1. Create a Slack app (api.slack.com/apps → From scratch), turn on **Incoming Webhooks**, and add one for your channel.
