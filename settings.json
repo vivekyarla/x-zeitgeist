@@ -95,7 +95,7 @@
   ],
   "searches": [
     "(\"just launched\" OR \"just shipped\" OR introducing OR \"new model\") (AI OR model OR agent) min_faves:1000 lang:en -filter:replies -from:OpenAI -from:AnthropicAI -from:claudeai -from:GoogleDeepMind -from:Google -from:sama -from:OpenAIDevs -from:ClaudeDevs",
-    "(ARR OR \"run-rate\" OR \"annualized revenue\" OR \"in revenue\" OR raises OR raised OR valuation OR acquires OR acquisition OR \"Series A\" OR \"Series B\" OR \"Series C\") (AI OR startup OR founders) min_faves:500 lang:en -filter:replies",
+    "(ARR OR \"run rate\" OR \"run-rate\" OR \"annualized revenue\" OR \"in revenue\" OR raises OR raised OR valuation OR acquires OR acquisition OR \"Series A\" OR \"Series B\" OR \"Series C\") min_faves:500 lang:en -filter:replies",
     "(AI OR startup OR founders OR \"tech\") min_faves:5000 lang:en -filter:replies",
     "(\"made this with\" OR \"built this with\" OR \"vibe coded\" OR \"one prompt\" OR \"one-shot\" OR animation OR \"generative art\" OR \"look what\") (Claude OR GPT OR Gemini OR Cursor OR AI) min_faves:300 lang:en -filter:replies",
     "(\"San Francisco\" OR \"SF tech\" OR \"in SF\" OR \"Bay Area\" OR founders OR a16z OR YC) (AI OR startup OR school OR hackathon OR party OR launch) min_faves:300 lang:en -filter:replies",
@@ -115,7 +115,8 @@
     "RobHoffman_",
     "antinertia",
     "fivosaresti",
-    "kristaletz"
+    "kristaletz",
+    "cognition"
   ],
   "watchlist_min_faves": 20,
   "thresholds": {
