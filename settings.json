@@ -2,11 +2,12 @@
   "focus": {
     "audience": "the marketing team at an AI startup in San Francisco",
     "care_about": [
-      "What GTM, sales, and revenue teams and tools are doing that's working: playbooks, outbound and signal-based experiments, GTM engineering, what companies like Clay, Monaco, and Gong are shipping or posting",
-      "Marketing and brand moves in tech: launch videos, campaigns, positioning, landing pages, content that took off, rebrands, clever stunts",
+      "The biggest conversations in tech and AI this week: what everyone on tech Twitter is talking about",
+      "Big startup and AI company moments: revenue milestones (e.g. Cognition hitting $1B ARR), major raises and valuations, acquisitions, notable hires and departures",
+      "AI model and product launches that people are excited about or arguing over",
       "Creative or delightful things people built with AI that are going viral, and how people actually use AI at work",
       "Startup, founder, VC, and SF culture moments people are talking about",
-      "AI model and product launches, but only the ones that change what GTM and marketing teams can do"
+      "What GTM, sales, and marketing teams and tools are doing that's working: playbooks, campaigns, launch videos, and what companies like Clay, Monaco, and Gong are shipping"
     ],
     "skip": [
       "Infrastructure and finance: data centers, compute deals, chips, power, bonds, debt, earnings, stock moves",
@@ -15,25 +16,25 @@
   },
   "topics": [
     {
-      "key": "gtm_sales",
-      "label": "GTM & sales",
-      "description": "What sales, GTM, and revenue teams and tools are doing: playbooks, outbound, signal-based selling, GTM engineering, AI SDRs, sales tools like Clay, Monaco, Gong, and pricing moves",
+      "key": "launches",
+      "label": "Launches",
+      "description": "New AI models and AI product launches, from big labs or startups, that people are excited about or arguing over",
       "include": true,
-      "share": 0.2
+      "share": 0.15
     },
     {
-      "key": "marketing_brand",
-      "label": "Marketing & brand",
-      "description": "Marketing and brand in tech: launch videos, ad campaigns, billboards, positioning, landing pages, content and social strategy, rebrands, and stunts",
+      "key": "startup_business",
+      "label": "Startup business",
+      "description": "Big business news about startups and AI companies that people are talking about: revenue and ARR milestones, major raises and valuations, acquisitions, notable hires and departures",
       "include": true,
-      "share": 0.2
+      "share": 0.15
     },
     {
       "key": "creative_viral",
       "label": "Going viral",
       "description": "Creative or delightful things people built with AI that are going viral: demos, animations, games, art, vibe-coded apps, clever prompts",
       "include": true,
-      "share": 0.15
+      "share": 0.12
     },
     {
       "key": "ai_at_work",
@@ -45,28 +46,35 @@
     {
       "key": "startup_culture",
       "label": "Startup culture",
-      "description": "Startup, founder, and VC culture moves: new programs, schools, hiring, notable raises or acquisitions that people are talking about",
+      "description": "Startup, founder, and VC culture: new programs and schools, founder stories, hiring and work culture, debates about how startups should run",
       "include": true,
-      "share": 0.15
+      "share": 0.13
     },
     {
       "key": "sf_scene",
       "label": "SF scene",
       "description": "San Francisco and Bay Area tech culture, events, parties, hackathons, and life",
       "include": true,
-      "share": 0.05
+      "share": 0.1
     },
     {
-      "key": "launches",
-      "label": "Launches",
-      "description": "New AI models and AI product launches, from big labs or startups",
+      "key": "gtm_sales",
+      "label": "GTM & sales",
+      "description": "What sales, GTM, and revenue teams and tools are doing: playbooks, outbound, signal-based selling, GTM engineering, AI SDRs, sales tools like Clay, Monaco, Gong, and pricing moves",
       "include": true,
-      "share": 0.15
+      "share": 0.13
+    },
+    {
+      "key": "marketing_brand",
+      "label": "Marketing & brand",
+      "description": "Marketing and brand in tech: launch videos, ad campaigns, billboards, positioning, landing pages, content and social strategy, rebrands, and stunts",
+      "include": true,
+      "share": 0.12
     },
     {
       "key": "industry_finance",
       "label": "Infra & finance",
-      "description": "Infrastructure and finance: data centers, compute buildout, chips supply, power, bonds, debt, earnings, stock moves, macro",
+      "description": "Infrastructure and markets: data centers, compute buildout, chips supply, power, bonds and debt, public-company earnings, stock moves, macro",
       "include": false,
       "share": 0
     },
@@ -87,12 +95,12 @@
   ],
   "searches": [
     "(\"just launched\" OR \"just shipped\" OR introducing OR \"new model\") (AI OR model OR agent) min_faves:1000 lang:en -filter:replies -from:OpenAI -from:AnthropicAI -from:claudeai -from:GoogleDeepMind -from:Google -from:sama -from:OpenAIDevs -from:ClaudeDevs",
+    "(ARR OR \"run rate\" OR \"run-rate\" OR \"annualized revenue\" OR \"in revenue\" OR raises OR raised OR valuation OR acquires OR acquisition OR \"Series A\" OR \"Series B\" OR \"Series C\") min_faves:500 lang:en -filter:replies",
+    "(AI OR startup OR founders OR \"tech\") min_faves:5000 lang:en -filter:replies",
     "(\"made this with\" OR \"built this with\" OR \"vibe coded\" OR \"one prompt\" OR \"one-shot\" OR animation OR \"generative art\" OR \"look what\") (Claude OR GPT OR Gemini OR Cursor OR AI) min_faves:300 lang:en -filter:replies",
-    "(positioning OR \"landing page\" OR \"launch video\" OR rebrand OR \"ad campaign\" OR billboard OR \"demand gen\" OR \"B2B marketing\" OR \"brand campaign\" OR \"marketing stunt\") (AI OR startup OR SaaS OR B2B) min_faves:50 lang:en -filter:replies",
-    "(\"founder-led sales\" OR \"signal-based\" OR \"GTM engineer\" OR \"GTM engineering\" OR ICP OR \"reply rate\" OR \"LinkedIn outreach\" OR \"cold email\" OR outbound OR \"AI SDR\") min_faves:40 lang:en -filter:replies",
-    "(Clay OR Apollo OR HeyReach OR Unify OR \"Common Room\" OR Instantly OR Gong OR Monaco OR Attio) (GTM OR sales OR outbound OR pipeline OR CRM OR workflow) min_faves:30 lang:en -filter:replies",
-    "(GTM OR \"go-to-market\" OR RevOps OR \"sales team\" OR \"sales playbook\" OR ARR OR \"usage-based pricing\" OR \"pricing page\") (AI OR startup OR SaaS) min_faves:100 lang:en -filter:replies",
-    "(\"San Francisco\" OR \"SF tech\" OR \"in SF\" OR \"Bay Area\" OR founders OR a16z OR YC) (AI OR startup OR school OR hackathon OR party OR launch) min_faves:300 lang:en -filter:replies"
+    "(\"San Francisco\" OR \"SF tech\" OR \"in SF\" OR \"Bay Area\" OR founders OR a16z OR YC) (AI OR startup OR school OR hackathon OR party OR launch) min_faves:300 lang:en -filter:replies",
+    "(GTM OR \"go-to-market\" OR \"founder-led sales\" OR \"signal-based\" OR \"GTM engineer\" OR outbound OR \"cold email\" OR \"AI SDR\" OR Clay OR Apollo OR HeyReach OR Gong OR Monaco OR Attio) min_faves:75 lang:en -filter:replies",
+    "(positioning OR \"landing page\" OR \"launch video\" OR rebrand OR \"ad campaign\" OR billboard OR \"demand gen\" OR \"B2B marketing\" OR \"brand campaign\") (AI OR startup OR SaaS OR B2B) min_faves:100 lang:en -filter:replies"
   ],
   "watchlist": [
     "ycombinator",
@@ -107,7 +115,8 @@
     "RobHoffman_",
     "antinertia",
     "fivosaresti",
-    "kristaletz"
+    "kristaletz",
+    "cognition"
   ],
   "watchlist_min_faves": 20,
   "thresholds": {
@@ -125,8 +134,8 @@
   },
   "ranking": {
     "per_author_max": 2,
-    "breakout_weight": 0.5,
-    "mainstream_penalty": 0.5,
+    "breakout_weight": 0.35,
+    "mainstream_penalty": 0.25,
     "account_groups": {
       "OpenAI": [
         "OpenAI",
