@@ -66,8 +66,19 @@ class TwitterApiIo:
 
     def last_tweets(self, handle: str) -> list[dict]:
         """An account's ~20 most recent original tweets (no replies or retweets)."""
-        r = self.session.get("https://api.twitterapi.io/twitter/user/last_tweets",
-                             params={"userName": handle, "includeReplies": "false"}, timeout=30)
+        for attempt in range(3):
+            try:
+                r = self.session.get("https://api.twitterapi.io/twitter/user/last_tweets",
+                                     params={"userName": handle, "includeReplies": "false"}, timeout=45)
+            except requests.RequestException:
+                if attempt == 2:
+                    raise
+                time.sleep(2 ** attempt)
+                continue
+            if r.status_code == 429 or r.status_code >= 500:
+                time.sleep(2 ** attempt)
+                continue
+            break
         r.raise_for_status()
         data = r.json()
         if data.get("status") == "error":

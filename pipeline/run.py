@@ -76,8 +76,11 @@ def refresh_baselines(src, state: dict, now: datetime) -> list[dict]:
         try:
             posts = src.last_tweets(h)
         except Exception as e:
-            print(f"  tracked @{h}: couldn't load recent posts ({e})")
-            baselines[h.lower()] = {"at": now.isoformat(), "n": 0, "error": str(e)[:120]}
+            print(f"  tracked @{h}: couldn't load recent posts ({e}); "
+                  + ("keeping the last baseline" if b and b.get("n") else "no baseline yet"))
+            if not (b and b.get("n")):
+                baselines[h.lower()] = {"at": (now - timedelta(hours=19)).isoformat(), "n": 0,
+                                        "error": str(e)[:120]}  # retry within the hour
             continue
         likes = [t["likes"] for t in posts]
         baselines[h.lower()] = {"at": now.isoformat(), "n": len(likes),

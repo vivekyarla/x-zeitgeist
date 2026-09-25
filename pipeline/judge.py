@@ -158,6 +158,9 @@ def why_not(t: dict, baselines: dict) -> str | None:
     if j["relevant"] < config.MIN_RELEVANCE:
         return f"relevance {j['relevant']:.2f}"
     base = _tracked_baseline(t, baselines)
+    tracked = t["author"]["handle"].lower() in config.TRACKED_LOWER
+    if tracked and base is None and t["likes"] < config.TRACKED_MIN_LIKES:
+        return f"{t['likes']:,} likes, under {config.TRACKED_MIN_LIKES} (no baseline yet)"
     if base is not None:  # company accounts: beat their own usual, not the global bar
         need = max(config.TRACKED_MIN_LIKES, config.TRACKED_BEAT_BY * base)
         if t["likes"] < need:
