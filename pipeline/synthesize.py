@@ -104,14 +104,16 @@ def _ask(user: str) -> dict | None:
             "messages": [{"role": "system", "content": SYSTEM},
                          {"role": "user", "content": user}],
             "temperature": 0.4,
-            "max_tokens": 3000,
+            "max_tokens": 16000,  # reasoning tokens count toward this; you pay only for what is used
         },
         timeout=120,
     )
     if r.status_code != 200:
         print(f"  writer {r.status_code}: {r.text[:300]}")
     r.raise_for_status()
-    choice = r.json()["choices"][0]
+    body = r.json()
+    choice = body["choices"][0]
+    print(f"  writer usage: {body.get('usage')}")
     text = re.sub(r"^```(?:json)?|```$", "", (choice["message"]["content"] or "").strip(), flags=re.M).strip()
     try:
         return json.loads(text)
