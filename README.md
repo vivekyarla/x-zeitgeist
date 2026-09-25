@@ -8,7 +8,7 @@ Every 3 hours a GitHub Action runs `python -m pipeline.run`:
 
 1. **Fetch** (`pipeline/sources.py`): runs the searches and watchlist in `pipeline/config.py` against twitterapi.io, limited to tweets since Monday 00:00 PT.
 2. **Judge** (`pipeline/judge.py`): sends each *new* tweet to Jev once (through Vercel AI Gateway, or TypeSafe directly if `TYPESAFE_API_KEY` is set), asking five questions in one call: is it on-topic, which topic, how much signal (0–4 rubric), is it bait, and would marketing care. Tweets that clear the thresholds are ranked, with Jev's scores weighted most and engagement breaking ties.
-3. **Synthesize** (`pipeline/synthesize.py`): sends the top 40 to Claude through Vercel AI Gateway, which writes the thesis and groups tweets into 3–5 themes. It sees its previous thesis, so the read evolves instead of starting over.
+3. **Synthesize** (`pipeline/synthesize.py`): sends the top 60 to Claude through Vercel AI Gateway, which writes the thesis and groups tweets into 3–5 themes. It sees its previous thesis, so the read evolves instead of starting over.
 4. **Publish** (`pipeline/build.py`): renders `public/index.html` (plus `public/data.json` for a future Notion sync) and deploys to GitHub Pages. Weekly state is committed to `data/week.json`; on Monday the old week moves to `data/archive/`.
 
 ## Setup (about 15 minutes)

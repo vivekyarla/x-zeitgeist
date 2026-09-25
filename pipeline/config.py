@@ -71,7 +71,7 @@ TRACKED_MIN_SIGNAL = float(_tr["min_signal"])
 # Thesis writing (Vercel AI Gateway)
 # ---------------------------------------------------------------------------
 WRITER_MODEL = os.getenv("WRITER_MODEL") or SETTINGS.get("writer_model", "anthropic/claude-sonnet-5")
-TWEETS_FOR_THESIS = 40     # top-ranked tweets sent to the writer model
+TWEETS_FOR_THESIS = 60     # top-ranked tweets sent to the writer model
 TWEETS_PER_THEME_SHOWN = 6
 
 # ---------------------------------------------------------------------------

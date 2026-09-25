@@ -102,7 +102,7 @@ def score(state: dict) -> tuple[list[dict], list[dict], list[dict]]:
     top = select(kept, config.TWEETS_FOR_THESIS)
     top_ids = {t["id"] for t in top}
     misses = sorted((t for t in judged if t["id"] not in top_ids), key=lambda t: t["rank"], reverse=True)[:40]
-    near = [{"id": t["id"], "reason": reasons[t["id"]] or "ranked below the top 40"} for t in misses]
+    near = [{"id": t["id"], "reason": reasons[t["id"]] or f"ranked below the top {config.TWEETS_FOR_THESIS}"} for t in misses]
     return kept, top, near
 
 
