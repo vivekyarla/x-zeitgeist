@@ -41,7 +41,9 @@ jobs:
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
           TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: python -m pipeline.run --dry-run
+        # Put extra arguments in preview_args.txt on the branch, e.g. "--week 2026-09-21" to
+        # replay a past week from scratch.
+        run: python -m pipeline.run --dry-run $(cat preview_args.txt 2>/dev/null)
 
       - uses: actions/upload-artifact@v4
         with:

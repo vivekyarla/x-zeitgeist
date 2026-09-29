@@ -84,6 +84,7 @@ def build_site(state: dict, out_dir: Path, demo: bool = False) -> None:
         updated_label=f"{_local(latest['updated_at']):%a %-I:%M %p} PT" if latest else None,
         themes=themes,
         history=history,
+        known_stories=(latest or {}).get("known_stories", []),
         near_misses=[{"reason": m["reason"], "tweet": tweets[m["id"]]}
                      for m in (latest or {}).get("near_misses", []) if m["id"] in tweets][:30],
         demo=demo,

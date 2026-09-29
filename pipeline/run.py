@@ -36,32 +36,99 @@ def load_state(ws: datetime) -> dict:
     return {"week_start": ws.isoformat(), "tweets": {}, "thesis_history": [], "latest": None}
 
 
-def fetch(ws: datetime, state: dict, now: datetime) -> list[dict]:
+def _posted(t: dict) -> datetime | None:
+    try:
+        return datetime.strptime(t["created_at"], "%a %b %d %H:%M:%S %z %Y")
+    except (ValueError, KeyError):
+        return None
+
+
+def fetch(ws: datetime, state: dict, now: datetime, until: datetime | None = None,
+          replay: bool = False) -> list[dict]:
+    """Collect candidate tweets and record each story's reach across the panel.
+
+    Sources: the timeline panel (primary: what the scene is posting, quoting, and
+    retweeting), plus keyword searches, the watchlist, and tracked companies. Every quote
+    or retweet is traced back to its original, so a story is found by who's talking about
+    it, whatever words it uses.
+    """
+    from . import panel as panel_mod
     from .sources import TwitterApiIo
     src = TwitterApiIo()
-    since = f"since_time:{int(ws.timestamp())}"
-    queries = [(f"{q} {since}", "Top") for q in config.SEARCH_QUERIES]
-    for i in range(0, len(config.WATCHLIST), 6):  # keep queries short
-        handles = " OR ".join(f"from:{h}" for h in config.WATCHLIST[i:i + 6])
-        queries.append((f"({handles}) min_faves:{config.WATCHLIST_MIN_FAVES} -filter:replies {since}", "Latest"))
-    for i in range(0, len(config.TRACKED), 6):  # company accounts: every original post, judged vs their usual
-        handles = " OR ".join(f"from:{h}" for h in config.TRACKED[i:i + 6])
-        queries.append((f"({handles}) -filter:replies -filter:retweets {since}", "Latest"))
+    end = until or now
+    since = f"since_time:{int(ws.timestamp())}" + (f" until_time:{int(until.timestamp())}" if until else "")
+    pan = panel_mod.refresh(src, now)
+    panel_set = {h.lower() for h in panel_mod.handles(pan)}
+    reach: dict[str, set] = {k: set(v) for k, v in state.get("reach", {}).items()}
     seen: dict[str, dict] = {}
-    for q, qt in queries:
+    counts = collections.Counter()
+
+    def add(t: dict) -> None:
+        posted = _posted(t)
+        if not t["id"] or not t["text"] or (posted and not (ws - timedelta(days=2) <= posted <= end)):
+            return
+        old = seen.get(t["id"])
+        if old:
+            for k in ("likes", "retweets", "replies", "quotes", "views"):
+                old[k] = max(old[k], t[k])
+        else:
+            seen[t["id"]] = t
+
+    def ingest(t: dict, via: str) -> None:
+        author = t["author"]["handle"].lower()
+        in_panel = author in panel_set
+        counts[via] += 1
+        if t["ref"]:  # a quote or retweet: credit the original with this account's attention
+            orig = t["ref"]
+            orig.setdefault("story", orig["id"])
+            add({k: v for k, v in orig.items() if k != "ref"})
+            if in_panel:
+                reach.setdefault(orig["id"], set()).add(author)
+            if t["is_retweet"]:
+                return
+            t["story"] = orig["id"]
+        else:
+            t["story"] = t["id"]
+        if in_panel:
+            reach.setdefault(t["story"], set()).add(author)
+            for u in t["urls"]:
+                reach.setdefault("url:" + u, set()).add(author)
+        add({k: v for k, v in t.items() if k != "ref"})
+
+    def run_query(q: str, qt: str, pages: int, via: str) -> None:
         try:
-            for t in src.search(q, qt, config.PAGES_PER_QUERY):
-                if not t["is_retweet"]:
-                    seen[t["id"]] = t
+            for t in src.search(q, qt, pages):
+                ingest(t, via)
         except Exception as e:  # one bad query shouldn't kill the run
             print(f"  search failed ({e}): {q[:80]}")
+
+    # 1. The panel: its most-engaged posts and quotes this week (re-fetched every run, so
+    #    counts stay current), and its recent retweets (reach).
+    hs = panel_mod.handles(pan)
+    n = int(config.PANEL["handles_per_query"])
+    rt_since = ws if replay else max(ws, now - timedelta(hours=8))
+    rt_window = f"since_time:{int(rt_since.timestamp())}" + (f" until_time:{int(until.timestamp())}" if until else "")
+    for i in range(0, len(hs), n):
+        who = " OR ".join(f"from:{h}" for h in hs[i:i + n])
+        run_query(f"({who}) -filter:replies {since}", "Top", int(config.PANEL["pages_per_batch"]), "panel")
+        run_query(f"({who}) filter:nativeretweets {rt_window}", "Latest", 10 if replay else int(config.PANEL["retweet_pages"]), "panel retweets")
+
+    # 2. Keyword searches, watchlist, and tracked companies (supplements).
+    for q in config.SEARCH_QUERIES:
+        run_query(f"{q} {since}", "Top", config.PAGES_PER_QUERY, "searches")
+    for i in range(0, len(config.WATCHLIST), 6):
+        who = " OR ".join(f"from:{h}" for h in config.WATCHLIST[i:i + 6])
+        run_query(f"({who}) min_faves:{config.WATCHLIST_MIN_FAVES} -filter:replies {since}", "Latest",
+                  config.PAGES_PER_QUERY, "watchlist")
+    for i in range(0, len(config.TRACKED), 6):  # company accounts: every original post, judged vs their usual
+        who = " OR ".join(f"from:{h}" for h in config.TRACKED[i:i + 6])
+        run_query(f"({who}) -filter:replies -filter:retweets {since}", "Latest", config.PAGES_PER_QUERY, "tracked")
     for t in refresh_baselines(src, state, now):  # their recent posts double as candidates
-        try:
-            posted = datetime.strptime(t["created_at"], "%a %b %d %H:%M:%S %z %Y")
-        except ValueError:
-            continue
-        if posted >= ws:
-            seen.setdefault(t["id"], t)
+        if (_posted(t) or ws) >= ws:
+            ingest(t, "tracked")
+
+    state["reach"] = {k: sorted(v) for k, v in reach.items()}
+    print("  fetched by source:", dict(counts), f"| panel: {len(panel_set)} accounts")
     return list(seen.values())
 
 
@@ -96,7 +163,7 @@ def score(state: dict) -> tuple[list[dict], list[dict], list[dict]]:
     from .judge import rank_all, select, why_not
     baselines = state.get("baselines", {})
     judged = [t for t in state["tweets"].values() if "jev" in t]
-    rank_all(judged, baselines)
+    rank_all(judged, baselines, state.get("reach", {}))
     reasons = {t["id"]: why_not(t, baselines) for t in judged}
     kept = [t for t in judged if reasons[t["id"]] is None]
     top = select(kept, config.TWEETS_FOR_THESIS)
@@ -106,13 +173,13 @@ def score(state: dict) -> tuple[list[dict], list[dict], list[dict]]:
     return kept, top, near
 
 
-def update(state: dict, now: datetime) -> bool:
+def update(state: dict, now: datetime, until: datetime | None = None, replay: bool = False) -> bool:
     """Run one cycle. Returns True if the thesis changed."""
     from .judge import Jev
     from .synthesize import synthesize
 
     ws = datetime.fromisoformat(state["week_start"])
-    fetched = fetch(ws, state, now)
+    fetched = fetch(ws, state, now, until, replay)
     print(f"fetched {len(fetched)} tweets")
 
     tweets = state["tweets"]
@@ -122,6 +189,9 @@ def update(state: dict, now: datetime) -> bool:
             old = tweets[t["id"]]
             for k in ("likes", "retweets", "replies", "quotes", "views"):
                 old[k] = max(old[k], t[k])
+            for k in ("story", "urls"):
+                if t.get(k) and not old.get(k):
+                    old[k] = t[k]
         else:
             t["first_seen"] = now.isoformat()
             new.append(t)
@@ -157,6 +227,8 @@ def update(state: dict, now: datetime) -> bool:
         "stats": {"scanned": len(tweets), "kept": len(kept)},
         "near_misses": near,
     }
+    from . import recall
+    state["latest"]["known_stories"] = recall.report(state)
     return bool(changed)
 
 
@@ -166,11 +238,23 @@ def main() -> None:
     ap.add_argument("--build-only", action="store_true", help="re-render the page from saved state")
     ap.add_argument("--slack", choices=["auto", "now", "skip"], default="auto",
                     help="auto: post if the schedule in settings.json says so; now: post regardless")
+    ap.add_argument("--week", help="replay a past week (its Monday, YYYY-MM-DD) from scratch; implies --dry-run")
     ap.add_argument("--dry-run", action="store_true",
                     help="do a full update and build the page, but save nothing and post nothing; "
                          "writes public/compare.json (before vs after)")
     args = ap.parse_args()
 
+    if args.week:  # replay: fresh state for that week, fetched as if at the week's end
+        ws = datetime.fromisoformat(args.week).replace(tzinfo=ZoneInfo(config.TIMEZONE)).astimezone(timezone.utc)
+        until = min(ws + timedelta(days=7), datetime.now(timezone.utc))
+        state = {"week_start": ws.isoformat(), "tweets": {}, "thesis_history": [], "latest": None}
+        update(state, until, until=until, replay=True)
+        (ROOT / "public").mkdir(exist_ok=True)
+        (ROOT / "public" / "compare.json").write_text(json.dumps(
+            compare({}, [], state), indent=1, ensure_ascii=False))
+        build_site(state, ROOT / "public")
+        print(f"replay of week {args.week}: built public/ and public/compare.json; nothing saved or posted")
+        return
     if args.demo:
         state = json.loads((ROOT / "pipeline" / "demo_state.json").read_text())
     else:
@@ -227,6 +311,7 @@ def compare(before: dict, before_top: list[dict], state: dict) -> dict:
                      f"{t['likes']:>5} likes @{t['author']['handle']}: {(why_not(t, state.get('baselines', {})) or '')[:50]:<50} "
                      f"{t['text'][:60]}" for t in company_posts]
     return {"before": side(before, before_top), "after": side(after, after_top),
+            "known_stories": after.get("known_stories", []),
             "tracked_baselines": tracked, "tracked_posts": tracked_posts,
             "near_misses": [f"{m['reason']:<44} @{state['tweets'][m['id']]['author']['handle']}: "
                             f"{state['tweets'][m['id']]['text'][:70]}" for m in after.get("near_misses", [])]}
