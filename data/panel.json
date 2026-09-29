@@ -1,0 +1,1927 @@
+{
+ "built_at": "2026-09-29T19:56:29.276353+00:00",
+ "settings": [
+  [
+   [
+    "tech culture",
+    0.7,
+    [
+     "a16z",
+     "cgtwts",
+     "deedydas",
+     "eriktorenberg",
+     "levie",
+     "mollysoshea",
+     "paulg",
+     "roundtablespace",
+     "techcrunch",
+     "ycombinator"
+    ]
+   ],
+   [
+    "GTM",
+    0.3,
+    [
+     "attio",
+     "clay",
+     "commonroomhq",
+     "gong_io",
+     "heyreach_io",
+     "instantlyai",
+     "monacogtm",
+     "outreach_io",
+     "unifygtm",
+     "useapolloio"
+    ]
+   ]
+  ],
+  2,
+  300,
+  [],
+  []
+ ],
+ "anchors_loaded": [
+  "a16z",
+  "ycombinator",
+  "eriktorenberg",
+  "MollySOShea",
+  "deedydas",
+  "levie",
+  "paulg",
+  "TechCrunch",
+  "cgtwts",
+  "RoundtableSpace",
+  "clay",
+  "MonacoGTM",
+  "gong_io",
+  "attio",
+  "unifygtm",
+  "CommonRoomHQ",
+  "useapolloio",
+  "heyreach_io",
+  "InstantlyAI",
+  "outreach_io"
+ ],
+ "accounts": [
+  {
+   "handle": "elonmusk",
+   "group": "tech culture",
+   "overlap": 6,
+   "followers": 241719036
+  },
+  {
+   "handle": "sama",
+   "group": "tech culture",
+   "overlap": 6,
+   "followers": 6305934
+  },
+  {
+   "handle": "tbpn",
+   "group": "tech culture",
+   "overlap": 6,
+   "followers": 1592014
+  },
+  {
+   "handle": "nikitabier",
+   "group": "tech culture",
+   "overlap": 6,
+   "followers": 1340772
+  },
+  {
+   "handle": "JensenHuang",
+   "group": "tech culture",
+   "overlap": 6,
+   "followers": 1105748
+  },
+  {
+   "handle": "apoorva_mehta",
+   "group": "tech culture",
+   "overlap": 6,
+   "followers": 437684
+  },
+  {
+   "handle": "pmarca",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 6545305
+  },
+  {
+   "handle": "OpenAI",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 5400085
+  },
+  {
+   "handle": "karpathy",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 4244786
+  },
+  {
+   "handle": "brian_armstrong",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 3963599
+  },
+  {
+   "handle": "demishassabis",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 1905815
+  },
+  {
+   "handle": "alexandr_wang",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 754790
+  },
+  {
+   "handle": "bcherny",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 583486
+  },
+  {
+   "handle": "MTSlive",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 531709
+  },
+  {
+   "handle": "jesslivingston",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 432774
+  },
+  {
+   "handle": "jgebbia",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 227557
+  },
+  {
+   "handle": "alexrkonrad",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 91010
+  },
+  {
+   "handle": "t_blom",
+   "group": "tech culture",
+   "overlap": 5,
+   "followers": 89707
+  },
+  {
+   "handle": "jack",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 12375368
+  },
+  {
+   "handle": "Benioff",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 6235981
+  },
+  {
+   "handle": "naval",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 4072735
+  },
+  {
+   "handle": "patrickc",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 1789842
+  },
+  {
+   "handle": "bchesky",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 1663365
+  },
+  {
+   "handle": "AravSrinivas",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 1145061
+  },
+  {
+   "handle": "garrytan",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 1124698
+  },
+  {
+   "handle": "alexisohanian",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 975249
+  },
+  {
+   "handle": "cdixon",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 958491
+  },
+  {
+   "handle": "rauchg",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 889234
+  },
+  {
+   "handle": "bgurley",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 810887
+  },
+  {
+   "handle": "bhorowitz",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 766023
+  },
+  {
+   "handle": "thsottiaux",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 765129
+  },
+  {
+   "handle": "typesfast",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 740450
+  },
+  {
+   "handle": "steipete",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 593880
+  },
+  {
+   "handle": "msuster",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 403313
+  },
+  {
+   "handle": "eastdakota",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 340719
+  },
+  {
+   "handle": "jaredkushner",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 328645
+  },
+  {
+   "handle": "mwseibel",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 303961
+  },
+  {
+   "handle": "travisk",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 295453
+  },
+  {
+   "handle": "kirstenagreen",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 270977
+  },
+  {
+   "handle": "signulll",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 267965
+  },
+  {
+   "handle": "im_roy_lee",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 256087
+  },
+  {
+   "handle": "ashleevance",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 203058
+  },
+  {
+   "handle": "zephyr_z9",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 172975
+  },
+  {
+   "handle": "scottbelsky",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 151432
+  },
+  {
+   "handle": "alexia",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 147097
+  },
+  {
+   "handle": "MatthewBerman",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 141228
+  },
+  {
+   "handle": "davidu",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 129930
+  },
+  {
+   "handle": "boztank",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 124445
+  },
+  {
+   "handle": "PJaccetturo",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 98051
+  },
+  {
+   "handle": "ericzakariasson",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 90894
+  },
+  {
+   "handle": "kvogt",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 61396
+  },
+  {
+   "handle": "KateClarkTweets",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 60233
+  },
+  {
+   "handle": "Katie_Roof",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 56544
+  },
+  {
+   "handle": "nmasc_",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 56090
+  },
+  {
+   "handle": "willcb",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 51292
+  },
+  {
+   "handle": "harjtaggar",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 39515
+  },
+  {
+   "handle": "dflieb",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 37339
+  },
+  {
+   "handle": "gustaf",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 36630
+  },
+  {
+   "handle": "awxjack",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 33773
+  },
+  {
+   "handle": "jasonkwon",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 30203
+  },
+  {
+   "handle": "BrendanFoody",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 28762
+  },
+  {
+   "handle": "pedroh96",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 27833
+  },
+  {
+   "handle": "luke_metro",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 19415
+  },
+  {
+   "handle": "ChaseLochmiller",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 16271
+  },
+  {
+   "handle": "BillGates",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 65201445
+  },
+  {
+   "handle": "Google",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 31897905
+  },
+  {
+   "handle": "Tesla",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 24778072
+  },
+  {
+   "handle": "sundarpichai",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 11725529
+  },
+  {
+   "handle": "MeekMill",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 10410576
+  },
+  {
+   "handle": "JeffBezos",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 10248031
+  },
+  {
+   "handle": "satyanadella",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 9469003
+  },
+  {
+   "handle": "mcuban",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 8554997
+  },
+  {
+   "handle": "MichaelDell",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 8404121
+  },
+  {
+   "handle": "unusual_whales",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 5411326
+  },
+  {
+   "handle": "paulg",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 5360487
+  },
+  {
+   "handle": "levie",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 3489835
+  },
+  {
+   "handle": "TheChainsmokers",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 3145412
+  },
+  {
+   "handle": "finkd",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 2455470
+  },
+  {
+   "handle": "chamath",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 2440678
+  },
+  {
+   "handle": "mert",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 2338486
+  },
+  {
+   "handle": "AndrewYNg",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1904175
+  },
+  {
+   "handle": "claudeai",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1838566
+  },
+  {
+   "handle": "Jason",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1775773
+  },
+  {
+   "handle": "AnthropicAI",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1762416
+  },
+  {
+   "handle": "DavidSacks",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1758736
+  },
+  {
+   "handle": "litcapital",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1723458
+  },
+  {
+   "handle": "ycombinator",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1653553
+  },
+  {
+   "handle": "Dexerto",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1446765
+  },
+  {
+   "handle": "ylecun",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1314893
+  },
+  {
+   "handle": "a16z",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1080858
+  },
+  {
+   "handle": "drfeifei",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1073670
+  },
+  {
+   "handle": "gdb",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 1063437
+  },
+  {
+   "handle": "drewhouston",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 916127
+  },
+  {
+   "handle": "lindayaX",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 844522
+  },
+  {
+   "handle": "getpeid",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 834820
+  },
+  {
+   "handle": "DarioAmodei",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 829049
+  },
+  {
+   "handle": "vkhosla",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 773292
+  },
+  {
+   "handle": "fchollet",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 735631
+  },
+  {
+   "handle": "eladgil",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 723286
+  },
+  {
+   "handle": "Gwynne_Shotwell",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 663723
+  },
+  {
+   "handle": "justinkan",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 616633
+  },
+  {
+   "handle": "tszzl",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 498305
+  },
+  {
+   "handle": "amasad",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 493981
+  },
+  {
+   "handle": "cursor_ai",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 484875
+  },
+  {
+   "handle": "Kalshi",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 471737
+  },
+  {
+   "handle": "mikeyk",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 467910
+  },
+  {
+   "handle": "TheStalwart",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 450198
+  },
+  {
+   "handle": "Suhail",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 447323
+  },
+  {
+   "handle": "lennysan",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 446428
+  },
+  {
+   "handle": "andrewchen",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 446088
+  },
+  {
+   "handle": "annewoj23",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 430729
+  },
+  {
+   "handle": "joshuareeves",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 411593
+  },
+  {
+   "handle": "danielgross",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 394706
+  },
+  {
+   "handle": "jaltma",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 392191
+  },
+  {
+   "handle": "OfficialLoganK",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 369112
+  },
+  {
+   "handle": "Kimi_Moonshot",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 364748
+  },
+  {
+   "handle": "trq212",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 357327
+  },
+  {
+   "handle": "JTLonsdale",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 339548
+  },
+  {
+   "handle": "beffjezos",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 304955
+  },
+  {
+   "handle": "ericries",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 301307
+  },
+  {
+   "handle": "Alibaba_Qwen",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 292323
+  },
+  {
+   "handle": "leerob",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 290225
+  },
+  {
+   "handle": "kul",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 276786
+  },
+  {
+   "handle": "davidsenra",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 270438
+  },
+  {
+   "handle": "mlevchin",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 256629
+  },
+  {
+   "handle": "deedydas",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 255797
+  },
+  {
+   "handle": "collision",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 244054
+  },
+  {
+   "handle": "mntruell",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 229165
+  },
+  {
+   "handle": "sporadica",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 219057
+  },
+  {
+   "handle": "FoundersPodcast",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 213857
+  },
+  {
+   "handle": "jukan05",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 213063
+  },
+  {
+   "handle": "emilychangtv",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 208073
+  },
+  {
+   "handle": "bscholl",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 200865
+  },
+  {
+   "handle": "MikeIsaac",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 192506
+  },
+  {
+   "handle": "chrishlad",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 191520
+  },
+  {
+   "handle": "buccocapital",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 187876
+  },
+  {
+   "handle": "thinkymachines",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 183766
+  },
+  {
+   "handle": "KTmBoyle",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 170951
+  },
+  {
+   "handle": "eriktorenberg",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 166120
+  },
+  {
+   "handle": "dylan522p",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 164154
+  },
+  {
+   "handle": "danprimack",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 163326
+  },
+  {
+   "handle": "rohanpaul_ai",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 158177
+  },
+  {
+   "handle": "CompleteSkeptic",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 148903
+  },
+  {
+   "handle": "ScottWu46",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 143900
+  },
+  {
+   "handle": "laserboat999",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 139440
+  },
+  {
+   "handle": "gabriel1",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 125906
+  },
+  {
+   "handle": "eshear",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 122834
+  },
+  {
+   "handle": "kevinweil",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 121852
+  },
+  {
+   "handle": "bhalligan",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 106946
+  },
+  {
+   "handle": "esthercrawford",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 106288
+  },
+  {
+   "handle": "alex",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 106202
+  },
+  {
+   "handle": "StevenLevy",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 102456
+  },
+  {
+   "handle": "AndrewCurran_",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 100414
+  },
+  {
+   "handle": "ryolu_",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 97679
+  },
+  {
+   "handle": "martin_casado",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 96356
+  },
+  {
+   "handle": "ElizabethHolmes",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 96057
+  },
+  {
+   "handle": "TheGregYang",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 94863
+  },
+  {
+   "handle": "jaminball",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 93094
+  },
+  {
+   "handle": "iannuttall",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 81630
+  },
+  {
+   "handle": "jietang",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 76323
+  },
+  {
+   "handle": "deanwball",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 75047
+  },
+  {
+   "handle": "MollySOShea",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 75046
+  },
+  {
+   "handle": "felixrieseberg",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 73029
+  },
+  {
+   "handle": "rahul",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 66357
+  },
+  {
+   "handle": "snowmaker",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 64032
+  },
+  {
+   "handle": "msquinn",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 63679
+  },
+  {
+   "handle": "j0hnwang",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 62096
+  },
+  {
+   "handle": "hthieblot",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 61059
+  },
+  {
+   "handle": "kimmaicutler",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 58429
+  },
+  {
+   "handle": "mrexits",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 52222
+  },
+  {
+   "handle": "joannejang",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 51190
+  },
+  {
+   "handle": "c_valenzuelab",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 50834
+  },
+  {
+   "handle": "pronounced_kyle",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 50818
+  },
+  {
+   "handle": "klarnaseb",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 49356
+  },
+  {
+   "handle": "paularambles",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 48718
+  },
+  {
+   "handle": "EricNewcomer",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 48365
+  },
+  {
+   "handle": "NotTomBrown",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 47493
+  },
+  {
+   "handle": "myprasanna",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 46971
+  },
+  {
+   "handle": "sundeep",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 44845
+  },
+  {
+   "handle": "amir",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 42738
+  },
+  {
+   "handle": "parmita",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 40684
+  },
+  {
+   "handle": "btibor91",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 40424
+  },
+  {
+   "handle": "quxiaoyin",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 38021
+  },
+  {
+   "handle": "alexolegimas",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 37146
+  },
+  {
+   "handle": "edwinarbus",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 36308
+  },
+  {
+   "handle": "noahzweben",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 35649
+  },
+  {
+   "handle": "maxmarchione",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 34624
+  },
+  {
+   "handle": "alexkehr",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 33672
+  },
+  {
+   "handle": "MilksandMatcha",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 31911
+  },
+  {
+   "handle": "katgleason",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 31230
+  },
+  {
+   "handle": "mati",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 30697
+  },
+  {
+   "handle": "jiratickets",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 30450
+  },
+  {
+   "handle": "yuris",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 29112
+  },
+  {
+   "handle": "aliansarinik",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 28959
+  },
+  {
+   "handle": "ROWGHANI",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 28437
+  },
+  {
+   "handle": "soundboy",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 27669
+  },
+  {
+   "handle": "crystalsssup",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 27105
+  },
+  {
+   "handle": "brendaniribe",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 26998
+  },
+  {
+   "handle": "jpatel41",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 26797
+  },
+  {
+   "handle": "dps",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 26207
+  },
+  {
+   "handle": "wadefoster",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 26023
+  },
+  {
+   "handle": "ti_morse",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 24653
+  },
+  {
+   "handle": "matanSF",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 24400
+  },
+  {
+   "handle": "collinmathilde",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 24391
+  },
+  {
+   "handle": "SinaHartung",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 24366
+  },
+  {
+   "handle": "Keller",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 23703
+  },
+  {
+   "handle": "kirbyman01",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 23026
+  },
+  {
+   "handle": "zatlyn",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 22753
+  },
+  {
+   "handle": "Basti",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 22238
+  },
+  {
+   "handle": "sourceryy",
+   "group": "tech culture",
+   "overlap": 3,
+   "followers": 22236
+  },
+  {
+   "handle": "HubSpot",
+   "group": "GTM",
+   "overlap": 4,
+   "followers": 782867
+  },
+  {
+   "handle": "salesforce",
+   "group": "GTM",
+   "overlap": 4,
+   "followers": 583110
+  },
+  {
+   "handle": "fivosaresti",
+   "group": "GTM",
+   "overlap": 4,
+   "followers": 4208
+  },
+  {
+   "handle": "figma",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 576427
+  },
+  {
+   "handle": "NotionHQ",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 531072
+  },
+  {
+   "handle": "SlackHQ",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 434772
+  },
+  {
+   "handle": "codyschneider",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 65327
+  },
+  {
+   "handle": "itsalexvacca",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 36306
+  },
+  {
+   "handle": "G2dotcom",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 32922
+  },
+  {
+   "handle": "GTMnow_",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 26124
+  },
+  {
+   "handle": "TechSalesGuy",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 22430
+  },
+  {
+   "handle": "Salesloft",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 18381
+  },
+  {
+   "handle": "MichLieben",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 13204
+  },
+  {
+   "handle": "HackItMax",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 12201
+  },
+  {
+   "handle": "JeremyNoad",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 5955
+  },
+  {
+   "handle": "A0ddo",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 3323
+  },
+  {
+   "handle": "saywhatsales",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 2988
+  },
+  {
+   "handle": "brandon_ai",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 1155
+  },
+  {
+   "handle": "YourVibeGuy",
+   "group": "GTM",
+   "overlap": 3,
+   "followers": 329
+  },
+  {
+   "handle": "AlexHormozi",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 1077547
+  },
+  {
+   "handle": "reidhoffman",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 1057824
+  },
+  {
+   "handle": "LeadToday",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 989663
+  },
+  {
+   "handle": "gregisenberg",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 721500
+  },
+  {
+   "handle": "thejustinwelsh",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 590694
+  },
+  {
+   "handle": "jasonlk",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 251731
+  },
+  {
+   "handle": "Timothy_Hughes",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 165898
+  },
+  {
+   "handle": "waynesutton",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 68134
+  },
+  {
+   "handle": "NathanLatka",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 65615
+  },
+  {
+   "handle": "saastr",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 65419
+  },
+  {
+   "handle": "akothari",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 62951
+  },
+  {
+   "handle": "smoothsale",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 55103
+  },
+  {
+   "handle": "M_3jr",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 53684
+  },
+  {
+   "handle": "sujanpatel",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 51956
+  },
+  {
+   "handle": "fin_ai",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 45249
+  },
+  {
+   "handle": "TunstallAsc",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 44842
+  },
+  {
+   "handle": "kokasexton",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 44295
+  },
+  {
+   "handle": "shanegibson",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 31171
+  },
+  {
+   "handle": "jonobacon",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 30929
+  },
+  {
+   "handle": "kkruse",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 28817
+  },
+  {
+   "handle": "coldemailchris",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 20864
+  },
+  {
+   "handle": "Laraacostar",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 20471
+  },
+  {
+   "handle": "TomPick",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 20357
+  },
+  {
+   "handle": "kathylayne",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 18430
+  },
+  {
+   "handle": "Capterra",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 18030
+  },
+  {
+   "handle": "apify",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 17186
+  },
+  {
+   "handle": "attio",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 17140
+  },
+  {
+   "handle": "6senseInc",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 16859
+  },
+  {
+   "handle": "BestSalesTips",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 16835
+  },
+  {
+   "handle": "PhilGerb",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 16557
+  },
+  {
+   "handle": "CaseyCRL",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 16246
+  },
+  {
+   "handle": "cahidalgo",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 14922
+  },
+  {
+   "handle": "DigitalKeith",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 14914
+  },
+  {
+   "handle": "xavier_coiffard",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 14516
+  },
+  {
+   "handle": "B2B_SalesTips",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 13152
+  },
+  {
+   "handle": "kwanzoo",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 12005
+  },
+  {
+   "handle": "JohnMBarrows",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 10953
+  },
+  {
+   "handle": "Chris_Orlob",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 10561
+  },
+  {
+   "handle": "GS_Social",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 10547
+  },
+  {
+   "handle": "jeannieywalden",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 9873
+  },
+  {
+   "handle": "vxanand",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 9785
+  },
+  {
+   "handle": "memoryBlueSales",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 8969
+  },
+  {
+   "handle": "outreach_io",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 7670
+  },
+  {
+   "handle": "thescottleese",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 7636
+  },
+  {
+   "handle": "natolisnuggets",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 7528
+  },
+  {
+   "handle": "close",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 6618
+  },
+  {
+   "handle": "cleodotxyz",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 6236
+  },
+  {
+   "handle": "majavoje",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 6225
+  },
+  {
+   "handle": "poyark",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 6176
+  },
+  {
+   "handle": "Benson_Mwaura",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5955
+  },
+  {
+   "handle": "dan__rosenthal",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5646
+  },
+  {
+   "handle": "GoModernSelling",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5585
+  },
+  {
+   "handle": "clay",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5448
+  },
+  {
+   "handle": "rstone57",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5423
+  },
+  {
+   "handle": "KathleenGlass",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5385
+  },
+  {
+   "handle": "LynnetteKTaylor",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5384
+  },
+  {
+   "handle": "TomDore",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5304
+  },
+  {
+   "handle": "dfishrockstar",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5254
+  },
+  {
+   "handle": "OllieWhitfield_",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5067
+  },
+  {
+   "handle": "ENowoslawski",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 5022
+  },
+  {
+   "handle": "my6cess",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 4875
+  },
+  {
+   "handle": "WillAllred117",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 4621
+  },
+  {
+   "handle": "MitchellKeller_",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 4386
+  },
+  {
+   "handle": "ifeellikemacmac",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 4298
+  },
+  {
+   "handle": "PCinTheCloud",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 3950
+  },
+  {
+   "handle": "sudhirjhs",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 3869
+  },
+  {
+   "handle": "SkaledConsult",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 3867
+  },
+  {
+   "handle": "SeismicSoftware",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 3795
+  },
+  {
+   "handle": "MarioBuntic",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 3601
+  },
+  {
+   "handle": "icarolemahoney",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 3370
+  },
+  {
+   "handle": "RAINSelling",
+   "group": "GTM",
+   "overlap": 2,
+   "followers": 3218
+  },
+  {
+   "handle": "TechCrunch",
+   "group": "tech culture",
+   "overlap": 0,
+   "followers": 11025052
+  },
+  {
+   "handle": "cgtwts",
+   "group": "tech culture",
+   "overlap": 0,
+   "followers": 0
+  },
+  {
+   "handle": "RoundtableSpace",
+   "group": "tech culture",
+   "overlap": 0,
+   "followers": 265341
+  },
+  {
+   "handle": "MonacoGTM",
+   "group": "GTM",
+   "overlap": 0,
+   "followers": 0
+  },
+  {
+   "handle": "gong_io",
+   "group": "GTM",
+   "overlap": 0,
+   "followers": 7664
+  },
+  {
+   "handle": "unifygtm",
+   "group": "GTM",
+   "overlap": 0,
+   "followers": 0
+  },
+  {
+   "handle": "CommonRoomHQ",
+   "group": "GTM",
+   "overlap": 0,
+   "followers": 0
+  },
+  {
+   "handle": "useapolloio",
+   "group": "GTM",
+   "overlap": 0,
+   "followers": 0
+  },
+  {
+   "handle": "heyreach_io",
+   "group": "GTM",
+   "overlap": 0,
+   "followers": 0
+  },
+  {
+   "handle": "InstantlyAI",
+   "group": "GTM",
+   "overlap": 0,
+   "followers": 3077
+  }
+ ]
+}
