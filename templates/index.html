@@ -126,14 +126,16 @@ dialog { width: min(760px, calc(100vw - 24px)); max-height: calc(100vh - 48px); 
   border-radius: 16px; background: var(--surface); color: var(--ink); }
 dialog::backdrop { background: rgb(0 0 0 / .55); }
 .dlg { display: flex; flex-direction: column; max-height: calc(100vh - 50px); }
+.dlg-head, .tabs, .dlg-foot { flex: none; }  /* only the body scrolls; tabs never get squeezed */
 .dlg-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
 .dlg-head h2 { font: 400 26px/1.2 var(--serif); margin: 0; }
 .x-close { border: 0; background: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--muted); padding: 6px; }
-.tabs { display: flex; gap: 4px; padding: 16px 24px 0; border-bottom: 1px solid var(--rule); overflow-x: auto; }
-.tabs button { border: 0; background: none; padding: 10px 12px; font-size: 13.5px; font-weight: 500; color: var(--muted);
+.tabs { display: flex; gap: 4px; padding: 16px 24px 0; border-bottom: 1px solid var(--rule); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button { flex: none; border: 0; background: none; padding: 10px 12px; font-size: 13.5px; font-weight: 500; color: var(--muted);
   cursor: pointer; border-bottom: 1.5px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
-.dlg-body { padding: 22px 24px; overflow-y: auto; }
+.dlg-body { flex: 1 1 auto; min-height: 0; padding: 22px 24px; overflow-y: auto; }
 .panel[hidden] { display: none; }
 .field { margin-bottom: 20px; }
 .field > label, .field > .lbl { display: block; font-weight: 500; font-size: 13.5px; margin-bottom: 6px; }
@@ -275,7 +277,7 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
 
       <div class="panel" data-panel="interests">
         <div class="field"><label for="f-audience">Written for</label><input class="inp" id="f-audience"></div>
-        <div class="field"><label for="f-care">Focus on</label><textarea class="inp" id="f-care"></textarea>
+        <div class="field"><label for="f-care">Focus on</label><textarea class="inp" id="f-care" style="min-height:170px"></textarea>
           <p class="hint">One per line, most important first. Jev uses these to decide what's relevant, and Claude to write the read.</p></div>
         <div class="field"><label for="f-skip">Skip</label><textarea class="inp" id="f-skip" style="min-height:64px"></textarea>
           <p class="hint">One per line. Tweets about these are filtered out, even when they're popular.</p></div>

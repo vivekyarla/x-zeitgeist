@@ -10,6 +10,10 @@ on:
         type: choice
         options: [auto, now, skip]
         default: auto
+      build_only:
+        description: "Only re-render the page from saved data (no fetching or API calls), e.g. after a design change"
+        type: boolean
+        default: false
 
 permissions:
   contents: write            # commit data/week.json back to the repo
@@ -43,7 +47,7 @@ jobs:
           TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}       # optional: Jev direct instead
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}     # optional: post the read to Slack
           PAGE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
-        run: python -m pipeline.run --slack ${{ inputs.slack || 'auto' }}
+        run: python -m pipeline.run --slack ${{ inputs.slack || 'auto' }} ${{ inputs.build_only && '--build-only' || '' }}
 
       - name: Save this week's state
         if: ${{ !cancelled() }}   # keep paid-for Jev verdicts even if the thesis step failed
