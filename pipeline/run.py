@@ -111,7 +111,7 @@ def fetch(ws: datetime, state: dict, now: datetime, until: datetime | None = Non
     for i in range(0, len(hs), n):
         who = " OR ".join(f"from:{h}" for h in hs[i:i + n])
         run_query(f"({who}) -filter:replies {since}", "Top", int(config.PANEL["pages_per_batch"]), "panel")
-        run_query(f"({who}) filter:nativeretweets {rt_window}", "Latest", 10 if replay else 2, "panel retweets")
+        run_query(f"({who}) filter:nativeretweets {rt_window}", "Latest", 10 if replay else int(config.PANEL["retweet_pages"]), "panel retweets")
 
     # 2. Keyword searches, watchlist, and tracked companies (supplements).
     for q in config.SEARCH_QUERIES:

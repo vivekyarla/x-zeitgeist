@@ -69,7 +69,7 @@ TRACKED_MIN_SIGNAL = float(_tr["min_signal"])
 
 # The timeline panel (see panel.py): accounts followed by the anchor groups.
 PANEL = {"groups": [], "min_overlap": 2, "max_accounts": 300, "include": [], "exclude": [],
-         "refresh_days": 7, "max_pages_per_anchor": 10, "pages_per_batch": 3, "handles_per_query": 18,
+         "refresh_days": 7, "max_pages_per_anchor": 10, "pages_per_batch": 2, "retweet_pages": 1, "handles_per_query": 18,
          **SETTINGS.get("panel", {})}
 # How much a story's reach (distinct panel accounts posting, quoting, or retweeting it) counts.
 BREADTH_WEIGHT = float(_rk.get("breadth_weight", 1.0))

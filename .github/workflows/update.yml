@@ -2,7 +2,7 @@ name: Update timeline page
 
 on:
   schedule:
-    - cron: "0 */3 * * *"   # every 3 hours (UTC)
+    - cron: "17 */3 * * *"  # every 3 hours (UTC), off the top of the hour so GitHub doesn't skip it
   workflow_dispatch:         # "Run workflow" button, and the page's Settings panel
     inputs:
       slack:
