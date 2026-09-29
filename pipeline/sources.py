@@ -12,7 +12,21 @@ from typing import Iterable, Protocol
 import requests
 
 
-def normalize(raw: dict) -> dict:
+_SKIP_HOSTS = ("twitter.com/", "x.com/", "t.co/")
+
+
+def _urls(raw: dict) -> list[str]:
+    """External links in a tweet, normalized so the same article matches across tweets."""
+    out = []
+    for u in ((raw.get("entities") or {}).get("urls") or []):
+        url = (u.get("expanded_url") or u.get("url") or "").split("?")[0].split("#")[0].rstrip("/").lower()
+        url = url.replace("https://", "").replace("http://", "").removeprefix("www.")
+        if url and not url.startswith(_SKIP_HOSTS):
+            out.append(url)
+    return out
+
+
+def normalize(raw: dict, _depth: int = 0) -> dict:
     """Map a provider's tweet object onto the fields the pipeline uses."""
     author = raw.get("author") or {}
     handle = author.get("userName") or ""
@@ -29,6 +43,11 @@ def normalize(raw: dict) -> dict:
         "views": int(raw.get("viewCount") or 0),
         "is_retweet": bool(raw.get("retweeted_tweet")),
         "is_reply": bool(raw.get("isReply")),
+        "urls": _urls(raw),
+        # The tweet this one retweets or quotes, so reactions can be traced back to the original.
+        "ref": (normalize(raw.get("retweeted_tweet") or raw.get("quoted_tweet"), _depth + 1)
+                if _depth == 0 and (raw.get("retweeted_tweet") or raw.get("quoted_tweet")) else None),
+        "ref_kind": "retweet" if raw.get("retweeted_tweet") else "quote" if raw.get("quoted_tweet") else None,
         "author": {
             "handle": handle,
             "name": author.get("name") or handle,
@@ -91,6 +110,25 @@ class TwitterApiIo:
             raise RuntimeError(data.get("message") or "error")
         raw = data.get("tweets") or (data.get("data") or {}).get("tweets") or []
         return [t for t in map(normalize, raw) if t["id"] and not t["is_retweet"] and not t["is_reply"]]
+
+    def followings(self, handle: str, max_pages: int = 10) -> list[dict]:
+        """Accounts a user follows (200 per page), as {handle, name, followers}."""
+        out, cursor = [], ""
+        for _ in range(max_pages):
+            r = self.session.get("https://api.twitterapi.io/twitter/user/followings",
+                                 params={"userName": handle, "cursor": cursor, "pageSize": 200}, timeout=45)
+            r.raise_for_status()
+            data = r.json()
+            if data.get("status") == "error":
+                raise RuntimeError(data.get("message") or "error")
+            for u in data.get("followings") or []:
+                if u.get("userName"):
+                    out.append({"handle": u["userName"], "name": u.get("name") or u["userName"],
+                                "followers": int(u.get("followers") or u.get("followers_count") or 0)})
+            if not data.get("has_next_page") or not data.get("next_cursor"):
+                break
+            cursor = data["next_cursor"]
+        return out
 
     def search(self, query: str, query_type: str = "Top", pages: int = 2):
         cursor = ""

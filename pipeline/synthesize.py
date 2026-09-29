@@ -50,7 +50,9 @@ conversation on tech Twitter this week, then what's most useful for this team. A
 about three quarters of the read is general tech, AI, startup, and SF culture, and about a quarter
 is GTM and marketing: when the input has good GTM or marketing tweets, give them one theme (lead
 with what's working), but don't force one. Don't let model launches take more than about a third
-of the themes. Tweets marked "company_post_outperforming" are posts from GTM companies (Clay,
+of the themes. "accounts_on_this_story" is how many accounts from the team's timeline panel posted, quoted,
+or retweeted that story; a high number means it's all over their timeline, so weigh it heavily
+when deciding what the week's biggest conversation is. Tweets marked "company_post_outperforming" are posts from GTM companies (Clay,
 Monaco, Gong, ...) that did much better than that company usually does; treat them as signs of
 what's working in GTM, not as ads. If the previous thesis still holds and fits the
 focus above, keep its core but update the specifics; if it's about things they don't care about,
@@ -58,6 +60,7 @@ replace it."""
 
 
 def _payload(tweets: list[dict], baselines: dict) -> list[dict]:
+    """Each tweet, plus how many panel accounts are on its story (posting, quoting, retweeting)."""
     def perf(t: dict) -> dict:
         b = baselines.get(t["author"]["handle"].lower())
         if b and b.get("median"):
@@ -72,6 +75,7 @@ def _payload(tweets: list[dict], baselines: dict) -> list[dict]:
         "reposts": t["retweets"],
         "topic": t["jev"]["topic"],
         "jev_signal_0_to_4": round(t["jev"]["signal"], 2),
+        "accounts_on_this_story": t.get("reach", 0),
         **perf(t),
     } for t in tweets]
 

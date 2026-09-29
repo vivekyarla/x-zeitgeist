@@ -150,6 +150,12 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
 .topic .share { text-align: right; }
 .topics-head { display: grid; grid-template-columns: auto 140px 1fr 72px auto; gap: 8px; font-size: 12px; color: var(--faint); padding: 0 0 2px; }
 .topics-head span:first-child { width: 13px; }
+.group { border: 1px solid var(--rule); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: var(--bg); }
+.group-top { display: grid; grid-template-columns: 1fr 90px auto; gap: 8px; margin-bottom: 8px; }
+.known { padding: 10px 0; border-top: 1px solid var(--rule); font-size: 13.5px; }
+.known b { font-weight: 600; } .known .st { color: var(--accent); margin-left: 6px; }
+.known.miss-st .st { color: var(--danger); }
+.known p { margin: 4px 0 0; color: var(--muted); }
 .miss { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 10px 0; border-top: 1px solid var(--rule); font-size: 13.5px; }
 .miss a { color: var(--ink); text-decoration: none; } .miss a:hover { text-decoration: underline; }
 .miss .why { color: var(--accent); font-size: 12.5px; white-space: nowrap; }
@@ -295,6 +301,19 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
       </div>
 
       <div class="panel" data-panel="searches" hidden>
+        <div class="field"><span class="lbl">Timeline panel</span>
+          <p class="hint" style="margin:0 0 10px">The main source. Each group's anchor accounts define who's on the panel: accounts that at least two anchors follow. The panel's posts, quotes, and retweets are pulled every update, and a story ranks higher the more panel accounts are on it, whatever words it uses. Share is each group's slice of the panel. Rebuilt weekly, or when you change this.</p>
+          <div id="p-groups"></div>
+          <button class="btn" type="button" id="add-group">Add group</button></div>
+        <div class="row3">
+          <div class="field"><label for="p-max">Panel size</label><input class="inp" id="p-max" type="number" min="20" max="1000" step="10"><p class="hint">accounts, at most</p></div>
+          <div class="field"><label for="p-overlap">Followed by at least</label><input class="inp" id="p-overlap" type="number" min="1" max="10" step="1"><p class="hint">anchors in the group</p></div>
+        </div>
+        <div class="field"><label for="p-include">Always on the panel</label><textarea class="inp" id="p-include" style="min-height:44px" spellcheck="false"></textarea></div>
+        <div class="field"><label for="p-exclude">Never on the panel</label><textarea class="inp" id="p-exclude" style="min-height:44px" spellcheck="false"></textarea>
+          <p class="hint">X handles, separated by commas or new lines.</p></div>
+        <div class="field"><label for="k-stories">Stories we should have caught</label><textarea class="inp mono" id="k-stories" style="min-height:70px" spellcheck="false"></textarea>
+          <p class="hint">One per line: <code>label | pattern | week</code>. The pattern is a case-insensitive regular expression matched against tweet text; the week (its Monday, YYYY-MM-DD) is optional. Every update reports how far each story got, under Filtered out.</p></div>
         <div class="field"><label for="f-searches">X searches</label><textarea class="inp mono" id="f-searches" spellcheck="false"></textarea>
           <p class="hint">One query per line, in X advanced-search syntax (OR, "quotes", min_faves:300, -filter:replies). Each is limited to this week automatically.</p></div>
         <div class="field"><label for="f-watch">Watchlist</label><textarea class="inp" id="f-watch" style="min-height:64px" spellcheck="false"></textarea>
@@ -310,6 +329,14 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
       </div>
 
       <div class="panel" data-panel="missed" hidden>
+        {% if known_stories %}
+        <p class="lbl" style="font-weight:500;font-size:13.5px;margin:0 0 4px">Stories we should have caught</p>
+        {% for k in known_stories %}
+        <div class="known{{ '' if k.stage == 'on the page' else ' miss-st' }}"><b>{{ k.label }}</b><span class="st">{{ k.stage }}{% if k.detail %}: {{ k.detail }}{% endif %}</span>
+          <p>{{ k.matches }} matching tweets · {{ k.reach }} panel accounts on it{% if k.tweet %} · {{ k.tweet }}{% endif %}</p></div>
+        {% endfor %}
+        <div style="height:18px"></div>
+        {% endif %}
         <p class="hint" style="margin:0 0 8px">The best-ranked tweets from the last update that didn't make it into the read, and why. Use this to decide what to loosen or tighten.</p>
         {% for m in near_misses %}
         <div class="miss"><a href="{{ m.tweet.url }}" target="_blank" rel="noopener">@{{ m.tweet.author.handle }} · {{ m.tweet.likes | compact }} likes · {{ topic_label(m.tweet.jev.topic) }}</a>
@@ -461,8 +488,27 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
     var sl = s.slack || {};
     $("s-enabled").checked = !!sl.enabled; $("s-freq").value = sl.frequency || "daily"; $("s-hour").value = sl.hour_pt != null ? sl.hour_pt : 8;
     $("s-weekdays").checked = sl.weekdays_only !== false; $("s-top").value = sl.top_tweets != null ? sl.top_tweets : 5;
+    var pn = s.panel || {};
+    $("p-groups").innerHTML = ""; (pn.groups || []).forEach(function (g) { $("p-groups").appendChild(groupRow(g)); });
+    $("p-max").value = pn.max_accounts || 300; $("p-overlap").value = pn.min_overlap || 2;
+    $("p-include").value = (pn.include || []).join(", "); $("p-exclude").value = (pn.exclude || []).join(", ");
+    $("k-stories").value = (s.known_stories || []).map(function (k) { return [k.label, k.match, k.week || ""].join(" | ").replace(/ \| $/, ""); }).join("\n");
     syncSlack();
   }
+  function groupRow(g) {
+    var box = document.createElement("div"); box.className = "group";
+    var top = document.createElement("div"); top.className = "group-top";
+    var name = document.createElement("input"); name.className = "inp"; name.value = g.name || ""; name.placeholder = "Group name";
+    var share = document.createElement("input"); share.className = "inp share"; share.type = "number"; share.min = 0; share.max = 100;
+    share.value = Math.round((g.share != null ? g.share : 0.5) * 100); share.title = "Share of the panel, percent";
+    var rm = document.createElement("button"); rm.type = "button"; rm.className = "btn"; rm.textContent = "Remove"; rm.onclick = function () { box.remove(); };
+    top.append(name, share, rm);
+    var acc = document.createElement("textarea"); acc.className = "inp"; acc.style.minHeight = "54px"; acc.spellcheck = false;
+    acc.placeholder = "Anchor X handles, separated by commas"; acc.value = (g.accounts || []).join(", ");
+    box.append(top, acc); return box;
+  }
+  function handles(v) { return v.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").trim(); }).filter(Boolean); }
+  $("add-group").onclick = function () { $("p-groups").appendChild(groupRow({ share: 0.3 })); };
   function syncSlack() { var d = $("s-freq").value === "daily"; $("s-hour-wrap").style.visibility = d ? "" : "hidden"; $("s-weekdays-wrap").hidden = !d; }
   $("s-freq").addEventListener("change", syncSlack);
   $("add-topic").onclick = function () { var r = topicRow({ include: true }); $("f-topics").appendChild(r); r.children[1].focus(); };
@@ -496,6 +542,24 @@ textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
     if (!s.searches.length) throw new Error("Add at least one X search.");
     s.watchlist = $("f-watch").value.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").trim(); }).filter(Boolean);
     s.watchlist_min_faves = Math.max(0, parseInt($("f-watchfaves").value, 10) || 0);
+    var groups = [];
+    document.querySelectorAll("#p-groups .group").forEach(function (b) {
+      var name = b.querySelector(".group-top input").value.trim(), acc = handles(b.querySelector("textarea").value);
+      if (!name && !acc.length) return;
+      if (!name || !acc.length) throw new Error("Each panel group needs a name and at least one anchor account.");
+      groups.push({ name: name, share: Math.max(0, parseFloat(b.querySelector(".share").value) || 0) / 100, accounts: acc });
+    });
+    if (!groups.length) throw new Error("Add at least one panel group.");
+    s.panel = Object.assign({}, settings.panel || {}, { groups: groups, max_accounts: Math.round(num("p-max", 20, 1000, "Panel size")),
+      min_overlap: Math.round(num("p-overlap", 1, 10, "Followed by at least")), include: handles($("p-include").value), exclude: handles($("p-exclude").value) });
+    s.known_stories = lines($("k-stories").value).map(function (l) {
+      var parts = l.split(" | "), label = parts.shift().trim(), week = "";
+      if (parts.length > 1 && /^\d{4}-\d{2}-\d{2}$/.test(parts[parts.length - 1].trim())) week = parts.pop().trim();
+      var pattern = parts.join(" | ").trim();  // patterns may use | themselves; only " | " separates fields
+      if (!label || !pattern) throw new Error("Each story needs a label and a pattern: label | pattern | week");
+      try { new RegExp(pattern, "i"); } catch (e) { throw new Error("That pattern isn't valid: " + pattern); }
+      var k = { label: label, match: pattern }; if (week) k.week = week; return k;
+    });
     s.slack = { enabled: $("s-enabled").checked, frequency: $("s-freq").value, hour_pt: parseInt($("s-hour").value, 10),
       weekdays_only: $("s-weekdays").checked, top_tweets: Math.min(10, Math.max(0, parseInt($("s-top").value, 10) || 0)) };
     return s;

@@ -173,11 +173,28 @@ def why_not(t: dict, baselines: dict) -> str | None:
     return None
 
 
-def rank_all(tweets: list[dict], baselines: dict) -> None:
-    """Set t["rank"]. Jev's judgment does most of the work; engagement (overall and
-    relative to the account's size) breaks ties, and big-lab news is ranked down."""
+def story_key(t: dict) -> str:
+    return t.get("story") or t["id"]
+
+
+def reach_of(t: dict, reach: dict) -> set:
+    """Panel accounts on this tweet's story: posting it, quoting or retweeting it, or sharing its link."""
+    who = set(reach.get(story_key(t), []))
+    for u in t.get("urls", []):
+        who |= set(reach.get("url:" + u, []))
+    return who
+
+
+def rank_all(tweets: list[dict], baselines: dict, reach: dict | None = None) -> None:
+    """Set t["rank"] and t["reach"]. Jev's judgment does most of the work; a story's reach
+    across the panel lifts it; engagement (overall and relative to the account's size)
+    breaks ties; big-lab news is ranked down."""
     if not tweets:
         return
+    reach = reach or {}
+    for t in tweets:
+        t["reach"] = len(reach_of(t, reach))
+    max_reach = max(t["reach"] for t in tweets)
     ratio = lambda t: engagement(t) / max(t["author"]["followers"], 500)
     max_abs = max(math.log1p(engagement(t)) for t in tweets) or 1
     max_br = max(math.log1p(100 * ratio(t)) for t in tweets) or 1
@@ -189,18 +206,21 @@ def rank_all(tweets: list[dict], baselines: dict) -> None:
         else:
             br = math.log1p(100 * ratio(t)) / max_br
         eng = (1 - config.BREAKOUT_WEIGHT) * math.log1p(engagement(t)) / max_abs + config.BREAKOUT_WEIGHT * br
+        spread = math.log1p(t["reach"]) / math.log1p(max_reach) if max_reach else 0
         t["rank"] = ((j["signal"] / 4) * j["relevant"] * (1 - j["bait"])
                      * (0.7 + 0.3 * j["marketing_useful"]) * (0.6 + 0.4 * eng)
-                     * (1 - config.MAINSTREAM_PENALTY * j.get("mainstream", 0)))
+                     * (1 - config.MAINSTREAM_PENALTY * j.get("mainstream", 0))
+                     * (1 + config.BREADTH_WEIGHT * spread))
 
 
 def select(kept: list[dict], n: int) -> list[dict]:
-    """Pick the n tweets the writer sees: best-ranked first, at most PER_AUTHOR_MAX per
-    account, each topic filled toward its share, and no topic far past its share."""
+    """Pick the n tweets the writer sees: best-ranked first, one tweet per story, at most
+    PER_AUTHOR_MAX per account, each topic filled toward its share, and no topic far past
+    its share."""
     ranked = sorted(kept, key=lambda t: t["rank"], reverse=True)
     quota = {k: round(s * n) for k, s in config.TOPIC_SHARES.items()}
     cap = {k: max(2, round(q * 1.5)) for k, q in quota.items()}
-    per_author, per_topic, chosen, ids = {}, {}, [], set()
+    per_author, per_topic, chosen, ids, stories = {}, {}, [], set(), set()
 
     def account(t: dict) -> str:
         h = t["author"]["handle"].lower()
@@ -211,8 +231,12 @@ def select(kept: list[dict], n: int) -> list[dict]:
         per_author[a] = per_author.get(a, 0) + 1
         per_topic[k] = per_topic.get(k, 0) + 1
         chosen.append(t); ids.add(t["id"])
+        stories.add(story_key(t)); stories.update("url:" + u for u in t.get("urls", []))
 
-    ok_author = lambda t: per_author.get(account(t), 0) < config.PER_AUTHOR_MAX
+    def new_story(t: dict) -> bool:
+        return story_key(t) not in stories and not any("url:" + u in stories for u in t.get("urls", []))
+
+    ok_author = lambda t: per_author.get(account(t), 0) < config.PER_AUTHOR_MAX and new_story(t)
     for k, q in quota.items():  # each topic's best, up to its share
         for t in ranked:
             if per_topic.get(k, 0) >= q or len(chosen) >= n:
