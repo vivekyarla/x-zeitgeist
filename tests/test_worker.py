@@ -107,3 +107,17 @@ def test_small_accounts_need_the_likes_floor(monkeypatch):
     # a tracked company that beat its usual still counts under the global floor
     clay = {"author": {"handle": "clay"}, "likes": 150, "jev": jev}
     assert judge.why_not(clay, {"clay": {"n": 20, "median": 30, "at": "2026-09-30T00:00:00+00:00"}}) is None
+
+
+def test_tracked_company_needs_a_real_bar_too(monkeypatch):
+    from pipeline import config, judge
+    monkeypatch.setattr(config, "TRACKED_LOWER", {"clay"})
+    monkeypatch.setattr(config, "TRACKED_MIN_LIKES", 150)
+    monkeypatch.setattr(config, "TRACKED_MIN_SIGNAL", 1.6)
+    base = {"clay": {"n": 20, "median": 15, "at": "2026-09-30T00:00:00+00:00"}}
+    small = {"author": {"handle": "clay"}, "likes": 46,
+             "jev": {"topic": "gtm_sales", "bait": 0.1, "relevant": 0.9, "signal": 1.2}}
+    assert judge.why_not(small, base) == "46 likes, under 150 (3x its usual 15)"
+    big = {**small, "likes": 400, "jev": {**small["jev"], "signal": 2.1}}
+    assert judge.why_not(big, base) is None  # well past its usual, and notable: still counts
+    assert judge.why_not({**big, "jev": small["jev"]}, base) == "signal 1.20"

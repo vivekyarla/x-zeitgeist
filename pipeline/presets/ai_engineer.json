@@ -195,8 +195,8 @@
       "replicate"
     ],
     "beat_baseline_by": 3.0,
-    "min_signal": 1.0,
-    "min_likes": 25
+    "min_signal": 1.5,
+    "min_likes": 100
   },
   "panel": {
     "groups": [
