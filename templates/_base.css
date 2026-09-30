@@ -312,3 +312,10 @@ a.btn { text-decoration: none; }
 .acct { position: relative; }
 .run-state { font-size: 13px; color: var(--accent); }
 .run-state.err { color: var(--danger); }
+.btn.google { width: 100%; justify-content: center; padding: 11px 14px; font-size: 14px; gap: 10px; }
+.btn.google svg { background: #fff; border-radius: 50%; padding: 2px; width: 22px; height: 22px; }
+.or { display: flex; align-items: center; gap: 12px; color: var(--faint); font-size: 12.5px; margin: 22px 0; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+.preview-bar { background: var(--raise); border-bottom: 1px solid var(--rule); font-size: 13.5px; }
+.preview-bar .frame { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; }
+.preview-bar span { color: var(--muted); }

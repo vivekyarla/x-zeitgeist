@@ -49,10 +49,13 @@ class DB:
         with self.conn() as c:
             c.execute("PRAGMA journal_mode=WAL")
             c.executescript(SCHEMA)
-            try:  # databases created before `rerun` existed
-                c.execute("ALTER TABLE runs ADD COLUMN rerun INTEGER NOT NULL DEFAULT 0")
-            except sqlite3.OperationalError:
-                pass
+            for alter in ("ALTER TABLE runs ADD COLUMN rerun INTEGER NOT NULL DEFAULT 0",  # older databases
+                          "ALTER TABLE users ADD COLUMN google_sub TEXT"):
+                try:
+                    c.execute(alter)
+                except sqlite3.OperationalError:
+                    pass
+            c.execute("CREATE UNIQUE INDEX IF NOT EXISTS users_google_sub ON users(google_sub)")
 
     @contextmanager
     def conn(self):
@@ -84,6 +87,14 @@ class DB:
     def user_by_email(self, email: str) -> sqlite3.Row | None:
         with self.conn() as c:
             return c.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+
+    def user_by_google(self, sub: str) -> sqlite3.Row | None:
+        with self.conn() as c:
+            return c.execute("SELECT * FROM users WHERE google_sub = ?", (sub,)).fetchone()
+
+    def set_google_sub(self, user_id: int, sub: str) -> None:
+        with self.conn() as c:
+            c.execute("UPDATE users SET google_sub = ? WHERE id = ?", (sub, user_id))
 
     def user_by_token(self, token: str) -> sqlite3.Row | None:
         with self.conn() as c:

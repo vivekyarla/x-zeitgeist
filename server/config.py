@@ -26,6 +26,20 @@ class Config:
     demo: bool
     worker: bool
     rate_limit: int  # login/signup attempts per IP per 10 minutes
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    allowed_domains: tuple[str, ...] = ()  # Google Workspace domains allowed to sign in; empty = any
+    password_login: bool = True
+    preview_keys: dict | None = None       # the owner's keys for the public example page
+    preview_preset: str = "ai_startup_marketing"
+
+    @property
+    def google(self) -> bool:
+        return bool(self.google_client_id and self.google_client_secret)
+
+    @property
+    def preview(self) -> bool:
+        return self.demo or bool(self.preview_keys)
 
     @property
     def secure_cookies(self) -> bool:
@@ -70,6 +84,13 @@ def load() -> Config:
         secret = f.read_text().strip()
     elif len(secret) < 16:
         raise RuntimeError("SECRET_KEY is too short; use at least 32 random characters.")
+    google_id, google_secret = os.getenv("GOOGLE_CLIENT_ID", "").strip(), os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
+    domains = tuple(d.strip().lower().lstrip("@") for d in os.getenv("ALLOWED_EMAIL_DOMAINS", "").split(",") if d.strip())
+    pw = os.getenv("PASSWORD_LOGIN", "").strip()
+    # With Google set up, email/password accounts are off unless PASSWORD_LOGIN=1 turns them back on.
+    password_login = _truthy(pw) if pw else not (google_id and google_secret)
+    pk = {"twitterapi_io": os.getenv("PREVIEW_TWITTERAPI_IO_KEY", "").strip(),
+          "ai_gateway": os.getenv("PREVIEW_AI_GATEWAY_API_KEY", "").strip()}
     return Config(
         data_dir=data_dir,
         base_url=base_url,
@@ -80,4 +101,10 @@ def load() -> Config:
         demo=demo,
         worker=os.getenv("TIMELINE_WORKER", "1") != "0",
         rate_limit=max(1, int(os.getenv("RATE_LIMIT", "20"))),
+        google_client_id=google_id,
+        google_client_secret=google_secret,
+        allowed_domains=domains,
+        password_login=password_login,
+        preview_keys=pk if all(pk.values()) else None,
+        preview_preset=os.getenv("PREVIEW_PRESET", "ai_startup_marketing").strip() or "ai_startup_marketing",
     )

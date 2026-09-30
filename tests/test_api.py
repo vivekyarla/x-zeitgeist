@@ -12,7 +12,7 @@ HOOK = "https://hooks.slack.com/services/T000/B000/abcdefSECRET"
 def test_healthz_and_pages_without_session(client):
     assert client.get("/healthz").json() == {"ok": True}
     r = client.get("/", follow_redirects=False)
-    assert r.status_code == 303 and r.headers["location"] == "/login"
+    assert r.status_code == 303 and r.headers["location"] == "/preview/"  # signed out: the example page
     assert client.get("/login").status_code == 200
     assert client.get("/welcome", follow_redirects=False).headers["location"] == "/login"
     assert client.get("/app/", follow_redirects=False).headers["location"] == "/login"

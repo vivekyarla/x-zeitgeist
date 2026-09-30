@@ -35,15 +35,47 @@ cp .env.example .env      # set BASE_URL and SECRET_KEY
 docker compose up -d --build
 ```
 
-On a platform:
+### Fly.io (about $4 a month)
 
-1. Deploy from this repo's `Dockerfile` (it runs `uvicorn server.app:app --host 0.0.0.0 --port 8000` as a non-root user).
-2. Attach a **persistent volume at `/data`**. Every account, key, and page lives there; without a volume, a redeploy wipes everyone. Some platforms mount volumes owned by root; if the app can't write to `/data`, make it writable by uid 10001 (or use the platform's run-as-root option).
+`fly.toml` is ready: one always-on `shared-cpu-1x` machine with 512 MB (about $3.30/month) and a 1 GB volume (about $0.15/month). API costs are separate and land on each person's own keys, plus the example page on yours.
+
+```bash
+fly launch --copy-config --no-deploy          # pick an app name, then set BASE_URL in fly.toml to match
+fly volumes create timeline_data --size 1
+fly secrets set SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(48))') \
+    GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... \
+    PREVIEW_TWITTERAPI_IO_KEY=... PREVIEW_AI_GATEWAY_API_KEY=...
+fly deploy
+```
+
+The machine has to stay up (`auto_stop_machines = "off"`), because the scheduler runs inside the server.
+
+### Other platforms
+
+1. Deploy from this repo's `Dockerfile`. The server runs as a non-root user; the entrypoint starts as root only to hand a root-owned volume to that user.
+2. Attach a **persistent volume at `/data`**. Every account, key, and page lives there; without a volume, a redeploy wipes everyone.
 3. Set the env vars:
    - `BASE_URL`: the public URL, e.g. `https://timeline.example.com`. Links in recaps and Slack come from it, and cookies are marked secure when it's https.
    - `SECRET_KEY`: a long random string (`python -c 'import secrets; print(secrets.token_urlsafe(48))'`). The server refuses to start without it unless `BASE_URL` is localhost or `TIMELINE_DEMO=1`. Changing it signs everyone out and makes saved keys unreadable, so people would re-enter them.
    - Optional: `ENCRYPTION_KEY` (a Fernet key, so key encryption doesn't depend on `SECRET_KEY`), `MAX_CONCURRENT_RUNS` (default 3), `REFRESH_HOURS` (default 3), `FORWARDED_ALLOW_IPS=*` behind the platform's proxy so the login rate limit sees real client IPs.
+   - Sign-in and the example page: see the next two sections.
 4. Health check: `GET /healthz`.
+
+## Sign in with Google
+
+1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials), create a project, then **OAuth consent screen**: pick **Internal** if everyone is in your Google Workspace (only your org can sign in, and there's no review), or External otherwise. Add only the `openid`, `email`, and `profile` scopes.
+2. **Credentials → Create credentials → OAuth client ID**, type **Web application**, with the authorized redirect URI `<BASE_URL>/auth/google/callback`.
+3. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `ALLOWED_EMAIL_DOMAINS` (e.g. `rox.com`; comma-separated; empty allows any Google account).
+
+What it can see: those three scopes are Google's basic sign-in scopes, marked non-sensitive, so the app needs no Google verification. They share the account's name, email address, and profile picture, and nothing else: no Gmail, Drive, Calendar, or contacts. The app asks for no offline access (no refresh token), throws away the access token Google returns, and stores only the account's id and email. With `ALLOWED_EMAIL_DOMAINS` set, it also checks Google's `hd` claim, so only accounts managed by your Workspace get in, not personal Google accounts that happen to use a work address.
+
+If your Workspace admin restricts third-party apps, they may need to mark the OAuth client as trusted (Admin console → Security → API controls → App access control). An Internal app in your own org is usually allowed by default.
+
+Once Google is set up, email/password sign-up turns off (`PASSWORD_LOGIN=1` turns it back on). An existing password account is linked the first time someone signs in with Google using the same address.
+
+## The example page
+
+Signed-out visitors land on `/preview/`: a real page built from one preset (`PREVIEW_PRESET`, default `ai_startup_marketing`) on **your** keys (`PREVIEW_TWITTERAPI_IO_KEY` and `PREVIEW_AI_GATEWAY_API_KEY`), refreshed on the same schedule as everyone else. It has no settings and no sign-in, and a "Make your own" button. It costs about what one person's page does ($20–35/month). Leave either key empty to turn it off.
 
 Run one instance. Several processes against the same volume won't double-run anyone (each run takes a lease in the database), but one is plenty: runs are mostly waiting on APIs.
 

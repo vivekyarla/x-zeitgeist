@@ -20,19 +20,32 @@
     <form class="auth" id="auth" novalidate>
       <h1 id="auth-title">Your week on the timeline</h1>
       <p class="ob-lede" id="auth-lede">A private page that reads what tech Twitter is posting and writes you a short thesis about the week, tuned to what you care about. It refreshes every three hours and runs on your own API keys.</p>
+      {% if google %}
+      <a class="btn primary google" href="/auth/google" id="google-go">
+        <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        Continue with Google</a>
+      <p class="hint" style="text-align:center;margin-top:10px">{% if domains %}Use your @{{ domains | join(' or @') }} work account. {% endif %}Google only shares your name, email, and profile picture. Nothing else in your account is read.</p>
+      {% endif %}
+      {% if password_login %}
+      {% if google %}<div class="or"><span>or</span></div>{% endif %}
       <div class="field"><label for="email">Email</label><input class="inp" id="email" type="email" autocomplete="email" required></div>
       <div class="field"><label for="password">Password</label><input class="inp" id="password" type="password" autocomplete="current-password" minlength="8" required>
         <p class="hint" id="pw-hint" hidden>At least 8 characters.</p></div>
       <button class="btn primary" type="submit" id="go">Sign in</button>
-      <p class="status" id="status" role="status" style="margin-top:12px;text-align:center"></p>
       <p class="switch" id="switch"></p>
+      {% endif %}
+      <p class="status" id="status" role="status" style="margin-top:12px;text-align:center"></p>
+      {% if preview %}<p class="switch"><a href="/preview/">See a live example page first</a>, no sign-in needed.</p>{% endif %}
     </form>
   </div>
 </div>
 <script>
 {% include "_shared.js" %}
 (function () {
-  var $ = TL.$, mode = new URLSearchParams(location.search).get("mode") === "signup" ? "signup" : "signin";
+  var $ = TL.$, q = new URLSearchParams(location.search), mode = q.get("mode") === "signup" ? "signup" : "signin";
+  function say(m, err) { var s = $("status"); s.textContent = m; s.className = "status" + (err ? " err" : ""); }
+  if (q.get("error")) say(q.get("error"), true);
+  if (!$("auth-title") || !$("email")) return;
   function draw() {
     var up = mode === "signup";
     $("auth-title").textContent = up ? "Make your own timeline" : "Your week on the timeline";
@@ -43,7 +56,6 @@
     sw.append(up ? "Already have an account? " : "New here? ",
       TL.h("button", { type: "button", text: up ? "Sign in" : "Create an account", onclick: function () {
         mode = up ? "signin" : "signup"; history.replaceState(null, "", up ? "/login" : "/login?mode=signup"); draw(); $("email").focus(); } }));
-    $("status").textContent = "";
   }
   $("auth").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -56,7 +68,6 @@
       .then(function (me) { location.href = me.onboarded ? "/app/" : "/welcome"; })
       .catch(function (err) { say(err.message, true); $("go").disabled = false; });
   });
-  function say(m, err) { var s = $("status"); s.textContent = m; s.className = "status" + (err ? " err" : ""); }
   draw();
   $("email").focus();
 })();

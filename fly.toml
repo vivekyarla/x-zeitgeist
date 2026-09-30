@@ -1,0 +1,38 @@
+# Fly.io: one small always-on machine plus a 1 GB volume for the database and pages.
+#   fly launch --copy-config --no-deploy        (pick an app name; update BASE_URL below to match)
+#   fly volumes create timeline_data --size 1
+#   fly secrets set SECRET_KEY=... GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... \
+#       PREVIEW_TWITTERAPI_IO_KEY=... PREVIEW_AI_GATEWAY_API_KEY=...
+#   fly deploy
+app = "x-zeitgeist"
+primary_region = "sjc"
+
+[env]
+  BASE_URL = "https://x-zeitgeist.fly.dev"
+  DATA_DIR = "/data"
+  ALLOWED_EMAIL_DOMAINS = "rox.com"
+  FORWARDED_ALLOW_IPS = "*"   # Fly's proxy sets X-Forwarded-For; the login rate limit reads it
+  MAX_CONCURRENT_RUNS = "3"
+
+[[mounts]]
+  source = "timeline_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  # The scheduler runs inside the server, so the machine must stay up between visits.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "30s"
+    method = "GET"
+    path = "/healthz"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

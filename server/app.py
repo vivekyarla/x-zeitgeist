@@ -14,6 +14,7 @@ import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Literal, Optional
+from urllib.parse import urlencode
 
 from fastapi import Body, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -25,6 +26,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
 from . import checks
+from . import google as google_mod
 from . import config as config_mod
 from .config import ROOT, SITE_TITLE, Config
 from .db import DB
@@ -40,6 +42,7 @@ APP_FILES = {"data.json": "application/json", "recap.json": "application/json",
              "recap.md": "text/markdown; charset=utf-8"}
 RECAP_FILES = {"recap.json": "application/json", "recap.md": "text/markdown; charset=utf-8"}
 RUN_COOLDOWN = 600
+PREVIEW_EMAIL = "preview@timeline.invalid"  # the public example page's profile; can never sign in
 NO_CACHE = {"Cache-Control": "no-cache"}
 
 
@@ -91,8 +94,9 @@ class ImportIn(_Body):
     profile: dict
 
 
-class PasswordIn(_Body):
-    password: str = Field(max_length=256)
+class DeleteIn(_Body):
+    password: str = Field(default="", max_length=256)  # password accounts
+    confirm: str = Field(default="", max_length=254)   # Google accounts type their email
 
 
 # ---------------------------------------------------------------------------
@@ -268,6 +272,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         uid = user["id"]
         ws = week_state(uid)
         return {"email": user["email"], "demo": cfg.demo, "onboarded": bool(user["onboarded"]),
+                "auth": "password" if user["pw_hash"] else "google",
                 "settings": json.loads(user["settings"]), "keys": key_flags(uid), "status": status(uid),
                 "recap_url": recap_url(user), "page_url": cfg.page_url,
                 "slack": {"last_post": ws.get("slack_last_post"), "last_error": ws.get("slack_last_error")}}
@@ -284,9 +289,37 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         for name, v in _validate_keys(values).items():
             db.set_key(uid, name, box.seal(v) if v else None)
 
+    # -- the public example page ------------------------------------------------
+    # One shared profile, built from a preset on the owner's keys (PREVIEW_* env), so people can
+    # see a real page before signing in or bringing keys. It has no login and no settings.
+    def ensure_preview() -> int | None:
+        user = db.user_by_email(PREVIEW_EMAIL)
+        if not cfg.preview:
+            if user:  # turned off: drop its keys so the scheduler stops running it
+                for n in KEY_ENV:
+                    db.set_key(user["id"], n, None)
+            return None
+        p = next((x for x in presets if x["id"] == cfg.preview_preset), None) or \
+            next(x for x in presets if x["id"] == "ai_startup_marketing")
+        settings = validate(p["settings"])
+        settings["slack"]["enabled"] = False
+        uid = user["id"] if user else db.create_user(PREVIEW_EMAIL, "", settings, recap_token())
+        db.set_settings(uid, settings)
+        db.set_onboarded(uid)
+        for n, v in (cfg.preview_keys or {}).items():
+            db.set_key(uid, n, box.seal(v))
+        if not (worker.paths(uid)["out"] / "index.html").exists():
+            db.queue(uid)
+        return uid
+
+    preview_uid = ensure_preview()
+    preview_name = next((x["name"] for x in presets if x["id"] == cfg.preview_preset), "AI startup marketer")
+
     # -- pages -----------------------------------------------------------------
     def render(name: str, user, fallback: str) -> str:
-        ctx = {"title": SITE_TITLE, "email": user["email"] if user else None, "demo": cfg.demo}
+        ctx = {"title": SITE_TITLE, "email": user["email"] if user else None, "demo": cfg.demo,
+               "google": cfg.google, "password_login": cfg.password_login, "preview": preview_uid is not None,
+               "preview_name": preview_name, "domains": cfg.allowed_domains}
         try:
             return templates.get_template(name).render(**ctx)
         except TemplateNotFound:  # templates/ is maintained separately; keep the server usable without it
@@ -301,8 +334,36 @@ def create_app(cfg: Config | None = None) -> FastAPI:
     def home(request: Request):
         user = session_user(request)
         if not user:
-            return RedirectResponse("/login", 303)
+            return RedirectResponse("/preview/" if preview_uid is not None else "/login", 303)
         return RedirectResponse("/app/" if user["onboarded"] else "/welcome", 303)
+
+    @app.get("/preview")
+    def preview_no_slash():
+        return RedirectResponse("/preview/", 308)
+
+    @app.get("/preview/")
+    def preview_page():
+        if preview_uid is None:
+            return RedirectResponse("/login", 303)
+        page = worker.paths(preview_uid)["out"] / "index.html"
+        if page.exists():
+            return FileResponse(page, media_type="text/html; charset=utf-8", headers=NO_CACHE)
+        return HTMLResponse(
+            "<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>"
+            "<meta http-equiv='refresh' content='20'><title>Example page</title>"
+            "<body style='font:16px/1.5 system-ui;max-width:36em;margin:15vh auto;padding:0 20px'>"
+            "<p>The example page is being built for the first time. This takes a few minutes; "
+            "this page refreshes on its own.</p><p><a href='/login'>Sign in to make your own</a></p>",
+            headers=NO_CACHE)
+
+    @app.get("/preview/{name}")
+    def preview_file(name: str):
+        if preview_uid is None or name not in APP_FILES:
+            raise ApiError(404, "Not found.")
+        f = worker.paths(preview_uid)["out"] / name
+        if not f.exists():
+            raise ApiError(404, "Not built yet.")
+        return FileResponse(f, media_type=APP_FILES[name], headers=NO_CACHE)
 
     @app.get("/login", response_class=HTMLResponse)
     def login_page(request: Request):
@@ -357,12 +418,62 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         return Response(f.read_bytes(), media_type=RECAP_FILES[name], headers=NO_CACHE)
 
     # -- auth ------------------------------------------------------------------
+    def start_session(request: Request, uid: int) -> None:
+        request.session.clear()
+        request.session["uid"] = uid
+
+    def login_error(msg: str):
+        return RedirectResponse("/login?" + urlencode({"error": msg}), 303)
+
+    @app.get("/auth/google")
+    def google_start(request: Request):
+        if not cfg.google:
+            return login_error("Google sign-in isn't set up on this server.")
+        url, pending = google_mod.start(cfg.google_client_id, cfg.base_url + "/auth/google/callback",
+                                        cfg.allowed_domains)
+        request.session["google"] = pending
+        return RedirectResponse(url, 303)
+
+    @app.get("/auth/google/callback")
+    def google_callback(request: Request, code: str = "", state: str = "", error: str = ""):
+        pending = request.session.pop("google", None)
+        if error:
+            return login_error("Google sign-in was cancelled." if error == "access_denied" else
+                               "Google couldn't sign you in. Try again.")
+        if not cfg.google or not pending or not code or state != pending.get("state"):
+            return login_error("That sign-in link expired. Try again.")
+        if not limiter.allow("auth:" + client_ip(request)):
+            return login_error("Too many attempts. Wait a few minutes and try again.")
+        try:
+            c = google_mod.exchange(cfg.google_client_id, cfg.google_client_secret,
+                                    cfg.base_url + "/auth/google/callback", code, pending["verifier"])
+            sub, email, _name = google_mod.claims(c, cfg.google_client_id, pending["nonce"], cfg.allowed_domains)
+        except google_mod.GoogleError as e:
+            return login_error(str(e))
+        user = db.user_by_google(sub)
+        if not user:
+            user = db.user_by_email(email)
+            if user and user["email"] == PREVIEW_EMAIL:
+                return login_error("Google couldn't sign you in. Try again.")
+            if user:  # Google verified this address: link it to the existing account
+                db.set_google_sub(user["id"], sub)
+            else:
+                uid = db.create_user(email, "", default_settings(), recap_token())
+                if uid is None:
+                    return login_error("Couldn't create your account. Try again.")
+                db.set_google_sub(uid, sub)
+                user = db.user(uid)
+        start_session(request, user["id"])
+        return RedirectResponse("/app/" if user["onboarded"] else "/welcome", 303)
+
     @app.post("/api/signup", status_code=201)
     def signup(request: Request, body: Creds):
+        if not cfg.password_login:
+            raise ApiError(403, "Sign in with Google instead.")
         if not limiter.allow("auth:" + client_ip(request)):
             raise ApiError(429, "Too many attempts. Wait a few minutes and try again.")
         email = body.email.strip().lower()
-        if not EMAIL.match(email):
+        if not EMAIL.match(email) or email.endswith(".invalid"):
             raise ApiError(422, "That doesn't look like an email address.")
         if len(body.password) < 8:
             raise ApiError(422, "Use a password with at least 8 characters.")
@@ -375,6 +486,8 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     @app.post("/api/login")
     def login(request: Request, body: Creds):
+        if not cfg.password_login:
+            raise ApiError(403, "Sign in with Google instead.")
         if not limiter.allow("auth:" + client_ip(request)):
             raise ApiError(429, "Too many attempts. Wait a few minutes and try again.")
         user = db.user_by_email(body.email.strip().lower())
@@ -523,10 +636,13 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         return {"recap_url": recap_url(db.user(user["id"]))}
 
     @app.delete("/api/account")
-    def delete_account(request: Request, body: PasswordIn):
+    def delete_account(request: Request, body: DeleteIn):
         user = require_user(request)
-        if not verify_password(body.password, user["pw_hash"]):
-            raise ApiError(403, "That password isn't right.")
+        if user["pw_hash"]:
+            if not verify_password(body.password, user["pw_hash"]):
+                raise ApiError(403, "That password isn't right.")
+        elif body.confirm.strip().lower() != user["email"].lower():
+            raise ApiError(403, "Type your email address to confirm.")
         db.delete_user(user["id"])
         shutil.rmtree(cfg.user_dir(user["id"]), ignore_errors=True)
         request.session.clear()

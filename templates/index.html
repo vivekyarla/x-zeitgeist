@@ -15,6 +15,10 @@
 </head>
 <body>
 {% if demo %}<div class="demo">Sample data. Real tweets appear once the pipeline runs with your API keys.</div>{% endif %}
+<div class="preview-bar" id="preview-bar" hidden><div class="frame">
+  <span>This is a live example built from one of the starter feeds. Yours follows the topics you pick, on your own keys.</span>
+  <a class="btn primary" href="/login?mode=signup">Make your own</a>
+</div></div>
 <div class="frame">
   <header class="bar">
     <p class="brand">{{ title }}</p>
@@ -407,7 +411,8 @@
 
   // Profile tab
   function drawProfile() {
-    $("acct-email").textContent = "Signed in as " + me.email + ".";
+    $("acct-email").textContent = "Signed in as " + me.email + (me.auth === "google" ? " with Google." : ".");
+    if (me.auth === "google") { $("del-pw").type = "email"; $("del-pw").placeholder = "Type " + me.email + " to confirm"; $("del-pw").autocomplete = "off"; }
     $("recap-url").value = me.recap_url;
     var p = TL.local("tl_prefs") || {}, cur = p.theme || "system";
     document.querySelectorAll("#theme-seg button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === cur)); });
@@ -443,7 +448,7 @@
   $("del-go").onclick = function () {
     var pw = $("del-pw").value; if (!pw) { $("del-pw").focus(); return; }
     if (!confirm("Delete your account, keys, and page? This can't be undone.")) return;
-    TL.api("DELETE", "/api/account", { password: pw }).then(function () { TL.local("tl_deliver", null); location.href = "/login"; })
+    TL.api("DELETE", "/api/account", me.auth === "google" ? { confirm: pw } : { password: pw }).then(function () { TL.local("tl_deliver", null); location.href = "/login"; })
       .catch(function (e) { say(e.message, true); });
   };
 
@@ -460,6 +465,10 @@
   dlg.querySelector("[data-close]").onclick = function () { dlg.close(); };
   dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
   $("open-settings").hidden = true;
+  if (/^\/preview(\/|$)/.test(location.pathname)) {  // the public example page: no account, no settings
+    $("preview-bar").hidden = false;
+    return;
+  }
   Promise.all([TL.api("GET", "/api/me"), TL.api("GET", "/api/presets").catch(function () { return []; })]).then(function (r) {
     me = r[0]; presets = r[1]; settings = me.settings;
     presets.forEach(function (p) { $("f-preset").append(h("option", { value: p.id, text: p.name + " · " + p.tagline })); });

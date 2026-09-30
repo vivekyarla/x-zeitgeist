@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 RUN useradd --system --uid 10001 --home-dir /app --shell /usr/sbin/nologin timeline \
     && mkdir -p /data && chown timeline:timeline /data
-USER timeline
+# Starts as root only to fix the volume's owner, then runs the server as `timeline`.
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # Every account, key, and page lives here: mount a persistent volume.
 VOLUME /data
