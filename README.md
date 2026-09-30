@@ -9,7 +9,7 @@ Every 3 hours a GitHub Action runs `python -m pipeline.run`:
 1. **Fetch** (`pipeline/sources.py`): runs the searches and watchlist in `pipeline/config.py` against twitterapi.io, limited to tweets since Monday 00:00 PT.
 2. **Judge** (`pipeline/judge.py`): sends each *new* tweet to Jev once (through Vercel AI Gateway, or TypeSafe directly if `TYPESAFE_API_KEY` is set), asking five questions in one call: is it on-topic, which topic, how much signal (0–4 rubric), is it bait, and would marketing care. Tweets that clear the thresholds are ranked, with Jev's scores weighted most and engagement breaking ties.
 3. **Synthesize** (`pipeline/synthesize.py`): sends the top 60 to Claude through Vercel AI Gateway, which writes the thesis and groups tweets into 3–5 themes. It sees its previous thesis, so the read evolves instead of starting over.
-4. **Publish** (`pipeline/build.py`): renders `public/index.html` (plus `public/data.json` for a future Notion sync) and deploys to GitHub Pages. Weekly state is committed to `data/week.json`; on Monday the old week moves to `data/archive/`.
+4. **Publish** (`pipeline/build.py`): renders `public/index.html` (plus `public/data.json` for a future Notion sync, and `recap.json`/`recap.md`, the daily recap for Slack and agents) and deploys to GitHub Pages. Weekly state is committed to `data/week.json`; on Monday the old week moves to `data/archive/`.
 
 ## Setup (about 15 minutes)
 
@@ -30,6 +30,16 @@ python -m pipeline.run                 # a real update
 python -m pipeline.run --build-only    # re-render from saved state (after template edits)
 ```
 
+## Onboarding a teammate
+
+Send them the page link. On their first visit a short **Guide** opens (you can reopen it from the header at any time). It walks through how the page works, then:
+
+- **Your view** (just them, saved in their browser): light or dark, and topics to hide on their screen.
+- **Focus, Topic mix, Filter, Sources** (team): the same settings as the Settings panel, in plain language with presets. Nothing is saved until the last step, which shows a summary of the changes.
+- **Daily recap**: connect Slack for the team, or set up Instinct or Muse for themselves.
+
+Saving team changes needs a GitHub token with access to this repo (see below). Anyone without one can still use Your view and set up Instinct or Muse, or copy the new settings and commit them on GitHub.
+
 ## Tuning
 
 Interests, topics, searches, thresholds, the writer model, and the Slack schedule live in `settings.json`. Edit them from the **Settings** button on the page (connect a fine-grained GitHub token for this repo with read/write on Contents, Secrets, and Actions), or edit the file directly. Saving from the page commits `settings.json` and starts an update; any change to the interests or topics re-judges the week's saved tweets automatically.
@@ -45,9 +55,17 @@ Interests, topics, searches, thresholds, the writer model, and the Slack schedul
 
 ## Slack
 
-1. Create a Slack app (api.slack.com/apps → From scratch), turn on **Incoming Webhooks**, and add one for your channel.
-2. On the page: Settings → API keys → paste the webhook URL as the Slack webhook.
-3. Settings → Slack → turn it on and pick how often: once a day after a set hour (PT), when the thesis changes, or every update. "Send to Slack now" posts after one immediate update.
+On the page, open Settings → **Daily recap** (or step 7 of the Guide):
+
+1. **Create the Slack app** opens Slack with an app manifest already filled in. Pick the workspace, click Create, then Install to Workspace and choose the channel.
+2. Copy the webhook URL from the app's Incoming Webhooks page, paste it, and click **Send test** to check it before saving. It's stored as the `SLACK_WEBHOOK_URL` secret.
+3. Turn posting on and pick how often: once a day after a set hour (PT), when the thesis changes, or every update. "Send today's recap now" posts after one immediate update.
+
+The daily post is checked every hour by the "Deliver the daily read" workflow (`python -m pipeline.run --deliver`), which posts from saved state without fetching anything, so a 9am post lands before 10am instead of at the next 3-hourly update. Failed posts are retried (rate limits and Slack outages), and if Slack still says no, the reason and how to fix it (e.g. a revoked webhook or archived channel) is saved to `data/week.json` and shown on the page.
+
+## Instinct and Muse
+
+Personal agents like Instinct and Meta Muse can't be pushed to, but they can run a daily task that reads a URL. Every update publishes `recap.md` (and `recap.json`) next to the page: the thesis, up to five tweets new in the last 24 hours, the themes, and the link. Settings → **Daily recap** (and the Guide) gives a one-tap setup message that asks your agent to read `<page>/recap.md` every morning and send you the thesis, today's recap, and the link.
 
 Every Jev verdict is saved in `data/week.json`, so you can look at what got filtered out and adjust thresholds from real data.
 

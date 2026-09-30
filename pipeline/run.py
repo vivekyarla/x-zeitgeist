@@ -238,6 +238,8 @@ def main() -> None:
     ap.add_argument("--build-only", action="store_true", help="re-render the page from saved state")
     ap.add_argument("--slack", choices=["auto", "now", "skip"], default="auto",
                     help="auto: post if the schedule in settings.json says so; now: post regardless")
+    ap.add_argument("--deliver", action="store_true",
+                    help="only post the daily Slack read if it's due, from saved state (no fetching, no build)")
     ap.add_argument("--week", help="replay a past week (its Monday, YYYY-MM-DD) from scratch; implies --dry-run")
     ap.add_argument("--dry-run", action="store_true",
                     help="do a full update and build the page, but save nothing and post nothing; "
@@ -254,6 +256,17 @@ def main() -> None:
             compare({}, [], state), indent=1, ensure_ascii=False))
         build_site(state, ROOT / "public")
         print(f"replay of week {args.week}: built public/ and public/compare.json; nothing saved or posted")
+        return
+    if args.deliver:  # hourly, so the daily post lands on time between 3-hourly updates
+        now = datetime.now(timezone.utc)
+        state = load_state(week_start(now))
+        if args.slack == "now" or (args.slack == "auto" and slack.due(state, now, False, deliver=True)):
+            if state.get("latest"):
+                slack.post(state, now)
+        else:
+            print("slack: nothing due")
+        DATA.mkdir(exist_ok=True)
+        STATE.write_text(json.dumps(state, indent=1, ensure_ascii=False))
         return
     if args.demo:
         state = json.loads((ROOT / "pipeline" / "demo_state.json").read_text())

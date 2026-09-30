@@ -1,4 +1,4 @@
-"""Render the weekly state into public/index.html (+ public/data.json)."""
+"""Render the weekly state into public/index.html (+ data.json, recap.json, recap.md)."""
 from __future__ import annotations
 
 import json
@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup, escape
 
-from . import config, thesis
+from . import config, recap as recap_mod, thesis
 
 TEMPLATES = Path(__file__).resolve().parent.parent / "templates"
 
@@ -51,7 +51,7 @@ def _local(iso: str) -> datetime:
     return datetime.fromisoformat(iso).astimezone(ZoneInfo(config.TIMEZONE))
 
 
-def build_site(state: dict, out_dir: Path, demo: bool = False) -> None:
+def build_site(state: dict, out_dir: Path, demo: bool = False, now: datetime | None = None) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     latest = state.get("latest")
     tweets = state["tweets"]
@@ -69,6 +69,8 @@ def build_site(state: dict, out_dir: Path, demo: bool = False) -> None:
         {"when": f"{_local(h['at']):%a} {_local(h['at']):%-I:%M %p}".replace(":00 ", " "), "thesis": h["thesis"]}
         for h in reversed(state.get("thesis_history", [])[:-1])
     ]
+
+    recap = recap_mod.recap(state, now)
 
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=select_autoescape())
     env.filters["compact"] = _compact
@@ -90,6 +92,8 @@ def build_site(state: dict, out_dir: Path, demo: bool = False) -> None:
         demo=demo,
         repo=config.REPO,
         settings=config.SETTINGS,
+        recap=recap,
+        slack_status={"last_post": state.get("slack_last_post"), "last_error": state.get("slack_last_error")},
     )
     (out_dir / "index.html").write_text(html)
     # Machine-readable copy, handy for a later Notion sync.
@@ -101,3 +105,6 @@ def build_site(state: dict, out_dir: Path, demo: bool = False) -> None:
                     "tweets": [{k: t[k] for k in ("id", "url", "text", "author", "likes", "retweets", "jev")}
                                for t in th["tweets"]]} for th in themes],
     }, ensure_ascii=False, indent=1))
+    # The daily recap feed, for Slack and for agents that fetch a URL each morning.
+    (out_dir / "recap.json").write_text(json.dumps(recap, ensure_ascii=False, indent=1))
+    (out_dir / "recap.md").write_text(recap_mod.markdown(recap))
