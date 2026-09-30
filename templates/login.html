@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign in · {{ title }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+{% include "_base.css" %}
+</style>
+<script>{% include "_theme.js" %}</script>
+</head>
+<body>
+<div class="frame screen">
+  <header class="bar"><p class="brand">{{ title }}</p></header>
+  <div class="rule"></div>
+  <div class="center">
+    <form class="auth" id="auth" novalidate>
+      <h1 id="auth-title">Your week on the timeline</h1>
+      <p class="ob-lede" id="auth-lede">A private page that reads what tech Twitter is posting and writes you a short thesis about the week, tuned to what you care about. It refreshes every three hours and runs on your own API keys.</p>
+      <div class="field"><label for="email">Email</label><input class="inp" id="email" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="password">Password</label><input class="inp" id="password" type="password" autocomplete="current-password" minlength="8" required>
+        <p class="hint" id="pw-hint" hidden>At least 8 characters.</p></div>
+      <button class="btn primary" type="submit" id="go">Sign in</button>
+      <p class="status" id="status" role="status" style="margin-top:12px;text-align:center"></p>
+      <p class="switch" id="switch"></p>
+    </form>
+  </div>
+</div>
+<script>
+{% include "_shared.js" %}
+(function () {
+  var $ = TL.$, mode = new URLSearchParams(location.search).get("mode") === "signup" ? "signup" : "signin";
+  function draw() {
+    var up = mode === "signup";
+    $("auth-title").textContent = up ? "Make your own timeline" : "Your week on the timeline";
+    $("go").textContent = up ? "Create account" : "Sign in";
+    $("password").autocomplete = up ? "new-password" : "current-password";
+    $("pw-hint").hidden = !up;
+    var sw = $("switch"); sw.innerHTML = "";
+    sw.append(up ? "Already have an account? " : "New here? ",
+      TL.h("button", { type: "button", text: up ? "Sign in" : "Create an account", onclick: function () {
+        mode = up ? "signin" : "signup"; history.replaceState(null, "", up ? "/login" : "/login?mode=signup"); draw(); $("email").focus(); } }));
+    $("status").textContent = "";
+  }
+  $("auth").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = $("email").value.trim(), pw = $("password").value;
+    if (!/^\S+@\S+\.\S+$/.test(email)) { say("Enter your email address.", true); $("email").focus(); return; }
+    if (mode === "signup" && pw.length < 8) { say("Use at least 8 characters for your password.", true); $("password").focus(); return; }
+    if (!pw) { say("Enter your password.", true); $("password").focus(); return; }
+    $("go").disabled = true; say(mode === "signup" ? "Creating your account…" : "Signing in…");
+    TL.api("POST", mode === "signup" ? "/api/signup" : "/api/login", { email: email, password: pw })
+      .then(function (me) { location.href = me.onboarded ? "/app/" : "/welcome"; })
+      .catch(function (err) { say(err.message, true); $("go").disabled = false; });
+  });
+  function say(m, err) { var s = $("status"); s.textContent = m; s.className = "status" + (err ? " err" : ""); }
+  draw();
+  $("email").focus();
+})();
+</script>
+</body>
+</html>

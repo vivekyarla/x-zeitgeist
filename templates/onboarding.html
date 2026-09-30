@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Set up · {{ title }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+{% include "_base.css" %}
+</style>
+<script>{% include "_theme.js" %}</script>
+</head>
+<body>
+{% if demo %}<div class="demo">Demo mode: keys aren't checked and your page is built from sample data.</div>{% endif %}
+<div class="frame screen">
+  <header class="bar">
+    <p class="brand">{{ title }}</p>
+    <div class="meta"><span>{{ email }}</span><button class="btn" type="button" id="signout">Sign out</button></div>
+  </header>
+  <div class="rule"></div>
+  <div class="center">
+    <form class="wizard ob" onsubmit="return false">
+      <div class="ob-top">
+        <div class="ob-steps" id="ob-steps" aria-label="Steps"></div>
+        <span class="ob-count" id="ob-count"></span>
+      </div>
+      <div class="ob-body" id="ob-body">
+        <section class="ob-step" data-step="welcome" data-name="Welcome">
+          <h2>Set up your timeline</h2>
+          <p class="ob-lede">Your own page that reads what X is posting about the things you care about, keeps the tweets that matter, and writes a short thesis about your week. It refreshes every three hours, and you can get a recap every morning.</p>
+          <div class="how">
+            <div><span class="num">01</span><b>Fetch</b><span>Posts, quotes, and retweets from a panel of accounts your scene follows, plus searches and a watchlist.</span></div>
+            <div><span class="num">02</span><b>Judge</b><span>Jev scores each new tweet. Is it on topic? Is there real signal? Is it bait?</span></div>
+            <div><span class="num">03</span><b>Write</b><span>Claude writes your thesis and groups the best tweets into themes.</span></div>
+            <div><span class="num">04</span><b>Deliver</b><span>Your page, plus a daily recap in Slack, Instinct, or Muse.</span></div>
+          </div>
+          <p class="hint">It runs on your own twitterapi.io and Vercel AI Gateway keys, so you control the cost, usually about $20–35 a month. Setup takes about three minutes. Moving from another install?
+            <label class="linklike"><input type="file" id="import-file" accept="application/json,.json" hidden><a href="#" id="import-link">Import your profile</a></label>.</p>
+        </section>
+
+        <section class="ob-step" data-step="preset" data-name="Starting point" hidden>
+          <h2>Pick a starting point</h2>
+          <p class="ob-lede">Each preset sets the topics, sources, and filter for one kind of reader. Pick the closest one. You can change any of it later.</p>
+          <div id="presets"><div class="spin"></div></div>
+          <div class="field" style="margin-top:22px"><span class="lbl">Then</span>
+            <div class="seg" id="tune" role="group" aria-label="Fine-tune">
+              <button type="button" data-v="0" aria-pressed="true">Use it as is</button><button type="button" data-v="1" aria-pressed="false">Fine-tune it first</button>
+            </div>
+            <p class="hint">Fine-tuning adds four short steps: focus, topic mix, filter, and accounts.</p></div>
+        </section>
+
+        <section class="ob-step" data-step="focus" data-name="Focus" data-fine hidden>
+          <h2>What should it look for?</h2>
+          <p class="ob-lede">Jev reads this list to decide what's relevant, and Claude reads it to write your thesis. Write each line the way you'd brief a person, most important first.</p>
+          <div class="field"><label for="audience">Written for</label><input class="inp" id="audience"></div>
+          <div class="field"><span class="lbl">Focus on</span><div id="care"></div><button class="btn" type="button" id="care-add">Add a line</button></div>
+          <div class="field"><span class="lbl">Skip, even when popular</span><div id="skip"></div><button class="btn" type="button" id="skip-add">Add a line</button></div>
+        </section>
+
+        <section class="ob-step" data-step="mix" data-name="Topic mix" data-fine hidden>
+          <h2>Set the topic mix</h2>
+          <p class="ob-lede">Jev files every tweet under one topic. Turn a topic off and it never makes your page. The sliders set roughly how much of the thesis each topic gets.</p>
+          <div id="mix"></div>
+          <p class="later">To add topics or change what counts under each one, go to Settings → Feed on your page.</p>
+        </section>
+
+        <section class="ob-step" data-step="filter" data-name="Filter" data-fine hidden>
+          <h2>How picky should it be?</h2>
+          <p class="ob-lede">This sets how good a tweet has to be to make your page. Later, the Filtered out tab shows what just missed.</p>
+          <div id="filter"></div>
+        </section>
+
+        <section class="ob-step" data-step="sources" data-name="Accounts" data-fine hidden>
+          <h2>Accounts to watch</h2>
+          <p class="ob-lede">Most stories come from your timeline panel, the accounts your preset's anchors follow. Add accounts here so they're always included.</p>
+          <div class="field"><span class="lbl">Watchlist</span><div id="watch"></div>
+            <p class="hint">People and outlets whose posts are always considered. Jev still judges each one. Type a handle and press Enter.</p></div>
+          <div class="field"><span class="lbl">Tracked companies</span><div id="tracked"></div>
+            <p class="hint">Company accounts held to their own bar. A post counts when it clearly beats that account's usual likes, even if it isn't broadly viral.</p></div>
+          <p class="later">You can edit the timeline panel and X searches in Settings → Sources on your page.</p>
+        </section>
+
+        <section class="ob-step" data-step="keys" data-name="API keys" hidden>
+          <h2>Connect your API keys</h2>
+          <p class="ob-lede">Your page runs on your own accounts, so nobody else's usage lands on your bill and yours doesn't land on theirs. Keys are encrypted on the server and never shown again.</p>
+          <div id="keys"></div>
+        </section>
+
+        <section class="ob-step" data-step="daily" data-name="Daily recap" hidden>
+          <h2>Get it every day</h2>
+          <p class="ob-lede">Each morning, get the thesis, what's new today, and a link to your page. Set up any or none of these now, and add more later in Settings.</p>
+          <div id="daily"></div>
+        </section>
+
+        <section class="ob-step" data-step="done" data-name="Build" hidden>
+          <h2>Ready to build your page</h2>
+          <p class="ob-lede">The first build reads the whole week so far, so it takes a few minutes. After that it refreshes every three hours.</p>
+          <ul class="changes" id="summary"></ul>
+          <p class="lbl" style="font-weight:500;font-size:13.5px;margin:22px 0 10px">Where to change things later (Settings on your page)</p>
+          <dl class="where">
+            <div><dt>Feed</dt><dd>Switch presets, focus, skip list, topics, filter</dd></div>
+            <div><dt>Sources</dt><dd>Timeline panel, X searches, watchlist, tracked companies</dd></div>
+            <div><dt>Filtered out</dt><dd>The best tweets that just missed, and why. Start here when tuning.</dd></div>
+            <div><dt>Daily recap</dt><dd>Slack, Instinct, Muse, and your time zone</dd></div>
+            <div><dt>API keys</dt><dd>Replace or re-check your keys</dd></div>
+            <div><dt>Profile</dt><dd>Export or import your profile, reset your recap link, delete your account</dd></div>
+          </dl>
+        </section>
+      </div>
+      <div class="ob-foot">
+        <button class="btn" type="button" id="back" hidden>Back</button>
+        <span class="status" id="status" role="status"></span>
+        <button class="btn primary" type="button" id="next">Get started</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+{% include "_shared.js" %}
+(function () {
+  var $ = TL.$, h = TL.h;
+  var all = Array.prototype.slice.call(document.querySelectorAll(".ob-step"));
+  var me = null, presets = null, S = null, fine = false, at = 0, keysUi = null;
+  function say(m, err) { var el = $("status"); el.className = "status" + (err ? " err" : ""); el.textContent = m || ""; }
+  function steps() { return all.filter(function (s) { return fine || !s.hasAttribute("data-fine"); }); }
+  function name() { return steps()[at].dataset.step; }
+  function persist() { TL.local("tl_ob", { step: name(), fine: fine }); return TL.api("PUT", "/api/settings", { settings: clean(S) }).then(function (r) { S = r.settings; }); }
+  function clean(s) { var c = TL.clone(s); c.topics = TL.normalizeTopics(c.topics); c.slack = TL.slackDefaults(c.slack); return c; }
+
+  var ENTER = {
+    preset: function () {
+      (presets ? Promise.resolve(presets) : TL.api("GET", "/api/presets").then(function (p) { return (presets = p); })).then(function (p) {
+        TL.presetPicker($("presets"), p, S.preset_id, function (pr) { S = TL.applyPreset(S, pr); drawNext(); });
+      }).catch(function (e) { $("presets").textContent = e.message; });
+    },
+    focus: function () {
+      $("audience").value = S.focus.audience;
+      $("audience").oninput = function () { S.focus.audience = this.value; };
+      $("care-add").onclick = TL.listEditor($("care"), S.focus.care_about, "e.g. Open-source model releases people are benchmarking");
+      $("skip-add").onclick = TL.listEditor($("skip"), S.focus.skip, "e.g. Politics and lawsuits");
+    },
+    mix: function () { TL.mixEditor($("mix"), S.topics); },
+    filter: function () { TL.filterEditor($("filter"), S); },
+    sources: function () {
+      S.tracked = Object.assign({ accounts: [] }, S.tracked);
+      TL.tagEditor($("watch"), S.watchlist); TL.tagEditor($("tracked"), S.tracked.accounts);
+    },
+    keys: function () { keysUi = TL.keyCards($("keys"), me, { recheck: true, onChange: drawNext }); },
+    daily: function () { TL.deliveries($("daily"), S, me, { openAgents: false, saveHint: "Connected. Your first recap posts after your page is built." }); },
+    done: function () {
+      var list = $("summary"); list.innerHTML = "";
+      var line = function (a, b) { list.append(h("li", null, [h("span", { text: a }), h("span", { text: b })])); };
+      var p = (presets || []).filter(function (x) { return x.id === S.preset_id; })[0];
+      line("Starting point", (p ? p.name : "Custom") + (fine ? ", fine-tuned" : ""));
+      line("Topics", TL.normalizeTopics(S.topics).filter(function (t) { return t.include && t.key !== "other"; }).map(function (t) { return t.label; }).join(", "));
+      var f = TL.filterName(S.thresholds); line("Filter", f ? f[0].toUpperCase() + f.slice(1) : "Custom");
+      line("API keys", TL.KEYS.filter(function (k) { return me.keys[k.id]; }).map(function (k) { return k.label; }).join(", "));
+      var sl = TL.slackDefaults(S.slack), ag = TL.local("tl_deliver") || {};
+      var d = [sl.enabled && me.keys.slack_webhook ? "Slack" : "", ag.instinct && ag.instinct.at ? "Instinct" : "", ag.muse && ag.muse.at ? "Muse" : ""].filter(Boolean);
+      line("Daily recap", d.length ? d.join(", ") + " · " + S.timezone.replace(/_/g, " ") : "Not yet. Add it any time from Settings.");
+    }
+  };
+  var LEAVE = {
+    preset: function () { if (!S.preset_id) throw new Error("Pick a starting point."); },
+    focus: function () { S.focus.audience = S.focus.audience.trim() || "me"; if (!S.focus.care_about.length) throw new Error("Add at least one thing to focus on."); },
+    mix: function () { if (!S.topics.some(function (t) { return t.include && t.key !== "other"; })) throw new Error("Turn on at least one topic."); },
+    filter: function () { TL.checkFilter(S.thresholds); },
+    keys: function () { if (!keysUi || !keysUi.ready()) throw new Error("Connect both required keys to continue."); }
+  };
+
+  function drawNext() {
+    var n = name(), last = at === steps().length - 1;
+    $("next").textContent = at === 0 ? "Get started" : last ? "Build my page" : n === "preset" && !fine ? "Use this preset" : "Next";
+    $("next").disabled = (n === "preset" && !S.preset_id) || (n === "keys" && !(keysUi && keysUi.ready()));
+  }
+  function show(i) {
+    var st = steps(); at = Math.max(0, Math.min(i, st.length - 1));
+    all.forEach(function (s) { s.hidden = s !== st[at]; });
+    var dots = $("ob-steps"); dots.innerHTML = "";
+    st.forEach(function (s, j) { dots.append(h("button", { type: "button", class: j < at ? "done" : "", "aria-current": j === at ? "step" : null, title: s.dataset.name,
+      "aria-label": "Step " + (j + 1) + ": " + s.dataset.name, onclick: function () { if (j < at) show(j); } })); });
+    $("ob-count").textContent = (at + 1) + " of " + st.length + " · " + st[at].dataset.name;
+    $("back").hidden = at === 0;
+    say(""); if (ENTER[name()]) ENTER[name()](); drawNext();
+    $("ob-body").scrollTop = 0;
+  }
+  function next() {
+    var n = name();
+    try { if (LEAVE[n]) LEAVE[n](); } catch (e) { say(e.message, true); return; }
+    if (at < steps().length - 1) {
+      var go = at + 1;
+      if (n === "welcome") return show(go);
+      $("next").disabled = true;
+      return persist().then(function () { show(go); }).catch(function (e) { say(e.message, true); $("next").disabled = false; });
+    }
+    $("next").disabled = true; say("Starting your first build…");
+    persist().then(function () { return TL.api("POST", "/api/onboarding/complete"); })
+      .then(function () { TL.local("tl_ob", null); location.href = "/app/"; })
+      .catch(function (e) { say(e.message, true); $("next").disabled = false; });
+  }
+  $("next").onclick = next;
+  $("back").onclick = function () { show(at - 1); };
+  document.querySelectorAll("#tune button").forEach(function (b) {
+    b.onclick = function () { fine = b.dataset.v === "1"; document.querySelectorAll("#tune button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); drawNext(); show(at); };
+  });
+  $("signout").onclick = function () { TL.api("POST", "/api/logout").finally(function () { location.href = "/login"; }); };
+  $("import-link").onclick = function (e) { e.preventDefault(); $("import-file").click(); };
+  $("import-file").onchange = function () {
+    var f = this.files[0]; if (!f) return;
+    f.text().then(function (t) { return TL.api("POST", "/api/import", { profile: JSON.parse(t) }); })
+      .then(function (m) { me = m; S = m.settings; S.preset_id = S.preset_id || "imported"; say("Profile imported." + (m.keys.twitterapi_io && m.keys.ai_gateway ? "" : " Now connect your keys."));
+        var st = steps(); show(st.findIndex(function (s) { return s.dataset.step === "keys"; })); })
+      .catch(function (e) { say(e instanceof SyntaxError ? "That file isn't a profile export." : e.message, true); });
+  };
+
+  TL.api("GET", "/api/me").then(function (m) {
+    me = m; S = m.settings;
+    if (m.onboarded) { location.href = "/app/"; return; }
+    var saved = TL.local("tl_ob") || {}; fine = !!saved.fine;
+    document.querySelectorAll("#tune button").forEach(function (x) { x.setAttribute("aria-pressed", String((x.dataset.v === "1") === fine)); });
+    var i = steps().findIndex(function (s) { return s.dataset.step === saved.step; });
+    show(i > 0 && S.preset_id ? i : 0);
+  }).catch(function (e) { say(e.message, true); });
+})();
+</script>
+</body>
+</html>

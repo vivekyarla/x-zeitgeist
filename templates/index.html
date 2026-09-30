@@ -9,285 +9,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0E0E0D; --surface: #151514; --raise: #1B1B19; --ink: #EDEBE6; --muted: #97938B;
-  --faint: #5F5C56; --rule: #272624; --accent: #BFA47C; --on-accent: #0E0E0D; --danger: #E08A7A;
-  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
-  --sans: "Inter", -apple-system, "Helvetica Neue", Arial, sans-serif;
-  color-scheme: dark;
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --bg: #F3F1EC; --surface: #FAF9F6; --raise: #FFFFFF; --ink: #161614; --muted: #67645D;
-    --faint: #A19D94; --rule: #DDD9D0; --accent: #7A6344; --on-accent: #FFFFFF; --danger: #B24A36;
-    color-scheme: light;
-  }
-}
-:root[data-theme="light"] {
-  --bg: #F3F1EC; --surface: #FAF9F6; --raise: #FFFFFF; --ink: #161614; --muted: #67645D;
-  --faint: #A19D94; --rule: #DDD9D0; --accent: #7A6344; --on-accent: #FFFFFF; --danger: #B24A36;
-  color-scheme: light;
-}
-*, *::before, *::after { box-sizing: border-box; }
-[hidden] { display: none !important; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--sans);
-  -webkit-font-smoothing: antialiased; }
-a { color: inherit; }
-:focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
-button, input, select, textarea { font: inherit; color: inherit; }
-
-/* Frame: hairlines with small dots at the corners, after the Rox launch creative */
-.frame { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
-.rule { position: relative; height: 1px; background: var(--rule); }
-.rule::before, .rule::after { content: ""; position: absolute; top: -2.5px; width: 6px; height: 6px;
-  border-radius: 50%; background: var(--faint); }
-.rule::before { left: -3px; } .rule::after { right: -3px; }
-
-.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 0; }
-.brand { font: 400 21px/1.2 var(--serif); letter-spacing: -0.01em; margin: 0; }
-.meta { display: flex; align-items: center; gap: 18px; color: var(--muted); font-size: 13px; }
-.meta .live { display: inline-flex; align-items: center; gap: 8px; }
-.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-@media (prefers-reduced-motion: no-preference) { .dot { animation: breathe 2.6s ease-in-out infinite; }
-  @keyframes breathe { 50% { opacity: .3; } } }
-.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--rule); background: transparent;
-  border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
-.btn:hover { border-color: var(--faint); }
-.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.btn.primary:hover { opacity: .88; }
-.btn[disabled] { opacity: .45; cursor: not-allowed; }
-@media (max-width: 640px) { .meta .week { display: none; } }
-
-/* The read */
-.hero { padding: 72px 0 64px; }
-.kicker { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 28px; }
-.thesis { font: 300 clamp(32px, 4.6vw, 62px)/1.1 var(--serif); letter-spacing: -0.022em; margin: 0;
-  max-width: 24ch; text-wrap: pretty; font-optical-sizing: auto; }
-.thesis strong { font-weight: 500; text-decoration: underline; text-decoration-color: var(--accent);
-  text-decoration-thickness: 1.5px; text-underline-offset: .13em; text-decoration-skip-ink: auto; }
-.thesis a.jump { color: inherit; text-decoration: none; border-radius: 4px; transition: color .15s, background-color .15s; }
-.thesis a.jump:hover strong, .thesis a.jump:focus-visible strong { color: var(--accent); text-decoration-thickness: 2.5px; }
-.thesis a.jump::after { content: "\2193"; font: 400 .42em/1 var(--sans); color: var(--accent); vertical-align: .9em; margin-left: .12em; opacity: 0; transition: opacity .15s; }
-.thesis a.jump:hover::after, .thesis a.jump:focus-visible::after { opacity: 1; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-.theme { scroll-margin-top: 16px; }
-.theme.flash .theme-head h2 { color: var(--accent); transition: color .3s; }
-.theme .theme-head h2 { transition: color 1.2s; }
-.history { margin-top: 44px; max-width: 72ch; }
-.history summary { cursor: pointer; color: var(--muted); font-size: 13px; list-style: none; display: inline-flex; gap: 8px; }
-.history summary::-webkit-details-marker { display: none; }
-.history summary::before { content: "+"; width: 1em; }
-.history[open] summary::before { content: "−"; }
-.history ol { list-style: none; margin: 16px 0 0; padding: 0; }
-.history li { display: grid; grid-template-columns: 96px 1fr; gap: 16px; padding: 10px 0; border-top: 1px solid var(--rule); }
-.history time { color: var(--faint); font-size: 13px; font-variant-numeric: tabular-nums; padding-top: 2px; }
-.history p { margin: 0; font: 400 17px/1.45 var(--serif); color: var(--muted); }
-
-/* Themes */
-.theme { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 56px; padding: 56px 0; }
-.theme + .theme { border-top: 1px solid var(--rule); }
-.theme-head { position: sticky; top: 24px; align-self: start; }
-.num { font: 400 13px/1 var(--sans); color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: .08em; }
-.theme h2 { font: 400 clamp(28px, 3vw, 38px)/1.1 var(--serif); letter-spacing: -0.018em; margin: 14px 0 14px; text-wrap: balance; }
-.theme-head p { margin: 0; color: var(--muted); max-width: 46ch; }
-.tweets { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-@media (max-width: 900px) { .theme { grid-template-columns: 1fr; gap: 28px; padding: 44px 0; }
-  .theme-head { position: static; } .hero { padding: 48px 0 44px; } }
-
-/* A tweet: official X embed once widgets.js loads; this card until then (or if X is blocked) */
-.tw { margin: 0; max-width: 550px; width: 100%; }
-.tw .twitter-tweet { margin: 0 !important; }
-.tw blockquote.twitter-tweet { background: var(--raise); border: 1px solid var(--rule); border-radius: 14px;
-  padding: 16px 18px 14px; font-family: var(--sans); }
-.tw-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.tw-head img, .tw-head .ph { width: 40px; height: 40px; border-radius: 50%; flex: none; background: var(--rule); object-fit: cover; }
-.tw-who { min-width: 0; line-height: 1.25; flex: 1; }
-.tw-who b { display: block; font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tw-who span { color: var(--muted); font-size: 14px; }
-.tw-x { width: 18px; height: 18px; fill: var(--ink); flex: none; }
-.tw blockquote p { margin: 0 0 12px; font-size: 15.5px; line-height: 1.45; white-space: pre-line; overflow-wrap: anywhere; }
-.tw-foot { font-size: 13.5px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
-.tw-foot a { color: var(--muted); text-decoration: none; } .tw-foot a:hover { text-decoration: underline; }
-.tw figcaption { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding-left: 2px;
-  font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.meter { display: inline-flex; align-items: flex-end; gap: 2px; height: 11px; }
-.meter i { width: 3px; border-radius: 1px; background: var(--rule); }
-.meter i:nth-child(1) { height: 4px; } .meter i:nth-child(2) { height: 6px; } .meter i:nth-child(3) { height: 8px; }
-.meter i:nth-child(4) { height: 10px; } .meter i:nth-child(5) { height: 11px; }
-.meter i.on { background: var(--accent); }
-
-.empty { font: 300 28px/1.3 var(--serif); color: var(--muted); max-width: 30ch; }
-.demo { background: var(--accent); color: var(--on-accent); text-align: center; font-size: 13px; padding: 8px 16px; }
-.colophon { color: var(--faint); font-size: 13px; padding: 24px 0 56px; max-width: 80ch; }
-
-/* Settings */
-dialog { width: min(760px, calc(100vw - 24px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--rule);
-  border-radius: 16px; background: var(--surface); color: var(--ink); }
-dialog::backdrop { background: rgb(0 0 0 / .55); }
-.dlg { display: flex; flex-direction: column; max-height: calc(100vh - 50px); }
-.dlg-head, .tabs, .dlg-foot { flex: none; }  /* only the body scrolls; tabs never get squeezed */
-.dlg-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
-.dlg-head h2 { font: 400 26px/1.2 var(--serif); margin: 0; }
-.x-close { border: 0; background: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--muted); padding: 6px; }
-.tabs { display: flex; gap: 4px; padding: 16px 24px 0; border-bottom: 1px solid var(--rule); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
-.tabs::-webkit-scrollbar { display: none; }
-.tabs button { flex: none; border: 0; background: none; padding: 10px 12px; font-size: 13.5px; font-weight: 500; color: var(--muted);
-  cursor: pointer; border-bottom: 1.5px solid transparent; margin-bottom: -1px; white-space: nowrap; }
-.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
-.dlg-body { flex: 1 1 auto; min-height: 0; padding: 22px 24px; overflow-y: auto; }
-.panel[hidden] { display: none; }
-.field { margin-bottom: 20px; }
-.field > label, .field > .lbl { display: block; font-weight: 500; font-size: 13.5px; margin-bottom: 6px; }
-.hint { color: var(--muted); font-size: 12.5px; margin: 4px 0 0; }
-.inp, textarea.inp, select.inp { width: 100%; background: var(--bg); border: 1px solid var(--rule); border-radius: 8px;
-  padding: 9px 11px; font-size: 14px; }
-textarea.inp { resize: vertical; min-height: 96px; line-height: 1.45; font-size: 13.5px; }
-textarea.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; min-height: 180px; }
-.inp:focus { outline: none; border-color: var(--accent); }
-.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-@media (max-width: 560px) { .row3 { grid-template-columns: 1fr; } }
-.topics { display: flex; flex-direction: column; gap: 8px; }
-.topic { display: grid; grid-template-columns: auto 140px 1fr 72px auto; gap: 8px; align-items: start; }
-.topic .share { text-align: right; }
-.topics-head { display: grid; grid-template-columns: auto 140px 1fr 72px auto; gap: 8px; font-size: 12px; color: var(--faint); padding: 0 0 2px; }
-.topics-head span:first-child { width: 13px; }
-.group { border: 1px solid var(--rule); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: var(--bg); }
-.group-top { display: grid; grid-template-columns: 1fr 90px auto; gap: 8px; margin-bottom: 8px; }
-.known { padding: 10px 0; border-top: 1px solid var(--rule); font-size: 13.5px; }
-.known b { font-weight: 600; } .known .st { color: var(--accent); margin-left: 6px; }
-.known.miss-st .st { color: var(--danger); }
-.known p { margin: 4px 0 0; color: var(--muted); }
-.miss { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 10px 0; border-top: 1px solid var(--rule); font-size: 13.5px; }
-.miss a { color: var(--ink); text-decoration: none; } .miss a:hover { text-decoration: underline; }
-.miss .why { color: var(--accent); font-size: 12.5px; white-space: nowrap; }
-.miss p { grid-column: 1 / -1; margin: 0; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.topic input[type="checkbox"] { margin-top: 11px; accent-color: var(--accent); }
-.topic .rm { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 18px; padding: 6px; }
-.topic .rm:hover { color: var(--danger); }
-@media (max-width: 560px) { .topic { grid-template-columns: auto 1fr 64px auto; } .topic .desc { grid-column: 2 / 5; grid-row: 2; } .topics-head { display: none; } }
-.check { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-.check input { accent-color: var(--accent); }
-.key { border: 1px solid var(--rule); border-radius: 10px; padding: 14px; margin-bottom: 12px; background: var(--bg); }
-.key-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 8px; flex-wrap: wrap; }
-.key-top code { font-size: 12.5px; }
-.key-status { font-size: 12.5px; color: var(--muted); }
-.key-status.set { color: var(--accent); }
-.key-row { display: flex; gap: 8px; }
-.key-row .inp { flex: 1; }
-.connect { border: 1px solid var(--rule); border-radius: 10px; padding: 14px; margin-bottom: 22px; background: var(--bg); }
-.connect.ok { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.dlg-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 24px;
-  border-top: 1px solid var(--rule); }
-.status { font-size: 13px; color: var(--muted); min-height: 1.4em; }
-.status.err { color: var(--danger); }
-.status a { color: var(--accent); }
-
-/* New today (under the thesis) */
-.today { margin-top: 40px; max-width: 80ch; }
-.today h3 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin: 0 0 8px; }
-.today ul { list-style: none; margin: 0; padding: 0; }
-.today li { padding: 9px 0; border-top: 1px solid var(--rule); font-size: 14px; display: flex; gap: 10px; align-items: baseline; }
-.today li a { text-decoration: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-.today li a:hover { text-decoration: underline; }
-.today .who { color: var(--accent); }
-.today .n { color: var(--faint); font-size: 12.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
-
-/* Onboarding */
-#onboard { width: min(860px, calc(100vw - 24px)); }
-.ob { display: flex; flex-direction: column; height: min(700px, calc(100vh - 50px)); }
-.ob-top { flex: none; display: flex; align-items: center; gap: 16px; padding: 16px 20px 16px 24px; border-bottom: 1px solid var(--rule); }
-.ob-steps { display: flex; gap: 5px; flex: 1; }
-.ob-steps button { flex: 1; height: 16px; border: 0; padding: 0; background: none; cursor: pointer; position: relative; }
-.ob-steps button::after { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 3px; border-radius: 2px; background: var(--rule); transition: background .2s; }
-.ob-steps button.done::after { background: var(--accent); }
-.ob-steps button[aria-current="step"]::after { background: var(--ink); }
-.ob-count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.ob-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 32px 40px 28px; }
-.ob-step h2 { font: 400 clamp(26px, 3.2vw, 36px)/1.15 var(--serif); letter-spacing: -0.015em; margin: 0 0 10px; text-wrap: balance; }
-.ob-lede { color: var(--muted); max-width: 62ch; margin: 0 0 26px; }
-.ob-step .field > .lbl, .ob-step .field > label { font-size: 14px; }
-.scope { display: inline-flex; gap: 6px; align-items: center; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--muted); border: 1px solid var(--rule); border-radius: 999px; padding: 2px 9px; vertical-align: 1px; white-space: nowrap; }
-.scope::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--faint); }
-.scope.team::before { background: var(--accent); }
-.ob-step > .scope { margin-bottom: 14px; }
-.later { font-size: 12.5px; color: var(--faint); margin: 24px 0 0; }
-.ob-foot { flex: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 24px; border-top: 1px solid var(--rule); }
-.ob-foot .status { flex: 1; text-align: right; }
-.how { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0 0 24px; }
-.how div { border: 1px solid var(--rule); border-radius: 12px; padding: 14px; background: var(--bg); }
-.how b { display: block; font-weight: 600; font-size: 14px; margin: 8px 0 4px; }
-.how span:last-child { font-size: 12.5px; color: var(--muted); line-height: 1.45; display: block; }
-@media (max-width: 720px) { .how { grid-template-columns: 1fr 1fr; } .ob-body { padding: 24px 18px; } .ob-top, .ob-foot { padding-left: 16px; padding-right: 16px; } }
-.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; padding: 3px; gap: 2px; }
-.seg button { border: 0; background: none; border-radius: 999px; padding: 6px 14px; font-size: 13px; cursor: pointer; color: var(--muted); }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--rule); border-radius: 999px; padding: 6px 13px;
-  font-size: 13px; background: var(--bg); cursor: pointer; color: var(--muted); }
-.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--faint); }
-.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--ink); }
-.chip[aria-pressed="true"]::before { background: var(--accent); border-color: var(--accent); }
-.li { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-.li .inp { flex: 1; }
-.rm-x { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 18px; line-height: 1; padding: 6px; }
-.rm-x:hover { color: var(--danger); }
-.tagbox { display: flex; flex-wrap: wrap; gap: 6px; border: 1px solid var(--rule); border-radius: 8px; padding: 6px; background: var(--bg); cursor: text; }
-.tagbox:focus-within { border-color: var(--accent); }
-.tag { display: inline-flex; align-items: center; gap: 4px; background: var(--raise); border: 1px solid var(--rule); border-radius: 999px; padding: 3px 4px 3px 10px; font-size: 13px; }
-.tag button { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 15px; line-height: 1; padding: 0 4px; }
-.tag button:hover { color: var(--danger); }
-.tagbox input { flex: 1; min-width: 150px; border: 0; background: none; outline: none; padding: 4px 6px; font-size: 14px; }
-.mixbar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; margin: 4px 0 6px; background: var(--rule); gap: 2px; }
-.mixbar i { height: 100%; transition: flex-grow .2s; min-width: 0; }
-.mix-legend { font-size: 12px; color: var(--faint); margin: 0 0 14px; }
-.mix-row { display: grid; grid-template-columns: auto minmax(0, 1fr) 160px 44px; gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--rule); }
-.mix-row input[type="checkbox"], .mix-row input[type="range"] { accent-color: var(--accent); }
-.mix-row b { font-weight: 500; font-size: 14px; display: block; }
-.mix-row small { color: var(--muted); font-size: 12.5px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mix-row .pct { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--muted); }
-.mix-row.off b, .mix-row.off .pct { color: var(--faint); }
-@media (max-width: 560px) { .mix-row { grid-template-columns: auto minmax(0, 1fr) 44px; } .mix-row input[type="range"] { grid-column: 2 / 4; grid-row: 2; } }
-.presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.preset { text-align: left; border: 1px solid var(--rule); border-radius: 12px; padding: 16px; background: var(--bg); cursor: pointer; }
-.preset:hover { border-color: var(--faint); }
-.preset[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-.preset b { display: block; font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-.preset span { font-size: 12.5px; color: var(--muted); line-height: 1.45; display: block; }
-@media (max-width: 620px) { .presets { grid-template-columns: 1fr; } }
-details.more { margin-top: 18px; }
-details.more summary { cursor: pointer; color: var(--muted); font-size: 13px; }
-details.more[open] summary { margin-bottom: 12px; }
-.conn { border: 1px solid var(--rule); border-radius: 12px; padding: 16px; background: var(--bg); margin-bottom: 12px; }
-.conn-head { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-.conn-logo { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-weight: 600; font-size: 13px;
-  background: var(--raise); border: 1px solid var(--rule); flex: none; }
-.conn-head b { font-size: 15px; font-weight: 600; display: block; line-height: 1.25; }
-.conn-head .sub { font-size: 12.5px; color: var(--muted); }
-.pill { margin-left: auto; font-size: 12px; border-radius: 999px; padding: 3px 10px; border: 1px solid var(--rule); color: var(--muted); white-space: nowrap; }
-.pill.ok { color: var(--accent); border-color: var(--accent); }
-.pill.err { color: var(--danger); border-color: var(--danger); }
-.conn-body { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--rule); }
-.conn ol { margin: 0 0 14px; padding-left: 20px; font-size: 13.5px; }
-.conn ol li { margin-bottom: 8px; }
-.conn ol li::marker { color: var(--accent); }
-.msg-preview { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; font-size: 13px;
-  color: var(--muted); white-space: pre-wrap; margin: 4px 0 12px; line-height: 1.5; }
-.btn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-a.btn { text-decoration: none; }
-.note { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
-.note.err { color: var(--danger); }
-.note.ok { color: var(--accent); }
-.changes { list-style: none; margin: 0 0 22px; padding: 0; }
-.changes li { padding: 10px 0; border-top: 1px solid var(--rule); font-size: 14px; display: grid; grid-template-columns: 140px 1fr; gap: 12px; }
-.changes li span:first-child { color: var(--muted); }
-.changes li.none { display: block; color: var(--muted); }
-.where { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; font-size: 13.5px; margin: 0; }
-.where dt { font-weight: 500; } .where dd { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
-@media (max-width: 620px) { .where { grid-template-columns: 1fr; } .changes li { grid-template-columns: 1fr; gap: 2px; } }
+{% include "_base.css" %}
 </style>
-<script>try { var p = JSON.parse(localStorage.getItem("tl_prefs") || "{}"); if (p.theme === "light" || p.theme === "dark") document.documentElement.dataset.theme = p.theme; } catch (e) {}</script>
+<script>{% include "_theme.js" %}</script>
 </head>
 <body>
 {% if demo %}<div class="demo">Sample data. Real tweets appear once the pipeline runs with your API keys.</div>{% endif %}
@@ -297,7 +21,7 @@ a.btn { text-decoration: none; }
     <div class="meta">
       <span class="week">{{ week_label }}</span>
       {% if latest %}<span class="live"><span class="dot" aria-hidden="true"></span>Updated <time id="updated" datetime="{{ updated_iso }}">{{ updated_label }}</time></span>{% endif %}
-      <button class="btn" id="open-guide" type="button">Guide</button>
+      <span class="run-state" id="run-state" hidden></span>
       <button class="btn" id="open-settings" type="button">Settings</button>
     </div>
   </header>
@@ -369,29 +93,21 @@ a.btn { text-decoration: none; }
   <form class="dlg" method="dialog" onsubmit="return false">
     <div class="dlg-head"><h2 id="settings-title">Settings</h2><button class="x-close" type="button" data-close aria-label="Close">×</button></div>
     <div class="tabs" role="tablist">
-      <button type="button" role="tab" aria-selected="true" data-tab="interests">Interests</button>
-      <button type="button" role="tab" aria-selected="false" data-tab="searches">Searches</button>
+      <button type="button" role="tab" aria-selected="true" data-tab="feed">Feed</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="searches">Sources</button>
       <button type="button" role="tab" aria-selected="false" data-tab="missed">Filtered out</button>
       <button type="button" role="tab" aria-selected="false" data-tab="daily">Daily recap</button>
       <button type="button" role="tab" aria-selected="false" data-tab="keys">API keys</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="profile">Profile</button>
     </div>
     <div class="dlg-body">
-      <div id="connect" class="connect">
-        <div class="field" style="margin-bottom:10px">
-          <label for="gh-token">GitHub token</label>
-          <div class="key-row"><input class="inp" id="gh-token" type="password" autocomplete="off" placeholder="github_pat_…"><button class="btn primary" type="button" id="gh-connect">Connect</button></div>
-          <p class="hint">Changes are saved to the <span class="repo-name"></span> repo, so they need a
-            <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a>
-            for that repo only, with read and write access to <b>Contents</b>, <b>Secrets</b>, and <b>Actions</b>.
-            The token stays in this browser and is only sent to GitHub.</p>
-        </div>
-        <label class="check"><input type="checkbox" id="gh-remember"> Remember on this device</label>
-      </div>
-
-      <div class="panel" data-panel="interests">
+      <div class="panel" data-panel="feed">
+        <div class="field"><label for="f-preset">Start from a preset</label>
+          <div class="key-row"><select class="inp" id="f-preset"><option value="">Choose a preset…</option></select><button class="btn" type="button" id="apply-preset">Apply</button></div>
+          <p class="hint">Replaces your focus, topics, sources, and filter with the preset's. Your delivery settings and keys stay. Nothing is saved until you click Save and refresh.</p></div>
         <div class="field"><label for="f-audience">Written for</label><input class="inp" id="f-audience"></div>
         <div class="field"><label for="f-care">Focus on</label><textarea class="inp" id="f-care" style="min-height:170px"></textarea>
-          <p class="hint">One per line, most important first. Jev uses these to decide what's relevant, and Claude to write the read.</p></div>
+          <p class="hint">One per line, most important first. Jev uses these to decide what's relevant, and Claude uses them to write your thesis.</p></div>
         <div class="field"><label for="f-skip">Skip</label><textarea class="inp" id="f-skip" style="min-height:64px"></textarea>
           <p class="hint">One per line. Tweets about these are filtered out, even when they're popular.</p></div>
         <div class="field"><span class="lbl">Topics</span>
@@ -460,13 +176,37 @@ a.btn { text-decoration: none; }
       </div>
 
       <div class="panel" data-panel="daily" hidden>
-        <p class="hint" style="margin:0 0 14px">Get the thesis, what's new today, and a link to this page every day. Slack posts to a team channel; Instinct and Muse send it to you personally.</p>
+        <p class="hint" style="margin:0 0 14px">Get your thesis, what's new today, and a link to this page every day.</p>
         <div id="deliver-mount"></div>
       </div>
 
       <div class="panel" data-panel="keys" hidden>
-        <p class="hint" style="margin:0 0 16px">Keys are encrypted in this browser and stored as GitHub Actions secrets. They can be replaced here but never read back.</p>
+        <p class="hint" style="margin:0 0 16px">Your page runs on these keys. They're encrypted on the server and can be replaced here, but never read back.</p>
         <div id="keys"></div>
+      </div>
+
+      <div class="panel" data-panel="profile" hidden>
+        <div class="field"><span class="lbl">Account</span><p class="hint" style="margin:0" id="acct-email"></p></div>
+        <div class="field"><span class="lbl">Appearance</span>
+          <div class="seg" id="theme-seg" role="group" aria-label="Appearance">
+            <button type="button" data-v="system">System</button><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button>
+          </div><p class="hint">Saved on this device.</p></div>
+        <div class="field"><span class="lbl">Take your profile with you</span>
+          <p class="hint" style="margin:0 0 10px">Your profile is one file: your feed, sources, filter, and delivery settings. Import it on another install, or keep it as a backup.</p>
+          <div class="btn-row">
+            <a class="btn" id="export" href="/api/export" download>Export profile</a>
+            <label class="check"><input type="checkbox" id="export-keys"> Include my API keys</label>
+            <button class="btn" type="button" id="import-btn">Import a profile…</button><input type="file" id="import-file" accept="application/json,.json" hidden>
+          </div>
+          <p class="note" id="export-note" hidden></p></div>
+        <div class="field"><span class="lbl">Private recap link</span>
+          <p class="hint" style="margin:0 0 10px">Instinct, Muse, or anything else that reads your daily recap uses this link. Anyone who has it can read your recap, so reset it if it leaks. Resetting breaks agents set up with the old link.</p>
+          <div class="key-row"><input class="inp" id="recap-url" readonly><button class="btn" type="button" id="recap-copy">Copy</button><button class="btn" type="button" id="recap-rotate">Reset</button></div></div>
+        <div class="field"><div class="btn-row"><button class="btn" type="button" id="signout">Sign out</button></div></div>
+        <details class="more"><summary>Delete my account</summary>
+          <p class="hint">This deletes your profile, saved keys, and page on this server. It doesn't cancel anything at twitterapi.io, Vercel, or Slack.</p>
+          <div class="key-row" style="max-width:420px"><input class="inp" id="del-pw" type="password" placeholder="Your password" autocomplete="current-password"><button class="btn" type="button" id="del-go" style="color:var(--danger)">Delete</button></div>
+        </details>
       </div>
     </div>
     <div class="dlg-foot">
@@ -476,134 +216,9 @@ a.btn { text-decoration: none; }
   </form>
 </dialog>
 
-<dialog id="onboard" aria-labelledby="ob-title">
-  <form class="ob" method="dialog" onsubmit="return false">
-    <div class="ob-top">
-      <div class="ob-steps" id="ob-steps" aria-label="Steps"></div>
-      <span class="ob-count" id="ob-count"></span>
-      <button class="x-close" type="button" id="ob-close" aria-label="Close">×</button>
-    </div>
-    <div class="ob-body" id="ob-body">
-      <section class="ob-step" data-step="welcome" data-name="Welcome">
-        <h2 id="ob-title">Make this page yours</h2>
-        <p class="ob-lede">Every three hours this page reads what tech, AI, SF, and GTM Twitter is posting, keeps the tweets that matter, and writes a short thesis about the week. Take two minutes to set what it looks for and how you get it each day.</p>
-        <div class="how">
-          <div><span class="num">01</span><b>Fetch</b><span>Posts, quotes, and retweets from a panel of accounts the scene follows, plus searches and a watchlist.</span></div>
-          <div><span class="num">02</span><b>Judge</b><span>Jev scores each new tweet. Is it on topic? Is there real signal? Is it bait?</span></div>
-          <div><span class="num">03</span><b>Write</b><span>Claude writes the thesis and groups the best tweets into themes.</span></div>
-          <div><span class="num">04</span><b>Deliver</b><span>This page, plus a daily recap in Slack, Instinct, or Muse.</span></div>
-        </div>
-        <p class="hint">Steps marked <span class="scope">Just you</span> only change this device. Steps marked <span class="scope team">Team</span> change the page for everyone, and nothing is saved until the last step.</p>
-      </section>
-
-      <section class="ob-step" data-step="view" data-name="Your view" hidden>
-        <span class="scope">Just you</span>
-        <h2>How the page looks to you</h2>
-        <p class="ob-lede">These settings stay on this device and change nothing for the team.</p>
-        <div class="field"><span class="lbl">Appearance</span>
-          <div class="seg" id="ob-theme" role="group" aria-label="Appearance">
-            <button type="button" data-v="system">System</button><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button>
-          </div></div>
-        <div class="field"><span class="lbl">Topics on your screen</span>
-          <div class="chips" id="ob-mytopics"></div>
-          <p class="hint">Tap to hide a topic's tweets on your screen. A theme disappears when all of its tweets are hidden.</p></div>
-        <p class="later">Change this later: Guide → Your view.</p>
-      </section>
-
-      <section class="ob-step" data-step="focus" data-name="Focus" hidden>
-        <span class="scope team">Team</span>
-        <h2>What should it look for?</h2>
-        <p class="ob-lede">Jev reads this list to decide what's relevant, and Claude reads it to write the thesis. Write each line the way you'd brief a person, most important first.</p>
-        <div class="field"><label for="ob-audience">Written for</label><input class="inp" id="ob-audience"></div>
-        <div class="field"><span class="lbl">Focus on</span><div id="ob-care"></div>
-          <button class="btn" type="button" id="ob-care-add">Add a line</button></div>
-        <div class="field"><span class="lbl">Skip, even when popular</span><div id="ob-skip"></div>
-          <button class="btn" type="button" id="ob-skip-add">Add a line</button></div>
-        <p class="later">Change this later: Settings → Interests. A change here re-scores this week's saved tweets on the next update.</p>
-      </section>
-
-      <section class="ob-step" data-step="mix" data-name="Topic mix" hidden>
-        <span class="scope team">Team</span>
-        <h2>Set the topic mix</h2>
-        <p class="ob-lede">Jev files every tweet under one topic. Turn a topic off and it never makes the page. The sliders set roughly how much of the thesis each topic gets.</p>
-        <div class="mixbar" id="ob-mixbar" aria-hidden="true"></div>
-        <p class="mix-legend" id="ob-mixlegend"></p>
-        <div id="ob-mix"></div>
-        <p class="later">To add topics or change what counts under each one, go to Settings → Interests.</p>
-      </section>
-
-      <section class="ob-step" data-step="filter" data-name="Filter" hidden>
-        <span class="scope team">Team</span>
-        <h2>How picky should it be?</h2>
-        <p class="ob-lede">This sets how good a tweet has to be to make the page. Use the Filtered out tab in Settings to see what just missed.</p>
-        <div class="presets" id="ob-presets">
-          <button type="button" class="preset" data-p="sharper"><b>Sharper</b><span>Fewer tweets, each clearly notable. Best when the page feels noisy.</span></button>
-          <button type="button" class="preset" data-p="balanced"><b>Balanced</b><span>The default. It keeps what's notable and skips most filler.</span></button>
-          <button type="button" class="preset" data-p="wider"><b>Wider net</b><span>More tweets, some smaller stories too. Best when things feel missing.</span></button>
-        </div>
-        <details class="more"><summary>Exact numbers</summary>
-          <div class="row3">
-            <div><input class="inp" id="ob-signal" type="number" min="0" max="4" step="0.1"><p class="hint">Min signal, 0–4. About 2 means notable.</p></div>
-            <div><input class="inp" id="ob-relevance" type="number" min="0" max="1" step="0.05"><p class="hint">Min relevance, 0–1: how on-topic it must be</p></div>
-            <div><input class="inp" id="ob-bait" type="number" min="0" max="1" step="0.05"><p class="hint">Max bait, 0–1: how much engagement bait is tolerated</p></div>
-          </div></details>
-        <p class="later">Change this later: Settings → Interests → Filter and Ranking.</p>
-      </section>
-
-      <section class="ob-step" data-step="sources" data-name="Sources" hidden>
-        <span class="scope team">Team</span>
-        <h2>Accounts to watch</h2>
-        <p class="ob-lede">Most stories come from the timeline panel, the accounts that tech and GTM anchors follow. Add accounts here so they're always included.</p>
-        <div class="field"><span class="lbl">Watchlist</span><div id="ob-watch"></div>
-          <p class="hint">People and outlets whose posts are always considered. Jev still judges each one. Type a handle and press Enter.</p></div>
-        <div class="field"><span class="lbl">Tracked companies</span><div id="ob-tracked"></div>
-          <p class="hint">Company accounts held to their own bar. A post counts when it clearly beats that account's usual likes, even if it isn't broadly viral.</p></div>
-        <p class="later">You can edit the timeline panel, X searches, and "stories we should have caught" in Settings → Searches.</p>
-      </section>
-
-      <section class="ob-step" data-step="daily" data-name="Daily recap" hidden>
-        <h2>Get it every day</h2>
-        <p class="ob-lede">Each morning you get the thesis, what's new today, and a link to the full page. Set up as many of these as you like.</p>
-        <div id="ob-deliver"></div>
-      </section>
-
-      <section class="ob-step" data-step="save" data-name="Save" hidden>
-        <h2 id="ob-save-title">Review and save</h2>
-        <p class="ob-lede" id="ob-save-lede"></p>
-        <ul class="changes" id="ob-changes"></ul>
-        <div id="ob-connect" class="connect" hidden>
-          <div class="field" style="margin-bottom:10px">
-            <label for="ob-token">GitHub token</label>
-            <div class="key-row"><input class="inp" id="ob-token" type="password" autocomplete="off" placeholder="github_pat_…"><button class="btn primary" type="button" id="ob-token-go">Connect</button></div>
-            <p class="hint">Team settings live in the <span class="repo-name"></span> repo. To save, create a
-              <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a>
-              for that repo only, with read and write access to <b>Contents</b>, <b>Secrets</b>, and <b>Actions</b>. The token stays in this browser and is only sent to GitHub.
-              <span id="ob-nogh"> No token? <a href="#" id="ob-copyedit">Copy the new settings and open the file on GitHub</a>, then paste and commit.</span></p>
-          </div>
-          <label class="check"><input type="checkbox" id="ob-remember" checked> Remember on this device</label>
-        </div>
-        <p class="lbl" style="font-weight:500;font-size:13.5px;margin:22px 0 10px">Where to change things later</p>
-        <dl class="where">
-          <div><dt>Settings → Interests</dt><dd>Focus, skip list, topics, filter, ranking, writer model</dd></div>
-          <div><dt>Settings → Searches</dt><dd>Timeline panel, X searches, watchlist, tracked companies</dd></div>
-          <div><dt>Settings → Filtered out</dt><dd>The best tweets that just missed, and why. Start here when tuning.</dd></div>
-          <div><dt>Settings → Daily recap</dt><dd>Slack, Instinct, and Muse</dd></div>
-          <div><dt>Guide</dt><dd>Run this walkthrough again at any time</dd></div>
-          <div><dt>A <code>preview/…</code> branch</dt><dd>Test a big change against this week's data without publishing it</dd></div>
-        </dl>
-      </section>
-    </div>
-    <div class="ob-foot">
-      <button class="btn" type="button" id="ob-back">Skip for now</button>
-      <span class="status" id="ob-status" role="status"></span>
-      <button class="btn primary" type="button" id="ob-next" autofocus>Start</button>
-    </div>
-  </form>
-</dialog>
-
 <script type="application/json" id="settings-data">{{ settings | tojson }}</script>
-<script type="application/json" id="page-data">{{ {"recap_page": (recap.page_url if recap else ""), "slack": slack_status or {}, "demo": demo} | tojson }}</script>
 <script>
+{% include "_shared.js" %}
 (function () {
   // Relative "updated" time
   var el = document.getElementById("updated");
@@ -637,56 +252,30 @@ a.btn { text-decoration: none; }
 })();
 
 (function () {
-  var REPO = {{ repo | tojson }} || (function () {
-    var owner = location.hostname.split(".")[0], name = location.pathname.split("/").filter(Boolean)[0];
-    return location.hostname.endsWith("github.io") && name ? owner + "/" + name : "";
-  })();
-  var API = "https://api.github.com/repos/" + REPO;
-  var KEYS = [
-    { name: "TWITTERAPI_IO_KEY", label: "twitterapi.io", why: "Fetches tweets. From twitterapi.io/dashboard." },
-    { name: "AI_GATEWAY_API_KEY", label: "Vercel AI Gateway", why: "Runs Jev and Claude. From vercel.com → AI Gateway → API Keys (vck_…)." },
-    { name: "SLACK_WEBHOOK_URL", label: "Slack webhook", why: "Incoming webhook URL for the channel the read is posted to (https://hooks.slack.com/…)." },
-    { name: "TYPESAFE_API_KEY", label: "TypeSafe (optional)", why: "Only if you want Jev calls to go to TypeSafe directly instead of through the gateway." }
-  ];
-  var $ = function (id) { return document.getElementById(id); };
+  var $ = TL.$, h = TL.h;
   var dlg = $("settings"), statusEl = $("status");
   var settings = JSON.parse($("settings-data").textContent);
-  var token = "", settingsSha = null;
+  var me = null, presets = null, draft = null;  // draft: the profile being edited (slack, timezone live here)
 
-  function store(k, v) { try { v == null ? (localStorage.removeItem(k), sessionStorage.removeItem(k)) : ($("gh-remember").checked ? localStorage : sessionStorage).setItem(k, v); } catch (e) {} }
-  function recall(k) { try { return localStorage.getItem(k) || sessionStorage.getItem(k) || ""; } catch (e) { return ""; } }
   function say(msg, err) { statusEl.className = "status" + (err ? " err" : ""); statusEl.innerHTML = ""; if (typeof msg === "string") statusEl.textContent = msg; else statusEl.appendChild(msg); }
-  function gh(path, opts) {
-    opts = opts || {};
-    return fetch(API + path, { method: opts.method || "GET", body: opts.body ? JSON.stringify(opts.body) : undefined,
-      headers: { "Accept": "application/vnd.github+json", "Authorization": "Bearer " + token, "X-GitHub-Api-Version": "2022-11-28" } })
-      .then(function (r) {
-        if (r.status === 204) return null;
-        return r.json().catch(function () { return null; }).then(function (j) {
-          if (!r.ok) throw new Error((j && j.message) || ("GitHub returned " + r.status));
-          return j;
-        });
-      });
-  }
-  function b64utf8(s) { return btoa(String.fromCharCode.apply(null, new TextEncoder().encode(s))); }
-  function unb64utf8(s) { var bin = atob(s.replace(/\n/g, "")); return new TextDecoder().decode(Uint8Array.from(bin, function (c) { return c.charCodeAt(0); })); }
   function lines(v) { return v.split("\n").map(function (x) { return x.trim(); }).filter(Boolean); }
   function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "topic"; }
-
-  document.querySelectorAll(".repo-name").forEach(function (e) { e.textContent = REPO || "(unknown)"; });
+  var handles = TL.handles;
 
   // Tabs
   document.querySelectorAll("[data-tab]").forEach(function (b) {
-    b.addEventListener("click", function () {
-      document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
-      document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.dataset.panel !== b.dataset.tab; });
-      $("save").hidden = b.dataset.tab === "keys" || b.dataset.tab === "missed";
-      $("connect").hidden = b.dataset.tab === "missed";
-      if (b.dataset.tab === "keys") loadKeys();
-    });
+    b.addEventListener("click", function () { tab(b.dataset.tab); });
   });
+  function tab(name) {
+    document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", String(x.dataset.tab === name)); });
+    document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.dataset.panel !== name; });
+    $("save").hidden = ["keys", "missed", "profile"].indexOf(name) >= 0;
+    if (name === "keys") TL.keyCards($("keys"), me, { recheck: true });
+    if (name === "daily") TL.deliveries($("deliver-mount"), draft, me, { sendNow: true, saveHint: "Connected. Click Save and refresh to keep posting on." });
+    if (name === "profile") drawProfile();
+  }
 
-  // Form <-> settings
+  // Form <-> profile
   function topicRow(t) {
     var row = document.createElement("div"); row.className = "topic"; row.dataset.key = t.key || "";
     var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = t.include !== false; cb.title = "Show on the page";
@@ -697,31 +286,6 @@ a.btn { text-decoration: none; }
     var rm = document.createElement("button"); rm.type = "button"; rm.className = "rm"; rm.textContent = "×"; rm.setAttribute("aria-label", "Remove topic");
     rm.onclick = function () { row.remove(); };
     row.append(cb, lab, desc, share, rm); return row;
-  }
-  function fill(s) {
-    $("f-audience").value = s.focus.audience;
-    $("f-care").value = s.focus.care_about.join("\n");
-    $("f-skip").value = s.focus.skip.join("\n");
-    var box = $("f-topics"); box.innerHTML = "";
-    s.topics.filter(function (t) { return t.key !== "other"; }).forEach(function (t) { box.appendChild(topicRow(t)); });
-    $("f-signal").value = s.thresholds.min_signal; $("f-relevance").value = s.thresholds.min_relevance; $("f-bait").value = s.thresholds.max_bait;
-    $("f-model").value = s.writer_model || "";
-    var rk = s.ranking || {}, tr = s.tracked || {};
-    $("r-breakout").value = rk.breakout_weight != null ? rk.breakout_weight : 0.5;
-    $("r-mainstream").value = rk.mainstream_penalty != null ? rk.mainstream_penalty : 0.5;
-    $("r-author").value = rk.per_author_max || 2;
-    $("t-accounts").value = (tr.accounts || []).join(", ");
-    $("t-beat").value = tr.beat_baseline_by || 3; $("t-min").value = tr.min_likes != null ? tr.min_likes : 25; $("t-signal").value = tr.min_signal != null ? tr.min_signal : 1.0;
-    $("f-searches").value = s.searches.join("\n");
-    $("f-watch").value = s.watchlist.join(", ");
-    $("f-watchfaves").value = s.watchlist_min_faves;
-    slackDraft = slackDefaults(s.slack);
-    mountDeliveries($("deliver-mount"), { slack: slackDraft, deferred: false });
-    var pn = s.panel || {};
-    $("p-groups").innerHTML = ""; (pn.groups || []).forEach(function (g) { $("p-groups").appendChild(groupRow(g)); });
-    $("p-max").value = pn.max_accounts || 300; $("p-overlap").value = pn.min_overlap || 2;
-    $("p-include").value = (pn.include || []).join(", "); $("p-exclude").value = (pn.exclude || []).join(", ");
-    $("k-stories").value = (s.known_stories || []).map(function (k) { return [k.label, k.match, k.week || ""].join(" | ").replace(/ \| $/, ""); }).join("\n");
   }
   function groupRow(g) {
     var box = document.createElement("div"); box.className = "group";
@@ -735,9 +299,38 @@ a.btn { text-decoration: none; }
     acc.placeholder = "Anchor X handles, separated by commas"; acc.value = (g.accounts || []).join(", ");
     box.append(top, acc); return box;
   }
-  function handles(v) { return v.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").trim(); }).filter(Boolean); }
+  function fill(s) {
+    draft = TL.clone(s); draft.slack = TL.slackDefaults(draft.slack); draft.timezone = draft.timezone || TL.localTz();
+    $("f-preset").value = s.preset_id && presets && presets.some(function (p) { return p.id === s.preset_id; }) ? s.preset_id : "";
+    $("f-audience").value = s.focus.audience;
+    $("f-care").value = s.focus.care_about.join("\n");
+    $("f-skip").value = s.focus.skip.join("\n");
+    var box = $("f-topics"); box.innerHTML = "";
+    s.topics.filter(function (t) { return t.key !== "other"; }).forEach(function (t) { box.appendChild(topicRow(t)); });
+    $("f-signal").value = s.thresholds.min_signal; $("f-relevance").value = s.thresholds.min_relevance; $("f-bait").value = s.thresholds.max_bait;
+    $("f-model").value = s.writer_model || "";
+    var rk = s.ranking || {}, tr = s.tracked || {};
+    $("r-breakout").value = rk.breakout_weight != null ? rk.breakout_weight : 0.5;
+    $("r-mainstream").value = rk.mainstream_penalty != null ? rk.mainstream_penalty : 0.5;
+    $("r-author").value = rk.per_author_max || 2;
+    $("t-accounts").value = (tr.accounts || []).join(", ");
+    $("t-beat").value = tr.beat_baseline_by || 3; $("t-min").value = tr.min_likes != null ? tr.min_likes : 25; $("t-signal").value = tr.min_signal != null ? tr.min_signal : 1.0;
+    $("f-searches").value = (s.searches || []).join("\n");
+    $("f-watch").value = (s.watchlist || []).join(", ");
+    $("f-watchfaves").value = s.watchlist_min_faves != null ? s.watchlist_min_faves : 20;
+    var pn = s.panel || {};
+    $("p-groups").innerHTML = ""; (pn.groups || []).forEach(function (g) { $("p-groups").appendChild(groupRow(g)); });
+    $("p-max").value = pn.max_accounts || 300; $("p-overlap").value = pn.min_overlap || 2;
+    $("p-include").value = (pn.include || []).join(", "); $("p-exclude").value = (pn.exclude || []).join(", ");
+    $("k-stories").value = (s.known_stories || []).map(function (k) { return [k.label, k.match, k.week || ""].join(" | ").replace(/ \| $/, ""); }).join("\n");
+  }
   $("add-group").onclick = function () { $("p-groups").appendChild(groupRow({ share: 0.3 })); };
   $("add-topic").onclick = function () { var r = topicRow({ include: true }); $("f-topics").appendChild(r); r.children[1].focus(); };
+  $("apply-preset").onclick = function () {
+    var p = (presets || []).filter(function (x) { return x.id === $("f-preset").value; })[0];
+    if (!p) { say("Choose a preset first.", true); return; }
+    fill(TL.applyPreset(draft, p)); say("Applied " + p.name + ". Review it, then click Save and refresh.");
+  };
 
   function collect() {
     var topics = [], seen = {};
@@ -749,24 +342,21 @@ a.btn { text-decoration: none; }
       topics.push({ key: key, label: label, description: desc, include: r.children[0].checked,
         share: Math.max(0, Math.min(100, parseFloat(r.children[3].value) || 0)) / 100 });
     });
-    topics.push({ key: "other", label: "Other", description: "Anything else", include: false, share: 0 });
-    var total = topics.reduce(function (a, t) { return a + (t.include ? t.share : 0); }, 0);
-    if (total > 0) topics.forEach(function (t) { t.share = t.include ? Math.round(t.share / total * 1000) / 1000 : 0; });
     if (topics.filter(function (t) { return t.include; }).length < 1) throw new Error("Check at least one topic to show on the page.");
     var num = function (id, lo, hi, name) { var v = parseFloat($(id).value); if (isNaN(v) || v < lo || v > hi) throw new Error(name + " must be between " + lo + " and " + hi + "."); return v; };
-    var s = JSON.parse(JSON.stringify(settings));  // keeps fields the form doesn't show (e.g. account groups)
-    s.focus = { audience: $("f-audience").value.trim() || settings.focus.audience, care_about: lines($("f-care").value), skip: lines($("f-skip").value) };
+    var s = TL.clone(draft);  // keeps fields the form doesn't show (account groups, slack, timezone, preset_id)
+    s.focus = { audience: $("f-audience").value.trim() || draft.focus.audience, care_about: lines($("f-care").value), skip: lines($("f-skip").value) };
     if (!s.focus.care_about.length) throw new Error("Add at least one thing to focus on.");
-    s.topics = topics;
+    s.topics = TL.normalizeTopics(topics);
     s.thresholds = { min_signal: num("f-signal", 0, 4, "Min signal"), min_relevance: num("f-relevance", 0, 1, "Min relevance"), max_bait: num("f-bait", 0, 1, "Max bait") };
     s.writer_model = $("f-model").value.trim() || "anthropic/claude-sonnet-5";
-    s.ranking = { account_groups: (settings.ranking || {}).account_groups || {}, breakout_weight: num("r-breakout", 0, 1, "Breakout weight"), mainstream_penalty: num("r-mainstream", 0, 1, "Big-lab penalty"),
-      per_author_max: Math.round(num("r-author", 1, 10, "Max tweets per account")) };
-    s.tracked = { accounts: $("t-accounts").value.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").trim(); }).filter(Boolean),
-      beat_baseline_by: num("t-beat", 1, 10, "Beat their usual by"), min_likes: Math.max(0, parseInt($("t-min").value, 10) || 0), min_signal: num("t-signal", 0, 4, "Min signal for tracked companies") };
+    s.ranking = Object.assign({}, draft.ranking || {}, { breakout_weight: num("r-breakout", 0, 1, "Breakout weight"), mainstream_penalty: num("r-mainstream", 0, 1, "Big-lab penalty"),
+      per_author_max: Math.round(num("r-author", 1, 10, "Max tweets per account")) });
+    s.tracked = { accounts: handles($("t-accounts").value), beat_baseline_by: num("t-beat", 1, 10, "Beat their usual by"),
+      min_likes: Math.max(0, parseInt($("t-min").value, 10) || 0), min_signal: num("t-signal", 0, 4, "Min signal for tracked companies") };
     s.searches = lines($("f-searches").value);
     if (!s.searches.length) throw new Error("Add at least one X search.");
-    s.watchlist = $("f-watch").value.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").trim(); }).filter(Boolean);
+    s.watchlist = handles($("f-watch").value);
     s.watchlist_min_faves = Math.max(0, parseInt($("f-watchfaves").value, 10) || 0);
     var groups = [];
     document.querySelectorAll("#p-groups .group").forEach(function (b) {
@@ -776,7 +366,7 @@ a.btn { text-decoration: none; }
       groups.push({ name: name, share: Math.max(0, parseFloat(b.querySelector(".share").value) || 0) / 100, accounts: acc });
     });
     if (!groups.length) throw new Error("Add at least one panel group.");
-    s.panel = Object.assign({}, settings.panel || {}, { groups: groups, max_accounts: Math.round(num("p-max", 20, 1000, "Panel size")),
+    s.panel = Object.assign({}, draft.panel || {}, { groups: groups, max_accounts: Math.round(num("p-max", 20, 1000, "Panel size")),
       min_overlap: Math.round(num("p-overlap", 1, 10, "Followed by at least")), include: handles($("p-include").value), exclude: handles($("p-exclude").value) });
     s.known_stories = lines($("k-stories").value).map(function (l) {
       var parts = l.split(" | "), label = parts.shift().trim(), week = "";
@@ -786,627 +376,98 @@ a.btn { text-decoration: none; }
       try { new RegExp(pattern, "i"); } catch (e) { throw new Error("That pattern isn't valid: " + pattern); }
       var k = { label: label, match: pattern }; if (week) k.week = week; return k;
     });
-    s.slack = slackDefaults(slackDraft);
+    s.slack = TL.slackDefaults(draft.slack);
     return s;
   }
 
-  // GitHub connection
-  function setConnected(login) {
-    var c = $("connect"); c.className = "connect ok"; c.innerHTML = "";
-    var t = document.createElement("span"); t.className = "hint"; t.style.margin = 0;
-    t.textContent = "Connected to " + REPO + (login ? " as @" + login : "") + ". Saving changes what everyone sees.";
-    var out = document.createElement("button"); out.type = "button"; out.className = "btn"; out.textContent = "Disconnect";
-    out.onclick = function () { token = ""; store("gh_token", null); location.reload(); };
-    c.append(t, out);
+  // Saving rebuilds the page; watch the run and offer a reload when the new read is ready.
+  function watchRun(before) {
+    var tries = 0;
+    (function poll() {
+      TL.api("GET", "/api/status").then(function (st) {
+        drawRunState(st);
+        if (st.state === "error") { say("The refresh failed: " + (st.last_error || "unknown error"), true); return; }
+        if (st.last_run_at && st.last_run_at !== before && st.state !== "running" && st.state !== "queued") {
+          var a = h("a", { href: location.pathname, text: "Reload to see it" }); say(h("span", null, ["Your new read is ready. ", a])); return;
+        }
+        if (++tries < 120) setTimeout(poll, 10000);
+      }).catch(function () {});
+    })();
   }
-  function connect(t) {
-    token = t.trim();
-    if (!token) return Promise.reject(new Error("Paste a GitHub token first."));
-    return fetch("https://api.github.com/user", { headers: { "Authorization": "Bearer " + token } })
-      .then(function (r) { return r.ok ? r.json() : {}; })
-      .then(function (u) {
-        return gh("").then(function (repo) {
-          if (!repo.permissions || !repo.permissions.push) throw new Error("This token can't write to " + REPO + ".");
-          return gh("/contents/settings.json");
-        }).then(function (f) {
-          settingsSha = f.sha; settings = JSON.parse(unb64utf8(f.content)); fill(settings);
-          store("gh_token", token); setConnected(u.login); say("");
-        });
-      })
-      .catch(function (e) { token = ""; throw e; });
-  }
-  $("gh-connect").onclick = function () { say("Connecting…"); connect($("gh-token").value).catch(function (e) { say(e.message, true); }); };
-
-  function needToken() { if (!token) { say("Connect a GitHub token first.", true); $("gh-token").focus(); return true; } }
-  function runLink(text) {
-    var span = document.createElement("span"); span.textContent = text + " ";
-    var a = document.createElement("a"); a.href = "https://github.com/" + REPO + "/actions"; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Watch the run";
-    span.appendChild(a); return span;
-  }
-  function dispatch(slackMode) {
-    return gh("/actions/workflows/update.yml/dispatches", { method: "POST", body: { ref: "main", inputs: { slack: slackMode } } });
-  }
-
   $("save").onclick = function () {
-    if (needToken()) return;
     var s; try { s = collect(); } catch (e) { say(e.message, true); return; }
     var btn = this; btn.disabled = true; say("Saving…");
-    commitSettings(function () { return s; }, "Update settings from the page").then(function () {
-      return dispatch("auto");
-    }).then(function () {
-      say(runLink("Saved. The page refreshes with the new settings in about 3 minutes."));
+    var before = me && me.status.last_run_at;
+    TL.api("PUT", "/api/settings", { settings: s }).then(function (r) {
+      settings = r.settings; fill(settings);
+      return TL.api("POST", "/api/run", {}).then(function () { say("Saved. Your page rebuilds with the new settings in a few minutes."); watchRun(before); },
+        function (e) { say("Saved. " + e.message); });
     }).catch(function (e) { say(e.message, true); }).finally(function () { btn.disabled = false; });
   };
-  function commitSettings(apply, message) {
-    return gh("/contents/settings.json").then(function (f) {
-      var next = apply(JSON.parse(unb64utf8(f.content)));
-      return gh("/contents/settings.json", { method: "PUT", body: {
-        message: message, sha: f.sha, content: b64utf8(JSON.stringify(next, null, 2) + "\n") } })
-        .then(function (r) { settings = next; settingsSha = r && r.content && r.content.sha; return next; });
-    });
-  }
 
-  // API keys (GitHub Actions secrets, sealed-box encrypted in the browser)
-  var cryptoReady;
-  function loadScript(src, sri) {
-    return new Promise(function (res, rej) { var s = document.createElement("script"); s.src = src; s.integrity = sri; s.crossOrigin = "anonymous";
-      s.onload = res; s.onerror = function () { rej(new Error("Couldn't load " + src)); }; document.head.appendChild(s); });
+  // Profile tab
+  function drawProfile() {
+    $("acct-email").textContent = "Signed in as " + me.email + ".";
+    $("recap-url").value = me.recap_url;
+    var p = TL.local("tl_prefs") || {}, cur = p.theme || "system";
+    document.querySelectorAll("#theme-seg button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === cur)); });
   }
-  function loadCrypto() {
-    return cryptoReady || (cryptoReady = loadScript("https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js",
-      "sha384-05+sicyRJQ56XpL4U9HJ8YbtSzFDvAg7apPKOGV6A0JsAJKFM68jp5oLnUjG5mEp")
-      .then(function () { return loadScript("https://cdn.jsdelivr.net/npm/tweetnacl-sealedbox-js@1.2.0/sealedbox.web.js",
-        "sha384-gCr/Ers2SYUTIvvm+iWV5lakrZ/tTqxgYQckm0Znr3blQzNfOPirDZlpvkINLyhv"); }));
-  }
-  function saveSecret(name, value) {
-    return Promise.all([loadCrypto(), gh("/actions/secrets/public-key")]).then(function (r) {
-      var pk = Uint8Array.from(atob(r[1].key), function (c) { return c.charCodeAt(0); });
-      var sealed = window.sealedBox.seal(new TextEncoder().encode(value), pk);
-      return gh("/actions/secrets/" + name, { method: "PUT", body: { encrypted_value: btoa(String.fromCharCode.apply(null, sealed)), key_id: r[1].key_id } });
-    });
-  }
-  function loadKeys() {
-    var box = $("keys"); box.innerHTML = "";
-    var existing = {};
-    var render = function () {
-      box.innerHTML = "";
-      KEYS.forEach(function (k) {
-        var card = document.createElement("div"); card.className = "key";
-        var top = document.createElement("div"); top.className = "key-top";
-        var name = document.createElement("span"); name.innerHTML = "<b></b> <code></code>";
-        name.querySelector("b").textContent = k.label; name.querySelector("code").textContent = k.name;
-        var st = document.createElement("span"); st.className = "key-status" + (existing[k.name] ? " set" : "");
-        st.textContent = !token ? "" : existing[k.name] ? "Set · updated " + new Date(existing[k.name]).toLocaleDateString() : "Not set";
-        top.append(name, st);
-        var why = document.createElement("p"); why.className = "hint"; why.style.margin = "0 0 10px"; why.textContent = k.why;
-        var row = document.createElement("div"); row.className = "key-row";
-        var inp = document.createElement("input"); inp.className = "inp"; inp.type = "password"; inp.autocomplete = "off";
-        inp.placeholder = existing[k.name] ? "Paste a new value to replace it" : "Paste the key";
-        var btn = document.createElement("button"); btn.type = "button"; btn.className = "btn primary"; btn.textContent = "Save";
-        btn.onclick = function () {
-          if (needToken()) return;
-          var v = inp.value.trim(); if (!v) { inp.focus(); return; }
-          btn.disabled = true; say("Encrypting and saving " + k.name + "…");
-          saveSecret(k.name, v).then(function () { inp.value = ""; say(k.label + " key saved. The next update uses it."); existing[k.name] = new Date().toISOString(); render(); })
-            .catch(function (e) { say(e.message, true); }).finally(function () { btn.disabled = false; });
-        };
-        row.append(inp, btn); card.append(top, why, row); box.appendChild(card);
-      });
-    };
-    render();
-    if (token) gh("/actions/secrets?per_page=100").then(function (r) {
-      (r.secrets || []).forEach(function (s) { existing[s.name] = s.updated_at; }); render();
-    }).catch(function (e) { say(e.message, true); });
-  }
-
-
-  // ---- Shared helpers for the daily recap and the guide ----
-  var PAGE_DATA = JSON.parse($("page-data").textContent);
-  var PAGE = PAGE_DATA.recap_page || location.href.split("#")[0].split("?")[0].replace(/[^\/]*$/, "");
-  var RECAP_MD = PAGE + "recap.md";
-  var slackDraft = null, webhookSet = PAGE_DATA.slack.last_post ? true : null;
-  function h(tag, attrs, kids) {
-    var e = document.createElement(tag);
-    Object.keys(attrs || {}).forEach(function (k) {
-      var v = attrs[k]; if (v == null || v === false) return;
-      if (k === "class") e.className = v; else if (k === "text") e.textContent = v;
-      else if (k.slice(0, 2) === "on") e.addEventListener(k.slice(2), v);
-      else if (k === "value" || k === "checked") e[k] = v; else e.setAttribute(k, v === true ? "" : v);
-    });
-    (kids || []).forEach(function (c) { if (c != null) e.append(c); });
-    return e;
-  }
-  function clone(o) { return JSON.parse(JSON.stringify(o)); }
-  function local(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
-  function copy(text) {
-    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
-    var t = h("textarea", { value: text, style: "position:fixed;opacity:0" }); document.body.appendChild(t); t.select();
-    try { document.execCommand("copy"); } finally { t.remove(); } return Promise.resolve();
-  }
-  function hourLabel(hr) { return (hr % 12 || 12) + (hr < 12 ? " am" : " pm"); }
-  function slackDefaults(sl) {
-    sl = Object.assign({ enabled: false, frequency: "daily", hour_pt: 8, weekdays_only: true, top_tweets: 5 }, sl || {});
-    sl.hour_pt = parseInt(sl.hour_pt, 10) || 0; sl.top_tweets = Math.min(10, Math.max(0, parseInt(sl.top_tweets, 10) || 0));
-    return sl;
-  }
-  function slackLabel(d) {
-    return d.frequency === "daily" ? (d.weekdays_only ? "Weekdays" : "Daily") + " around " + hourLabel(d.hour_pt) + " PT"
-      : d.frequency === "on_change" ? "When the thesis changes" : "Every update";
-  }
-  var SLACK_MANIFEST = "https://api.slack.com/apps?new_app=1&manifest_json=" + encodeURIComponent(JSON.stringify({
-    display_information: { name: "Timeline recap", description: "The daily read of what tech Twitter is talking about" },
-    oauth_config: { scopes: { bot: ["incoming-webhook"] } },
-    settings: { org_deploy_enabled: false, socket_mode_enabled: false, token_rotation_enabled: false }
-  }));
-  function isWebhook(u) { return /^https:\/\/hooks\.slack\.com\/services\/\S+$/.test(u); }
-  function refreshWebhookStatus() {
-    if (!token) return Promise.resolve();
-    return gh("/actions/secrets?per_page=100").then(function (r) {
-      webhookSet = (r.secrets || []).some(function (x) { return x.name === "SLACK_WEBHOOK_URL"; });
-    }).catch(function () {});
-  }
-
-  // A delivery card: a header that toggles its body, and a status pill.
-  function card(logo, name, sub, open, body) {
-    var pill = h("span", { class: "pill" });
-    var wrap = h("div", { class: "conn-body", hidden: !open }, body);
-    var head = h("div", { class: "conn-head", role: "button", tabindex: "0", "aria-expanded": String(!!open),
-      onclick: function () { wrap.hidden = !wrap.hidden; head.setAttribute("aria-expanded", String(!wrap.hidden)); },
-      onkeydown: function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); head.click(); } } },
-      [h("span", { class: "conn-logo", text: logo }), h("span", null, [h("b", { text: name }), h("span", { class: "sub", text: sub })]), pill]);
-    return { el: h("div", { class: "conn" }, [head, wrap]), pill: pill };
-  }
-  function setPill(p, text, kind) { p.textContent = text; p.className = "pill" + (kind ? " " + kind : ""); }
-
-  // Slack: a team channel. o.deferred (the guide) keeps the webhook until the final save.
-  function slackCard(o) {
-    var d = o.slack, lastError = PAGE_DATA.slack.last_error;
-    var note = h("p", { class: "note", hidden: true });
-    function tell(msg, kind) { note.hidden = !msg; note.textContent = msg || ""; note.className = "note" + (kind ? " " + kind : ""); }
-    var url = h("input", { class: "inp", type: "url", placeholder: "https://hooks.slack.com/services/…", autocomplete: "off", spellcheck: "false" });
-    var enabled = h("input", { type: "checkbox", checked: d.enabled });
-    var hour = h("select", { class: "inp", "aria-label": "Post after (PT)" });
-    for (var i = 0; i < 24; i++) hour.append(h("option", { value: String(i), text: hourLabel(i) + " PT" }));
-    hour.value = String(d.hour_pt);
-    var freq = h("select", { class: "inp", "aria-label": "How often" }, [
-      h("option", { value: "daily", text: "Once a day" }), h("option", { value: "on_change", text: "When the thesis changes" }),
-      h("option", { value: "every_update", text: "Every update (3 hours)" })]);
-    freq.value = d.frequency;
-    var weekdays = h("input", { type: "checkbox", checked: d.weekdays_only });
-    var top = h("input", { class: "inp", type: "number", min: "0", max: "10", step: "1", value: String(d.top_tweets), "aria-label": "Tweets to include" });
-    var hourWrap = h("div", { class: "field" }, [h("span", { class: "lbl", text: "After" }), hour]);
-    var wdWrap = h("label", { class: "check" }, [weekdays, " Weekdays only"]);
-    var c = card("#", "Slack", "Posts to a team channel", o.open, []);
-    function sync() {
-      d.enabled = enabled.checked; d.frequency = freq.value; d.hour_pt = parseInt(hour.value, 10);
-      d.weekdays_only = weekdays.checked; d.top_tweets = Math.min(10, Math.max(0, parseInt(top.value, 10) || 0));
-      var daily = d.frequency === "daily"; hourWrap.style.visibility = daily ? "" : "hidden"; wdWrap.hidden = !daily;
-      var pending = o.deferred && o.pendingWebhook && o.pendingWebhook();
-      if (!d.enabled) setPill(c.pill, pending ? "Connected · turned off" : "Off");
-      else if (lastError) setPill(c.pill, "Last post failed", "err");
-      else if (webhookSet === false && !pending) setPill(c.pill, "Needs a webhook", "err");
-      else setPill(c.pill, slackLabel(d), "ok");
-      if (o.onChange) o.onChange();
-    }
-    [enabled, freq, hour, weekdays, top].forEach(function (x) { x.addEventListener("change", sync); x.addEventListener("input", sync); });
-
-    function test() {
-      var v = url.value.trim();
-      if (!isWebhook(v)) { tell("That doesn't look like a Slack webhook. It should start with https://hooks.slack.com/services/.", "err"); url.focus(); return; }
-      tell("Sending a test…");
-      fetch(v, { method: "POST", mode: "no-cors", body: JSON.stringify({ text: "The timeline recap is connected. The daily read will post here. " + PAGE }) })
-        .then(function () { tell("Test sent. It should show up in the channel within a few seconds. If it doesn't, copy the URL again from Slack.", "ok"); })
-        .catch(function () { tell("Couldn't reach Slack from this browser. Check the URL, or save it anyway and use Send now.", "err"); });
-    }
-    function use() {
-      var v = url.value.trim();
-      if (!isWebhook(v)) { tell("Paste the webhook URL first. It starts with https://hooks.slack.com/services/.", "err"); url.focus(); return; }
-      if (o.deferred) { o.setWebhook(v); url.value = ""; enabled.checked = true; lastError = null; sync(); tell("Got it. It's saved with the rest when you finish.", "ok"); return; }
-      if (needToken()) { tell("Connect a GitHub token at the top first.", "err"); return; }
-      tell("Saving…");
-      saveSecret("SLACK_WEBHOOK_URL", v).then(function () {
-        webhookSet = true; lastError = null; url.value = ""; enabled.checked = true; sync();
-        tell("Webhook saved. Click Save and refresh to turn on posting, then Send now to check it.", "ok");
-      }).catch(function (e) { tell(e.message, "err"); });
-    }
-    var hasHook = webhookSet === true || (o.deferred && o.pendingWebhook && o.pendingWebhook());
-    var steps = h("details", { class: "more", open: !hasHook }, [
-      h("summary", { text: hasHook ? "Connected. Replace the webhook or change channels" : "Connect a channel (about a minute)" }),
-      h("ol", null, [
-        h("li", null, [h("a", { class: "btn", href: SLACK_MANIFEST, target: "_blank", rel: "noopener", text: "Create the Slack app ↗" }),
-          h("span", { class: "hint", style: "display:block", text: "It opens Slack with everything filled in. Pick your workspace, then click Create." })]),
-        h("li", { text: "Click Install to Workspace, then choose the channel the recap should post to." }),
-        h("li", { text: "Go to Incoming Webhooks, copy the webhook URL, and paste it here:" })]),
-      h("div", { class: "key-row" }, [url, h("button", { class: "btn", type: "button", text: "Send test", onclick: test }),
-        h("button", { class: "btn primary", type: "button", text: o.deferred ? "Use it" : "Save", onclick: use })])]);
-    var body = c.el.querySelector(".conn-body");
-    if (lastError) body.append(h("p", { class: "note err", text: "The last post failed: " + lastError }));
-    body.append(steps, h("div", { style: "height:16px" }),
-      h("label", { class: "check", style: "margin-bottom:12px" }, [enabled, " Post the daily recap to Slack"]),
-      h("div", { class: "row3" }, [h("div", { class: "field" }, [h("span", { class: "lbl", text: "How often" }), freq]), hourWrap,
-        h("div", { class: "field" }, [h("span", { class: "lbl", text: "Tweets to include" }), top])]),
-      wdWrap, h("p", { class: "hint", text: "A delivery check runs every hour, so the daily post goes out shortly after the hour you pick." }));
-    if (!o.deferred) body.append(h("div", { class: "btn-row", style: "margin-top:12px" }, [
-      h("button", { class: "btn", type: "button", text: "Send today's recap now", onclick: function () {
-        if (needToken()) return;
-        tell("Starting…"); dispatch("now").then(function () { tell("Posting after this update. Allow about 3 minutes.", "ok"); })
-          .catch(function (e) { tell(e.message, "err"); });
-      } })]));
-    body.append(note);
-    sync();
-    return c.el;
-  }
-
-  // Instinct and Muse: personal agents with no push API, so we hand each one a recurring task
-  // that reads recap.md. Set up per person; remembered on this device.
-  function agentMessage(name, time, weekdays) {
-    var parts = time.split(":"), hr = +parts[0], min = parts[1];
-    var when = (hr % 12 || 12) + ":" + min + (hr < 12 ? " AM" : " PM");
-    var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) {}
-    return "Hi " + name + ". Please set up a recurring task: every " + (weekdays ? "weekday" : "day") + " at " + when + (tz ? " (" + tz + ")" : "") +
-      ", read " + RECAP_MD + " and send me a short recap with the week's X thesis in a sentence or two, the 2–3 most interesting items under “New today” with their links, " +
-      "and this link to the full page: " + PAGE + "\nKeep it under 100 words. If nothing is marked new, just send the thesis and the link.";
-  }
-  function agentCard(kind, open) {
-    var A = kind === "instinct"
-      ? { name: "Instinct", logo: "In", sub: "Texts you from your Instinct thread" }
-      : { name: "Muse", logo: "Mu", sub: "Sends it through Meta's Muse, in WhatsApp or at muse.ai" };
-    var all = local("tl_deliver") || {}, saved = all[kind] || {};
-    var c = card(A.logo, A.name, A.sub, open, []);
-    var time = h("input", { class: "inp", type: "time", value: saved.time || "08:00", "aria-label": "Time" });
-    var weekdays = h("input", { type: "checkbox", checked: saved.weekdays !== false });
-    var num = kind === "instinct" ? h("input", { class: "inp", type: "tel", placeholder: "Instinct's number (optional)", value: saved.number || "", autocomplete: "off" }) : null;
-    var preview = h("div", { class: "msg-preview" });
-    var note = h("p", { class: "note", hidden: true });
-    var primary = h("a", { class: "btn primary", target: kind === "muse" ? "_blank" : null, rel: "noopener" });
-    var alt = kind === "muse" ? h("a", { class: "btn", target: "_blank", rel: "noopener", text: "Send in WhatsApp" }) : null;
-    function msg() { return agentMessage(A.name, time.value || "08:00", weekdays.checked); }
-    function render() {
-      var m = msg(); preview.textContent = m;
-      if (kind === "instinct") {
-        primary.textContent = "Text it to Instinct";
-        primary.href = "sms:" + (num.value.replace(/[^\d+]/g, "")) + "?&body=" + encodeURIComponent(m);
-      } else {
-        primary.textContent = "Open Muse ↗"; primary.href = "https://muse.ai/";
-        alt.href = "https://wa.me/?text=" + encodeURIComponent(m);
-      }
-      var s = (local("tl_deliver") || {})[kind];
-      setPill(c.pill, s && s.at ? "Set up · " + new Date(s.at).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "Not set up", s && s.at ? "ok" : "");
-    }
-    function mark() {
-      var a = local("tl_deliver") || {};
-      a[kind] = { at: new Date().toISOString(), time: time.value, weekdays: weekdays.checked, number: num ? num.value : undefined };
-      local("tl_deliver", a); render();
-    }
-    function remember() { var a = local("tl_deliver") || {}; a[kind] = Object.assign({}, a[kind], { time: time.value, weekdays: weekdays.checked, number: num ? num.value : undefined }); local("tl_deliver", a); }
-    [time, weekdays, num].forEach(function (x) { if (x) { x.addEventListener("input", function () { render(); remember(); }); x.addEventListener("change", render); } });
-    primary.addEventListener("click", function () {
-      copy(msg()).catch(function () {}); mark();
-      note.hidden = false; note.className = "note ok";
-      note.textContent = kind === "instinct" ? "Opening your messages app with the text filled in. On a computer? The message is copied, so paste it into your Instinct thread."
-        : "Message copied. Paste it into Muse and send it.";
-    });
-    if (alt) alt.addEventListener("click", function () { mark(); note.hidden = false; note.className = "note ok"; note.textContent = "Pick your Muse chat in WhatsApp and send."; });
-    var copyBtn = h("button", { class: "btn", type: "button", text: "Copy message", onclick: function () {
-      copy(msg()).then(function () { mark(); note.hidden = false; note.className = "note ok"; note.textContent = "Copied. Paste it into " + A.name + " and send it."; });
-    } });
-    var body = c.el.querySelector(".conn-body");
-    body.append(
-      h("ol", null, [
-        h("li", { text: "Pick when you want it." }),
-        h("li", { text: "Send this message to " + A.name + ". It sets up a daily task that reads this page's recap and sends it to you." })]),
-      h("div", { class: "row3", style: "margin-bottom:12px" }, [time, h("label", { class: "check" }, [weekdays, " Weekdays only"]), num]),
-      preview,
-      h("div", { class: "btn-row" }, [primary, alt, copyBtn]),
-      note,
-      h("p", { class: "hint", style: "margin-top:12px" }, ["Only you get these. The recap updates every three hours (",
-        h("a", { href: RECAP_MD, target: "_blank", rel: "noopener", text: "see what " + A.name + " reads" }),
-        "). To stop, tell " + A.name + " to cancel the timeline recap."]));
-    render();
-    return c.el;
-  }
-  function mountDeliveries(box, o) {
-    if (!box) return;
-    box.innerHTML = "";
-    box.append(slackCard(Object.assign({ open: true }, o)), agentCard("instinct", !!o.deferred), agentCard("muse", false));
-  }
-
-
-  // ---- Your view (per device) ----
-  function prefs() { return Object.assign({ theme: "system", hidden: [] }, local("tl_prefs") || {}); }
-  function applyPrefs(p) {
-    var root = document.documentElement;
-    if (p.theme === "light" || p.theme === "dark") root.dataset.theme = p.theme; else delete root.dataset.theme;
-    document.querySelectorAll(".tw[data-topic]").forEach(function (f) { f.hidden = p.hidden.indexOf(f.dataset.topic) >= 0; });
-    document.querySelectorAll("main .theme").forEach(function (th) {
-      var figs = th.querySelectorAll(".tw");
-      th.hidden = figs.length > 0 && Array.prototype.every.call(figs, function (f) { return f.hidden; });
-    });
-  }
-  applyPrefs(prefs());
-
-  // ---- The guide ----
-  var PRESETS = { sharper: { min_signal: 2.2, min_relevance: 0.7, max_bait: 0.4 },
-                  balanced: { min_signal: 1.8, min_relevance: 0.6, max_bait: 0.5 },
-                  wider: { min_signal: 1.4, min_relevance: 0.5, max_bait: 0.6 } };
-  var ob = $("onboard"), steps = Array.prototype.slice.call(ob.querySelectorAll(".ob-step"));
-  var G = null;  // { step, base, draft, webhook, visited }
-  function obSay(msg, err) { var el = $("ob-status"); el.className = "status" + (err ? " err" : ""); el.innerHTML = ""; if (typeof msg === "string") el.textContent = msg; else el.appendChild(msg); }
-
-  function listEditor(box, arr, placeholder) {
-    box.innerHTML = "";
-    function row(v) {
-      var inp = h("input", { class: "inp", value: v, placeholder: placeholder });
-      var r = h("div", { class: "li" }, [inp, h("button", { class: "rm-x", type: "button", "aria-label": "Remove", text: "×", onclick: function () { r.remove(); read(); } })]);
-      inp.addEventListener("input", read);
-      inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); var n = row(""); r.after(n); n.firstChild.focus(); } });
-      return r;
-    }
-    function read() {
-      arr.length = 0;
-      box.querySelectorAll("input").forEach(function (i) { if (i.value.trim()) arr.push(i.value.trim()); });
-    }
-    arr.forEach(function (v) { box.append(row(v)); });
-    return function () { var n = row(""); box.append(n); n.firstChild.focus(); };
-  }
-  function tagEditor(box, arr) {
-    box.innerHTML = "";
-    var wrap = h("div", { class: "tagbox" }), inp = h("input", { placeholder: "@handle", spellcheck: "false", autocomplete: "off", "aria-label": "Add a handle" });
-    function draw() {
-      wrap.querySelectorAll(".tag").forEach(function (t) { t.remove(); });
-      arr.forEach(function (hd, i) {
-        wrap.insertBefore(h("span", { class: "tag" }, ["@" + hd, h("button", { type: "button", "aria-label": "Remove @" + hd, text: "×",
-          onclick: function () { arr.splice(i, 1); draw(); } })]), inp);
-      });
-    }
-    function add() {
-      inp.value.split(/[\s,]+/).map(function (x) { return x.replace(/^@/, "").replace(/^https?:\/\/(x|twitter)\.com\//, "").replace(/\/.*$/, "").trim(); })
-        .filter(Boolean).forEach(function (x) { if (!arr.some(function (a) { return a.toLowerCase() === x.toLowerCase(); })) arr.push(x); });
-      inp.value = ""; draw();
-    }
-    inp.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" || e.key === "," || e.key === " ") { e.preventDefault(); add(); }
-      else if (e.key === "Backspace" && !inp.value && arr.length) { arr.pop(); draw(); }
-    });
-    inp.addEventListener("blur", add);
-    inp.addEventListener("paste", function () { setTimeout(add); });
-    wrap.addEventListener("click", function (e) { if (e.target === wrap) inp.focus(); });
-    wrap.append(inp); box.append(wrap); draw();
-  }
-  function mixColor(i) { return "color-mix(in srgb, var(--accent) " + Math.max(28, 100 - i * 10) + "%, var(--surface))"; }
-  function drawMix() {
-    var ts = G.draft.topics.filter(function (t) { return t.key !== "other"; });
-    var on = ts.filter(function (t) { return t.include && t.share > 0; });
-    var total = on.reduce(function (a, t) { return a + t.share; }, 0) || 1;
-    var bar = $("ob-mixbar"); bar.innerHTML = "";
-    on.forEach(function (t, i) { bar.append(h("i", { style: "flex-grow:" + t.share + ";background:" + mixColor(i), title: t.label })); });
-    $("ob-mixlegend").textContent = on.length ? on.map(function (t) { return t.label + " " + Math.round(t.share / total * 100) + "%"; }).join(" · ") : "Turn on at least one topic.";
-    $("ob-mix").querySelectorAll(".mix-row").forEach(function (r) {
-      var t = ts[+r.dataset.i];
-      r.classList.toggle("off", !t.include);
-      r.querySelector(".pct").textContent = t.include ? Math.round(t.share / total * 100) + "%" : "Off";
-      r.querySelector("input[type=range]").disabled = !t.include;
-    });
-  }
-  function presetOf(th) {
-    for (var k in PRESETS) { var p = PRESETS[k]; if (p.min_signal === +th.min_signal && p.min_relevance === +th.min_relevance && p.max_bait === +th.max_bait) return k; }
-    return null;
-  }
-  function drawFilter() {
-    var th = G.draft.thresholds, cur = presetOf(th);
-    ob.querySelectorAll(".preset").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.p === cur)); });
-    $("ob-signal").value = th.min_signal; $("ob-relevance").value = th.min_relevance; $("ob-bait").value = th.max_bait;
-  }
-
-  var ENTER = {
-    view: function () {
-      var p = prefs();
-      ob.querySelectorAll("#ob-theme button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === p.theme)); });
-      var box = $("ob-mytopics"); box.innerHTML = "";
-      settings.topics.filter(function (t) { return t.include && t.key !== "other"; }).forEach(function (t) {
-        box.append(h("button", { type: "button", class: "chip", text: t.label, "aria-pressed": String(p.hidden.indexOf(t.key) < 0),
-          onclick: function () {
-            var q = prefs(), i = q.hidden.indexOf(t.key);
-            if (i < 0) q.hidden.push(t.key); else q.hidden.splice(i, 1);
-            local("tl_prefs", q); applyPrefs(q); this.setAttribute("aria-pressed", String(i >= 0));
-          } }));
-      });
-    },
-    focus: function () {
-      $("ob-audience").value = G.draft.focus.audience;
-      $("ob-care-add").onclick = listEditor($("ob-care"), G.draft.focus.care_about, "e.g. AI product launches people are arguing about");
-      $("ob-skip-add").onclick = listEditor($("ob-skip"), G.draft.focus.skip, "e.g. Macro, politics, and lawsuits");
-    },
-    mix: function () {
-      var box = $("ob-mix"); box.innerHTML = "";
-      G.draft.topics.filter(function (t) { return t.key !== "other"; }).forEach(function (t, i) {
-        var cb = h("input", { type: "checkbox", checked: t.include, "aria-label": "Include " + t.label });
-        var rg = h("input", { type: "range", min: "0", max: "40", step: "1", value: String(Math.round(t.share * 100)), "aria-label": t.label + " share" });
-        cb.addEventListener("change", function () { t.include = cb.checked; if (t.include && !t.share) { t.share = 0.1; rg.value = "10"; } drawMix(); });
-        rg.addEventListener("input", function () { t.share = +rg.value / 100; drawMix(); });
-        box.append(h("div", { class: "mix-row", "data-i": String(i) }, [cb, h("div", { style: "min-width:0" }, [h("b", { text: t.label }), h("small", { text: t.description, title: t.description })]), rg, h("span", { class: "pct" })]));
-      });
-      drawMix();
-    },
-    filter: drawFilter,
-    sources: function () {
-      G.draft.tracked = Object.assign({ accounts: [] }, G.draft.tracked);
-      tagEditor($("ob-watch"), G.draft.watchlist);
-      tagEditor($("ob-tracked"), G.draft.tracked.accounts);
-    },
-    daily: function () {
-      refreshWebhookStatus().then(function () {
-        mountDeliveries($("ob-deliver"), { slack: G.draft.slack, deferred: true,
-          setWebhook: function (v) { G.webhook = v; }, pendingWebhook: function () { return !!G.webhook; } });
-      });
-    },
-    save: function () { drawSave(); }
-  };
-  var LEAVE = {
-    focus: function () {
-      G.draft.focus.audience = $("ob-audience").value.trim() || G.base.focus.audience;
-      if (!G.draft.focus.care_about.length) throw new Error("Add at least one thing to focus on.");
-    },
-    mix: function () {
-      if (!G.draft.topics.some(function (t) { return t.include && t.key !== "other"; })) throw new Error("Turn on at least one topic.");
-    },
-    filter: function () {
-      var num = function (id, lo, hi, name) { var v = parseFloat($(id).value); if (isNaN(v) || v < lo || v > hi) throw new Error(name + " must be between " + lo + " and " + hi + "."); return v; };
-      G.draft.thresholds = { min_signal: num("ob-signal", 0, 4, "Min signal"), min_relevance: num("ob-relevance", 0, 1, "Min relevance"), max_bait: num("ob-bait", 0, 1, "Max bait") };
-    }
-  };
-
-  function normalized(topics) {
-    var t = clone(topics), total = t.reduce(function (a, x) { return a + (x.include && x.key !== "other" ? x.share : 0); }, 0);
-    t.forEach(function (x) { x.share = x.include && x.key !== "other" && total > 0 ? Math.round(x.share / total * 1000) / 1000 : 0; });
-    return t;
-  }
-  var SECTIONS = {
-    focus: { get: function (s) { return s.focus; }, set: function (s, v) { s.focus = v; } },
-    topics: { get: function (s) { return normalized(s.topics); }, set: function (s, v) { s.topics = v; } },
-    thresholds: { get: function (s) { return s.thresholds; }, set: function (s, v) { s.thresholds = v; } },
-    watchlist: { get: function (s) { return s.watchlist; }, set: function (s, v) { s.watchlist = v; } },
-    tracked: { get: function (s) { return (s.tracked || {}).accounts || []; }, set: function (s, v) { s.tracked = Object.assign({}, s.tracked, { accounts: v }); } },
-    slack: { get: function (s) { return slackDefaults(s.slack); }, set: function (s, v) { s.slack = v; } }
-  };
-  function changed() {
-    return Object.keys(SECTIONS).filter(function (k) {
-      return JSON.stringify(SECTIONS[k].get(G.draft)) !== JSON.stringify(SECTIONS[k].get(G.base));
-    });
-  }
-  function applyChanges(cur) {
-    var next = clone(cur);
-    changed().forEach(function (k) { SECTIONS[k].set(next, clone(SECTIONS[k].get(G.draft))); });
-    return next;
-  }
-  function diffHandles(a, b) {
-    var lo = function (x) { return x.map(function (y) { return y.toLowerCase(); }); }, A = lo(a), B = lo(b);
-    var add = b.filter(function (x) { return A.indexOf(x.toLowerCase()) < 0; }), rm = a.filter(function (x) { return B.indexOf(x.toLowerCase()) < 0; });
-    return [add.length ? "Adding " + add.map(function (x) { return "@" + x; }).join(", ") : "", rm.length ? "removing " + rm.map(function (x) { return "@" + x; }).join(", ") : ""].filter(Boolean).join("; ");
-  }
-  function drawSave() {
-    var ks = changed(), list = $("ob-changes"); list.innerHTML = "";
-    var line = function (a, b) { list.append(h("li", null, [h("span", { text: a }), h("span", { text: b })])); };
-    ks.forEach(function (k) {
-      var d = G.draft;
-      if (k === "focus") line("Focus", d.focus.care_about.length + " things to focus on, " + d.focus.skip.length + " to skip, written for " + d.focus.audience);
-      if (k === "topics") line("Topic mix", normalized(d.topics).filter(function (t) { return t.include && t.key !== "other"; })
-        .map(function (t) { return t.label + " " + Math.round(t.share * 100) + "%"; }).join(", "));
-      if (k === "thresholds") { var p = presetOf(d.thresholds); line("Filter", p ? p[0].toUpperCase() + p.slice(1) : "Custom: signal ≥ " + d.thresholds.min_signal + ", relevance ≥ " + d.thresholds.min_relevance + ", bait ≤ " + d.thresholds.max_bait); }
-      if (k === "watchlist") line("Watchlist", diffHandles(G.base.watchlist, d.watchlist));
-      if (k === "tracked") line("Tracked companies", diffHandles(SECTIONS.tracked.get(G.base), d.tracked.accounts));
-      if (k === "slack") line("Slack", d.slack.enabled ? slackLabel(d.slack) + ", " + d.slack.top_tweets + " tweets" : "Off");
-    });
-    if (G.webhook) line("Slack webhook", "New channel connected");
-    var any = ks.length || G.webhook;
-    if (!any) list.append(h("li", { class: "none", text: "Nothing team-wide changed, so there's nothing to save. Your view and your Instinct or Muse setup are already done." }));
-    $("ob-save-title").textContent = any ? "Review and save" : "You're all set";
-    $("ob-save-lede").textContent = any ? "These changes apply to the page for everyone. The page refreshes about 3 minutes after you save." : "Here's where everything lives when you want to adjust it.";
-    $("ob-connect").hidden = !any || !!token;
-    $("ob-nogh").hidden = !REPO || !!G.webhook;
-    $("ob-next").textContent = any ? (token ? "Save for the team" : "Connect and save") : "Done";
-  }
-  function saveGuide() {
-    var ks = changed();
-    if (!ks.length && !G.webhook) return Promise.resolve(false);
-    var go = token ? Promise.resolve() : ($("gh-remember").checked = $("ob-remember").checked, connect($("ob-token").value));
-    return go.then(function () {
-      obSay("Saving…");
-      var hook = G.webhook ? saveSecret("SLACK_WEBHOOK_URL", G.webhook).then(function () { webhookSet = true; G.webhook = null; }) : Promise.resolve();
-      return hook.then(function () {
-        return ks.length ? commitSettings(applyChanges, "Update settings from the guide") : null;
-      }).then(function () {
-        return dispatch(G.draft.slack.enabled && !G.base.slack.enabled ? "now" : "auto");  // just turned on: post once to confirm
-      }).then(function () { return true; });
-    });
-  }
-
-  function show(i) {
-    G.step = i; G.visited = Math.max(G.visited, i);
-    steps.forEach(function (s, j) { s.hidden = j !== i; });
-    var dots = $("ob-steps"); dots.innerHTML = "";
-    steps.forEach(function (s, j) {
-      dots.append(h("button", { type: "button", class: j < i ? "done" : "", "aria-current": j === i ? "step" : null, title: s.dataset.name,
-        "aria-label": "Step " + (j + 1) + ": " + s.dataset.name, onclick: function () { if (j <= G.visited) go(j); } }));
-    });
-    $("ob-count").textContent = (i + 1) + " of " + steps.length + " · " + steps[i].dataset.name;
-    $("ob-back").textContent = i === 0 ? "Skip for now" : "Back";
-    $("ob-next").textContent = i === 0 ? "Start" : "Next";
-    obSay("");
-    var fn = ENTER[steps[i].dataset.step]; if (fn) fn();
-    $("ob-body").scrollTop = 0;
-    var first = steps[i].querySelector("input:not([type=checkbox]):not([type=range]), textarea");
-    if (first && i > 0 && matchMedia("(pointer: fine)").matches) setTimeout(function () { first.focus(); });
-  }
-  function go(j) {
-    var leave = LEAVE[steps[G.step].dataset.step];
-    if (j > G.step && leave) { try { leave(); } catch (e) { obSay(e.message, true); return; } }
-    show(j);
-  }
-  function openGuide(at) {
-    G = { step: 0, visited: 0, base: clone(settings), draft: clone(settings), webhook: null };
-    G.base.slack = slackDefaults(G.base.slack); G.draft.slack = slackDefaults(G.draft.slack);
-    G.draft.focus.care_about = G.draft.focus.care_about.slice(); G.draft.focus.skip = G.draft.focus.skip.slice();
-    ob.showModal(); show(at || 0);
-  }
-  function closeGuide() { local("tl_onboarded", 1); if (ob.open) ob.close(); }
-  $("ob-next").onclick = function () {
-    if (G.step < steps.length - 1) return go(G.step + 1);
-    if (G.saved) return closeGuide();
-    var btn = this; btn.disabled = true;
-    saveGuide().then(function (saved) {
-      if (!saved) return closeGuide();
-      G.saved = true; G.base = clone(settings); $("ob-connect").hidden = true; btn.textContent = "Done";
-      obSay(runLink("Saved. The page refreshes with your changes in about 3 minutes."));
-    }).catch(function (e) { obSay(e.message, true); }).finally(function () { btn.disabled = false; });
-  };
-  $("ob-back").onclick = function () { if (G.step === 0) closeGuide(); else show(G.step - 1); };
-  $("ob-close").onclick = closeGuide;
-  ob.addEventListener("cancel", function () { local("tl_onboarded", 1); });
-  ob.querySelectorAll("#ob-theme button").forEach(function (b) {
+  document.querySelectorAll("#theme-seg button").forEach(function (b) {
     b.onclick = function () {
-      var p = prefs(); p.theme = b.dataset.v; local("tl_prefs", p); applyPrefs(p);
-      ob.querySelectorAll("#ob-theme button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      var p = TL.local("tl_prefs") || {}; p.theme = b.dataset.v; TL.local("tl_prefs", p);
+      if (p.theme === "light" || p.theme === "dark") document.documentElement.dataset.theme = p.theme; else delete document.documentElement.dataset.theme;
+      drawProfile();
     };
   });
-  ob.querySelectorAll(".preset").forEach(function (b) {
-    b.onclick = function () { G.draft.thresholds = clone(PRESETS[b.dataset.p]); drawFilter(); };
-  });
-  ["ob-signal", "ob-relevance", "ob-bait"].forEach(function (id) {
-    $(id).addEventListener("input", function () {
-      var v = parseFloat(this.value); if (isNaN(v)) return;
-      G.draft.thresholds[{ "ob-signal": "min_signal", "ob-relevance": "min_relevance", "ob-bait": "max_bait" }[id]] = v;
-      var cur = presetOf(G.draft.thresholds);
-      ob.querySelectorAll(".preset").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.p === cur)); });
-    });
-  });
-  $("ob-token-go").onclick = function () {
-    obSay("Connecting…");
-    $("gh-remember").checked = $("ob-remember").checked;
-    connect($("ob-token").value).then(function () { obSay("Connected."); drawSave(); }).catch(function (e) { obSay(e.message, true); });
+  $("export-keys").onchange = function () {
+    $("export").href = this.checked ? "/api/export?keys=1" : "/api/export";
+    var n = $("export-note"); n.hidden = !this.checked; n.className = "note err";
+    n.textContent = "The file will contain your API keys in plain text. Keep it somewhere private.";
   };
-  $("ob-copyedit").onclick = function (e) {
-    e.preventDefault();
-    copy(JSON.stringify(applyChanges(settings), null, 2) + "\n").then(function () {
-      obSay("Copied. On GitHub, select all, paste, and commit.");
-      window.open("https://github.com/" + REPO + "/edit/main/settings.json", "_blank", "noopener");
-    });
+  $("import-btn").onclick = function () { $("import-file").click(); };
+  $("import-file").onchange = function () {
+    var f = this.files[0]; if (!f) return; this.value = "";
+    if (!confirm("Replace your current feed and delivery settings with this profile?")) return;
+    f.text().then(function (t) { return TL.api("POST", "/api/import", { profile: JSON.parse(t) }); })
+      .then(function (m) { me = m; settings = m.settings; fill(settings); return TL.api("POST", "/api/run", {}).catch(function () {}); })
+      .then(function () { say("Profile imported. Your page rebuilds in a few minutes."); watchRun(me.status.last_run_at); })
+      .catch(function (e) { say(e instanceof SyntaxError ? "That file isn't a profile export." : e.message, true); });
   };
-  $("open-guide").onclick = function () { openGuide(0); };
-  var canStore = (function () { try { localStorage.setItem("tl_probe", "1"); return true; } catch (e) { return false; } })();
-  if (canStore && !local("tl_onboarded")) openGuide(0);  // first visit; never nag when storage is blocked
+  $("recap-copy").onclick = function () { TL.copy(me.recap_url).then(function () { say("Recap link copied."); }); };
+  $("recap-rotate").onclick = function () {
+    if (!confirm("Reset your recap link? Agents set up with the old link will stop getting your recap until you send them the new one.")) return;
+    TL.api("POST", "/api/recap/rotate").then(function (r) { me.recap_url = r.recap_url; drawProfile(); say("New recap link ready. Set up Instinct or Muse again from Daily recap."); })
+      .catch(function (e) { say(e.message, true); });
+  };
+  $("signout").onclick = function () { TL.api("POST", "/api/logout").finally(function () { location.href = "/login"; }); };
+  $("del-go").onclick = function () {
+    var pw = $("del-pw").value; if (!pw) { $("del-pw").focus(); return; }
+    if (!confirm("Delete your account, keys, and page? This can't be undone.")) return;
+    TL.api("DELETE", "/api/account", { password: pw }).then(function () { TL.local("tl_deliver", null); location.href = "/login"; })
+      .catch(function (e) { say(e.message, true); });
+  };
+
+  // Header: what the scheduler is doing
+  function drawRunState(st) {
+    var el = $("run-state"); if (!el) return;
+    el.textContent = st.state === "running" ? "Refreshing now…" : st.state === "queued" ? "Refresh queued" : st.state === "error" ? "Last refresh failed" : "";
+    el.className = "run-state" + (st.state === "error" ? " err" : "");
+    el.hidden = !el.textContent;
+  }
 
   // Open / close
-  $("open-settings").onclick = function () {
-    fill(settings); dlg.showModal(); if (!token) $("gh-token").focus();
-    else refreshWebhookStatus().then(function () { mountDeliveries($("deliver-mount"), { slack: slackDraft, deferred: false }); });
-  };
+  function open(which) { fill(settings); dlg.showModal(); tab(which || "feed"); say(me && me.status.state === "error" ? "The last refresh failed: " + (me.status.last_error || "unknown error") : ""); }
   dlg.querySelector("[data-close]").onclick = function () { dlg.close(); };
   dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
-  var saved = recall("gh_token");
-  if (saved) { try { $("gh-remember").checked = !!localStorage.getItem("gh_token"); } catch (e) {}
-    connect(saved).catch(function () { store("gh_token", null); }); }
-  if (!REPO) $("open-settings").hidden = true;
+  $("open-settings").hidden = true;
+  Promise.all([TL.api("GET", "/api/me"), TL.api("GET", "/api/presets").catch(function () { return []; })]).then(function (r) {
+    me = r[0]; presets = r[1]; settings = me.settings;
+    presets.forEach(function (p) { $("f-preset").append(h("option", { value: p.id, text: p.name + " · " + p.tagline })); });
+    $("open-settings").hidden = false; $("open-settings").onclick = function () { open(); };
+    drawRunState(me.status);
+    if (me.status.state === "running" || me.status.state === "queued") watchRun(me.status.last_run_at);
+    var q = new URLSearchParams(location.search).get("settings"); if (q) open(q);
+  }).catch(function () {});  // no backend (e.g. a static preview): the page just reads
 })();
 </script>
 </body>

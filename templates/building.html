@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Building your page · {{ title }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+{% include "_base.css" %}
+</style>
+<script>{% include "_theme.js" %}</script>
+</head>
+<body>
+<div class="frame screen">
+  <header class="bar">
+    <p class="brand">{{ title }}</p>
+    <div class="meta"><span>{{ email }}</span><button class="btn" type="button" id="signout">Sign out</button></div>
+  </header>
+  <div class="rule"></div>
+  <div class="center">
+    <div class="progress" aria-live="polite">
+      <div class="spin" id="spin"></div>
+      <h1 id="title">Building your first read</h1>
+      <p class="ob-lede" id="lede" style="margin:0 auto">This takes a few minutes the first time, because it reads the whole week so far. You can close this tab. The page will be here when you come back.</p>
+      <ol id="stages">
+        <li data-s="queued">Waiting for a free slot</li>
+        <li data-s="fetch">Fetching this week's tweets</li>
+        <li data-s="judge">Jev is scoring them</li>
+        <li data-s="write">Claude is writing your thesis</li>
+      </ol>
+      <div class="err-box" id="err" hidden></div>
+      <div class="btn-row" id="actions" style="justify-content:center;margin-top:20px" hidden>
+        <button class="btn primary" type="button" id="retry">Try again</button>
+        <button class="btn" type="button" id="fix">Check my keys</button>
+      </div>
+      <div id="keyfix" style="text-align:left;margin-top:22px" hidden></div>
+    </div>
+  </div>
+</div>
+<script>
+{% include "_shared.js" %}
+(function () {
+  var $ = TL.$, started = Date.now();
+  // The pipeline doesn't report its stage, so the list advances on typical timings while it runs.
+  function stage(st) {
+    var order = ["queued", "fetch", "judge", "write"], now = 0;
+    if (st.state === "running") { var m = (Date.now() - (Date.parse(st.last_run_started_at || "") || started)) / 60000; now = m < 1.5 ? 1 : m < 4 ? 2 : 3; }
+    document.querySelectorAll("#stages li").forEach(function (li) {
+      var i = order.indexOf(li.dataset.s);
+      li.className = i < now ? "on" : i === now ? "on now" : "";
+    });
+  }
+  function poll() {
+    TL.api("GET", "/api/status").then(function (st) {
+      if (st.has_page) { location.reload(); return; }
+      if (st.state === "error") {
+        $("spin").hidden = true; $("title").textContent = "The first build didn't finish";
+        $("lede").textContent = "Nothing was charged beyond the calls that ran. Here's what went wrong:";
+        $("err").hidden = false; $("err").textContent = st.last_error || "Unknown error.";
+        $("actions").hidden = false; $("stages").hidden = true;
+        return;
+      }
+      stage(st); setTimeout(poll, 5000);
+    }).catch(function () { setTimeout(poll, 10000); });
+  }
+  $("retry").onclick = function () {
+    this.disabled = true;
+    TL.api("POST", "/api/run", {}).then(function () { location.reload(); }).catch(function (e) { $("err").textContent = e.message; $("retry").disabled = false; });
+  };
+  $("fix").onclick = function () {
+    var box = $("keyfix"); box.hidden = !box.hidden; if (box.hidden || box.childNodes.length) return;
+    TL.api("GET", "/api/me").then(function (me) { TL.keyCards(box, me, { recheck: true }); }).catch(function (e) { box.textContent = e.message; });
+  };
+  $("signout").onclick = function () { TL.api("POST", "/api/logout").finally(function () { location.href = "/login"; }); };
+  poll();
+})();
+</script>
+</body>
+</html>
