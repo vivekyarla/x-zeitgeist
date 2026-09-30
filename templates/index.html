@@ -124,6 +124,9 @@
             <div><input class="inp" id="f-signal" type="number" min="0" max="4" step="0.1"><p class="hint">Min signal, 0–4</p></div>
             <div><input class="inp" id="f-relevance" type="number" min="0" max="1" step="0.05"><p class="hint">Min relevance, 0–1</p></div>
             <div><input class="inp" id="f-bait" type="number" min="0" max="1" step="0.05"><p class="hint">Max bait, 0–1</p></div>
+          </div>
+          <div class="row3" style="margin-top:12px">
+            <div><input class="inp" id="f-likes" type="number" min="0" step="50"><p class="hint">Min likes. Tracked companies use their own bar instead (under Sources).</p></div>
           </div></div>
         <div class="field"><span class="lbl">Ranking</span>
           <div class="row3">
@@ -312,6 +315,7 @@
     var box = $("f-topics"); box.innerHTML = "";
     s.topics.filter(function (t) { return t.key !== "other"; }).forEach(function (t) { box.appendChild(topicRow(t)); });
     $("f-signal").value = s.thresholds.min_signal; $("f-relevance").value = s.thresholds.min_relevance; $("f-bait").value = s.thresholds.max_bait;
+    $("f-likes").value = s.thresholds.min_likes != null ? s.thresholds.min_likes : 300;
     $("f-model").value = s.writer_model || "";
     var rk = s.ranking || {}, tr = s.tracked || {};
     $("r-breakout").value = rk.breakout_weight != null ? rk.breakout_weight : 0.5;
@@ -352,7 +356,8 @@
     s.focus = { audience: $("f-audience").value.trim() || draft.focus.audience, care_about: lines($("f-care").value), skip: lines($("f-skip").value) };
     if (!s.focus.care_about.length) throw new Error("Add at least one thing to focus on.");
     s.topics = TL.normalizeTopics(topics);
-    s.thresholds = { min_signal: num("f-signal", 0, 4, "Min signal"), min_relevance: num("f-relevance", 0, 1, "Min relevance"), max_bait: num("f-bait", 0, 1, "Max bait") };
+    s.thresholds = { min_signal: num("f-signal", 0, 4, "Min signal"), min_relevance: num("f-relevance", 0, 1, "Min relevance"), max_bait: num("f-bait", 0, 1, "Max bait"),
+      min_likes: Math.round(num("f-likes", 0, 1000000, "Min likes")) };
     s.writer_model = $("f-model").value.trim() || "anthropic/claude-sonnet-5";
     s.ranking = Object.assign({}, draft.ranking || {}, { breakout_weight: num("r-breakout", 0, 1, "Breakout weight"), mainstream_penalty: num("r-mainstream", 0, 1, "Big-lab penalty"),
       per_author_max: Math.round(num("r-author", 1, 10, "Max tweets per account")) });

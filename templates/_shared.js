@@ -140,7 +140,7 @@ var TL = (function () {
                  ["wider", "Wider net", "More tweets, some smaller stories too. Best when things feel missing."]];
     var nums = {};
     var grid = h("div", { class: "presets" }, cards.map(function (c) {
-      return h("button", { type: "button", class: "preset", "data-p": c[0], onclick: function () { s.thresholds = TL.clone(TL.FILTERS[c[0]]); draw(); } },
+      return h("button", { type: "button", class: "preset", "data-p": c[0], onclick: function () { s.thresholds = Object.assign({}, s.thresholds, TL.FILTERS[c[0]]); draw(); } },
         [h("b", { text: c[1] }), h("span", { text: c[2] })]);
     }));
     function num(key, min, max, step, hint) {
@@ -150,14 +150,21 @@ var TL = (function () {
     }
     function mark() { var cur = TL.filterName(s.thresholds); grid.querySelectorAll(".preset").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.p === cur)); }); }
     function draw() { Object.keys(nums).forEach(function (k) { nums[k].value = s.thresholds[k]; }); mark(); }
-    box.append(grid, h("details", { class: "more" }, [h("summary", { text: "Exact numbers" }), h("div", { class: "row3" }, [
+    if (s.thresholds.min_likes == null) s.thresholds.min_likes = 300;
+    var likes = h("input", { class: "inp", type: "number", min: "0", step: "50", style: "max-width:140px", "aria-label": "Minimum likes" });
+    likes.addEventListener("input", function () { var v = parseInt(this.value, 10); if (!isNaN(v) && v >= 0) s.thresholds.min_likes = v; });
+    nums.min_likes = likes;
+    box.append(grid, h("div", { class: "field", style: "margin-top:18px" }, [h("label", { text: "Minimum likes" }), likes,
+      h("p", { class: "hint", text: "A tweet needs at least this many likes to count, however on-topic it is, so small accounts' posts stay out. " +
+        "Tracked companies are the exception: they count when they clearly beat their own usual." })]),
+      h("details", { class: "more" }, [h("summary", { text: "Exact numbers" }), h("div", { class: "row3" }, [
       num("min_signal", 0, 4, 0.1, "Min signal, 0–4. About 2 means notable."),
       num("min_relevance", 0, 1, 0.05, "Min relevance, 0–1: how on-topic it must be"),
       num("max_bait", 0, 1, 0.05, "Max bait, 0–1: how much engagement bait is tolerated")])]));
     draw();
   };
   TL.checkFilter = function (th) {
-    [["min_signal", 0, 4, "Min signal"], ["min_relevance", 0, 1, "Min relevance"], ["max_bait", 0, 1, "Max bait"]].forEach(function (c) {
+    [["min_signal", 0, 4, "Min signal"], ["min_relevance", 0, 1, "Min relevance"], ["max_bait", 0, 1, "Max bait"], ["min_likes", 0, 1000000, "Minimum likes"]].forEach(function (c) {
       var v = +th[c[0]]; if (isNaN(v) || v < c[1] || v > c[2]) throw new Error(c[3] + " must be between " + c[1] + " and " + c[2] + ".");
     });
   };

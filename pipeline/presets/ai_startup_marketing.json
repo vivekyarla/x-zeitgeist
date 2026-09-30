@@ -127,7 +127,8 @@
   "thresholds": {
     "min_signal": 1.8,
     "min_relevance": 0.6,
-    "max_bait": 0.5
+    "max_bait": 0.5,
+    "min_likes": 500
   },
   "writer_model": "anthropic/claude-sonnet-5",
   "timezone": "America/Los_Angeles",

@@ -304,6 +304,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         settings = validate(p["settings"])
         settings["slack"]["enabled"] = False
         uid = user["id"] if user else db.create_user(PREVIEW_EMAIL, "", settings, recap_token())
+        changed = bool(user) and json.loads(user["settings"]) != settings
         db.set_settings(uid, settings)
         db.set_onboarded(uid)
         for n, v in (cfg.preview_keys or {}).items():
@@ -311,7 +312,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
             # Enough to compare against the provider's dashboard, not enough to use.
             log.info("example page %s key: %d characters, ends in …%s", n, len(v), v[-4:])
         run = db.run(uid)
-        if run["state"] in ("error", "new") or not worker._has_read(uid):
+        if changed or run["state"] in ("error", "new") or not worker._has_read(uid):
             db.queue(uid)  # e.g. after fixing a preview key: redeploying retries right away
         return uid
 

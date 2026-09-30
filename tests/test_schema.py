@@ -60,3 +60,11 @@ def test_limits(base):
     s = copy.deepcopy(base); s["panel"]["groups"][0]["accounts"] = [f"a{i}" for i in range(120)]
     bad(s, "anchor")
     bad("nope", "object")
+
+
+def test_min_likes_default_and_presets():
+    from server.settings_schema import load_presets, validate
+    s = validate({**load_presets()[0]["settings"], "thresholds": {"min_signal": 1.8, "min_relevance": 0.6, "max_bait": 0.5}})
+    assert s["thresholds"]["min_likes"] == 300  # older profiles get a floor
+    by_id = {p["id"]: p["settings"]["thresholds"]["min_likes"] for p in load_presets()}
+    assert by_id["ai_startup_marketing"] == 500 and by_id["gtm_sales"] == 250

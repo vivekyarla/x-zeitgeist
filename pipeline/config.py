@@ -58,6 +58,9 @@ _th = SETTINGS["thresholds"]
 MIN_RELEVANCE = float(_th["min_relevance"])  # P(on-topic for the focus above)
 MAX_BAIT = float(_th["max_bait"])            # P(engagement bait, spam, giveaway, shilling)
 MIN_SIGNAL = float(_th["min_signal"])        # 0-4 rubric score; ~2 = "notable"
+# Likes a tweet needs to count at all, however on-topic, unless it's from a tracked company
+# (they're held to their own usual instead). Keeps small accounts' 100-like posts out.
+MIN_LIKES = int(_th.get("min_likes", 0))
 
 # Share of the tweets sent to the writer that each topic should get (they sum to ~1).
 TOPIC_SHARES = {t["key"]: float(t.get("share", 0)) for t in _topics if t.get("include", True)}

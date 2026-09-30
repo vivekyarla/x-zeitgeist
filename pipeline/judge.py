@@ -168,6 +168,8 @@ def why_not(t: dict, baselines: dict) -> str | None:
         if j["signal"] < config.TRACKED_MIN_SIGNAL:
             return f"signal {j['signal']:.2f}"
         return None
+    if t["likes"] < config.MIN_LIKES:
+        return f"{t['likes']:,} likes, under {config.MIN_LIKES:,}"
     if j["signal"] < config.MIN_SIGNAL:
         return f"signal {j['signal']:.2f}"
     return None
