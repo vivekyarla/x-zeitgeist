@@ -308,6 +308,8 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         db.set_onboarded(uid)
         for n, v in (cfg.preview_keys or {}).items():
             db.set_key(uid, n, box.seal(v))
+            # Enough to compare against the provider's dashboard, not enough to use.
+            log.info("example page %s key: %d characters, ends in …%s", n, len(v), v[-4:])
         run = db.run(uid)
         if run["state"] in ("error", "new") or not worker._has_read(uid):
             db.queue(uid)  # e.g. after fixing a preview key: redeploying retries right away

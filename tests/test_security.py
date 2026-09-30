@@ -55,3 +55,12 @@ def test_base_url_defaults_to_railway_domain(monkeypatch, tmp_path):
     assert config.load().base_url == "https://timeline-production.up.railway.app"
     monkeypatch.setenv("BASE_URL", "https://timeline.rox.com/")
     assert config.load().base_url == "https://timeline.rox.com"
+
+
+def test_pasted_env_values_are_cleaned(monkeypatch, tmp_path):
+    from server import config
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("TIMELINE_DEMO", "1")
+    monkeypatch.setenv("PREVIEW_TWITTERAPI_IO_KEY", ' "<abc123>" ')
+    monkeypatch.setenv("PREVIEW_AI_GATEWAY_API_KEY", "'vck_x'")
+    assert config.load().preview_keys == {"twitterapi_io": "abc123", "ai_gateway": "vck_x"}

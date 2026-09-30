@@ -11,6 +11,14 @@ ROOT = Path(__file__).resolve().parent.parent
 SITE_TITLE = "This week on the timeline"
 
 
+def _env_value(name: str) -> str:
+    """An env var pasted into a dashboard: drop whitespace and stray wrapping quotes or <brackets>."""
+    v = os.getenv(name, "").strip()
+    while len(v) >= 2 and (v[0], v[-1]) in (('"', '"'), ("'", "'"), ("<", ">")):
+        v = v[1:-1].strip()
+    return v
+
+
 def _truthy(v: str | None) -> bool:
     return (v or "").strip().lower() in ("1", "true", "yes", "on")
 
@@ -86,13 +94,13 @@ def load() -> Config:
         secret = f.read_text().strip()
     elif len(secret) < 16:
         raise RuntimeError("SECRET_KEY is too short; use at least 32 random characters.")
-    google_id, google_secret = os.getenv("GOOGLE_CLIENT_ID", "").strip(), os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
+    google_id, google_secret = _env_value("GOOGLE_CLIENT_ID"), _env_value("GOOGLE_CLIENT_SECRET")
     domains = tuple(d.strip().lower().lstrip("@") for d in os.getenv("ALLOWED_EMAIL_DOMAINS", "").split(",") if d.strip())
     pw = os.getenv("PASSWORD_LOGIN", "").strip()
     # With Google set up, email/password accounts are off unless PASSWORD_LOGIN=1 turns them back on.
     password_login = _truthy(pw) if pw else not (google_id and google_secret)
-    pk = {"twitterapi_io": os.getenv("PREVIEW_TWITTERAPI_IO_KEY", "").strip(),
-          "ai_gateway": os.getenv("PREVIEW_AI_GATEWAY_API_KEY", "").strip()}
+    pk = {"twitterapi_io": _env_value("PREVIEW_TWITTERAPI_IO_KEY"),
+          "ai_gateway": _env_value("PREVIEW_AI_GATEWAY_API_KEY")}
     return Config(
         data_dir=data_dir,
         base_url=base_url,
