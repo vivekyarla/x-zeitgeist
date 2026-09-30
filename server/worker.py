@@ -22,6 +22,7 @@ import threading
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -38,6 +39,10 @@ KEY_ENV = {"twitterapi_io": "TWITTERAPI_IO_KEY", "ai_gateway": "AI_GATEWAY_API_K
 REQUIRED_KEYS = ("twitterapi_io", "ai_gateway")
 RUN_TIMEOUT = 20 * 60
 DELIVER_TIMEOUT = 5 * 60
+# Leases are short and renewed while a job runs, so one left by a process that died (e.g. a
+# redeploy mid-run) expires in minutes and the run is picked up again, instead of blocking it.
+LEASE = 180
+RENEW_EVERY = 60
 RETRY_AFTER = 30 * 60
 TICK = 20
 LOG_MAX = 200_000
@@ -113,6 +118,22 @@ class Worker:
         text = out.decode("utf-8", "replace") if isinstance(out, bytes) else str(out)
         return code, redact(text, secrets_)
 
+    @contextmanager
+    def _holding(self, user_id: int):
+        """Keep renewing this user's lease while the block runs."""
+        done = threading.Event()
+
+        def beat():
+            while not done.wait(RENEW_EVERY):
+                self.db.renew(user_id, self.owner, LEASE)
+        t = threading.Thread(target=beat, daemon=True)
+        t.start()
+        try:
+            yield
+        finally:
+            done.set()
+            t.join(timeout=5)
+
     def _has_read(self, user_id: int) -> bool:
         try:
             return bool(json.loads((self.paths(user_id)["data"] / "week.json").read_text()).get("latest"))
@@ -123,7 +144,7 @@ class Worker:
     def run_user(self, user_id: int) -> bool:
         """Run a queued update for this user now. Returns True on success, False on failure or if
         the run wasn't queued / someone else holds it."""
-        if not self.db.claim(user_id, self.owner, RUN_TIMEOUT + 300, start_run=True):
+        if not self.db.claim(user_id, self.owner, LEASE, start_run=True):
             return False
         try:
             user = self.db.user(user_id)
@@ -136,7 +157,8 @@ class Worker:
             env = self.env_for(user_id, keys, user["recap_token"])
             args = ["--demo"] if self.cfg.demo else ["--slack", slack_mode]
             started = time.time()
-            code, text = self._exec(args, env, RUN_TIMEOUT, list(keys.values()))
+            with self._holding(user_id):
+                code, text = self._exec(args, env, RUN_TIMEOUT, list(keys.values()))
             self._write_log(self.paths(user_id)["data"] / "last_run.log", text)
             # A few progress lines (already redacted) in the server log, so a host's log view shows
             # what each run fetched and kept without opening the per-user log file.
@@ -175,7 +197,7 @@ class Worker:
 
     def deliver_user(self, user_id: int) -> bool:
         """The hourly daily-post check: `pipeline.run --deliver` on saved state (no API calls)."""
-        if self.cfg.demo or not self.db.claim(user_id, self.owner, DELIVER_TIMEOUT + 60, start_run=False):
+        if self.cfg.demo or not self.db.claim(user_id, self.owner, LEASE, start_run=False):
             return False
         try:
             user = self.db.user(user_id)
@@ -183,8 +205,9 @@ class Worker:
                 return False
             self.write_settings(user_id, user["settings"])
             keys = self.keys(user_id)
-            code, text = self._exec(["--deliver"], self.env_for(user_id, keys, user["recap_token"]),
-                                    DELIVER_TIMEOUT, list(keys.values()))
+            with self._holding(user_id):
+                code, text = self._exec(["--deliver"], self.env_for(user_id, keys, user["recap_token"]),
+                                        DELIVER_TIMEOUT, list(keys.values()))
             self._write_log(self.paths(user_id)["data"] / "last_deliver.log", text)
             self.db.update_run(user_id, last_deliver_at=time.time())
             return code == 0

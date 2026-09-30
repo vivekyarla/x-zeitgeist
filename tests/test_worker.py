@@ -121,3 +121,30 @@ def test_tracked_company_needs_a_real_bar_too(monkeypatch):
     big = {**small, "likes": 400, "jev": {**small["jev"], "signal": 2.1}}
     assert judge.why_not(big, base) is None  # well past its usual, and notable: still counts
     assert judge.why_not({**big, "jev": small["jev"]}, base) == "signal 1.20"
+
+
+def test_run_left_by_a_dead_process_is_picked_up_again(app, monkeypatch):
+    import time
+    from server import worker as wmod
+    db, worker = app.state.db, app.state.worker
+    uid = db.user_by_email("preview@timeline.invalid")["id"]
+    # a redeploy killed the old container mid-run: its lease outlives it by at most LEASE seconds
+    db.update_run(uid, state="running", lease_owner="old-container", lease_until=time.time() + wmod.LEASE)
+    assert db.queue(uid) is False  # still "running" until the lease runs out
+    db.update_run(uid, lease_until=time.time() - 1)
+    db.queue_due(time.time(), ())
+    assert db.run(uid)["state"] == "queued"
+    assert worker.run_user(uid) is True
+
+
+def test_lease_is_renewed_while_a_run_is_going(app, monkeypatch):
+    import time
+    from server import worker as wmod
+    db, worker = app.state.db, app.state.worker
+    uid = db.user_by_email("preview@timeline.invalid")["id"]
+    monkeypatch.setattr(wmod, "RENEW_EVERY", 0.05)
+    monkeypatch.setattr(wmod, "LEASE", 1000)
+    db.update_run(uid, lease_owner=worker.owner, lease_until=time.time())
+    with worker._holding(uid):
+        time.sleep(0.2)
+    assert db.run(uid)["lease_until"] > time.time() + 900

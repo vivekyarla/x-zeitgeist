@@ -169,6 +169,17 @@ class DB:
                                 (now + seconds, owner, user_id, now))
             return cur.rowcount == 1
 
+    def cap_leases(self, seconds: float) -> None:
+        """Shorten leases longer than `seconds` (left by older versions that held them for 25 minutes)."""
+        until = time.time() + seconds
+        with self.conn() as c:
+            c.execute("UPDATE runs SET lease_until = ? WHERE lease_until > ?", (until, until))
+
+    def renew(self, user_id: int, owner: str, seconds: float) -> None:
+        with self.conn() as c:
+            c.execute("UPDATE runs SET lease_until = ? WHERE user_id = ? AND lease_owner = ?",
+                      (time.time() + seconds, user_id, owner))
+
     def release(self, user_id: int, owner: str) -> None:
         with self.conn() as c:
             c.execute("UPDATE runs SET lease_until = 0, lease_owner = NULL WHERE user_id = ? AND lease_owner = ?",

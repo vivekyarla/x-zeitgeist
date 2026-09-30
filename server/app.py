@@ -32,7 +32,7 @@ from .config import ROOT, SITE_TITLE, Config
 from .db import DB
 from .security import Box, fernet_key, hash_password, recap_token, verify_password
 from .settings_schema import SettingsError, default_settings, load_presets, validate
-from .worker import KEY_ENV, REQUIRED_KEYS, Worker
+from .worker import KEY_ENV, LEASE, REQUIRED_KEYS, Worker
 
 log = logging.getLogger("timeline")
 
@@ -316,6 +316,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
             db.queue(uid)  # e.g. after fixing a preview key: redeploying retries right away
         return uid
 
+    db.cap_leases(LEASE)  # a run cut off by the last redeploy is picked up again within minutes
     preview_uid = ensure_preview()
     preview_name = next((x["name"] for x in presets if x["id"] == cfg.preview_preset), "AI startup marketer")
 
