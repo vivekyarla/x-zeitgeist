@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -112,6 +113,12 @@ class Worker:
         text = out.decode("utf-8", "replace") if isinstance(out, bytes) else str(out)
         return code, redact(text, secrets_)
 
+    def _has_read(self, user_id: int) -> bool:
+        try:
+            return bool(json.loads((self.paths(user_id)["data"] / "week.json").read_text()).get("latest"))
+        except (OSError, ValueError):
+            return False
+
     # -- one update --------------------------------------------------------
     def run_user(self, user_id: int) -> bool:
         """Run a queued update for this user now. Returns True on success, False on failure or if
@@ -131,12 +138,19 @@ class Worker:
             started = time.time()
             code, text = self._exec(args, env, RUN_TIMEOUT, list(keys.values()))
             self._write_log(self.paths(user_id)["data"] / "last_run.log", text)
+            # A few progress lines (already redacted) in the server log, so a host's log view shows
+            # what each run fetched and kept without opening the per-user log file.
+            for ln in text.splitlines():
+                if ln.strip().startswith(SUMMARY_PREFIXES):
+                    log.info("user %s: %s", user_id, ln.strip()[:300])
             now = time.time()
             error = None
             if code is None:
                 error = "The update took longer than 20 minutes and was stopped. It will try again in 30 minutes."
             elif code != 0:
                 error = humanize(text)
+            elif not self.cfg.demo and "nothing passed the filter" in text and not self._has_read(user_id):
+                error = empty_reason(text)  # it ran, but there's still no thesis to show
             elif not self.cfg.demo and "fetched 0 tweets" in text and "search failed" in text:
                 error = humanize(text)  # every search failed (e.g. a rejected key) but nothing crashed
             rerun = bool((self.db.run(user_id) or {"rerun": 0})["rerun"])  # settings saved while this ran
@@ -255,6 +269,24 @@ class Worker:
         self._pool.shutdown(wait=False, cancel_futures=True)
 
 
+SUMMARY_PREFIXES = ("fetched", "judged", "sent to writer", "nothing passed", "search failed", "  search failed",
+                    "  fetched by source", "slack:", "Jev", "jev:", "Traceback", "SystemExit", "requests.exceptions")
+
+
+def empty_reason(text: str) -> str:
+    """Why a run that finished still has nothing to show."""
+    m = re.search(r"fetched (\d+) tweets", text)
+    n = int(m.group(1)) if m else 0
+    if n == 0:
+        failed = "search failed" in text
+        return (humanize(text) if failed and humanize(text) != "The last update failed: no output" else
+                "The update found no tweets this week. " + ("Every search failed, so check your twitterapi.io key "
+                "and credits." if failed else "Check the searches and panel accounts under Sources.")) + \
+            " It will try again in 30 minutes."
+    return (f"The update read {n} tweets, but none passed the filter yet. Early in the week there's less to go on; "
+            "try the Wider net filter under Feed. It will try again in 30 minutes.")
+
+
 def humanize(text: str) -> str:
     """Turn a run's output into one sentence a person can act on."""
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
@@ -264,7 +296,7 @@ def humanize(text: str) -> str:
     if "keyerror: 'ai_gateway_api_key'" in low:
         return "Your AI Gateway key is missing. Add it under API keys."
     for ln in reversed(lines):
-        l = ln.lower()
+        l = " " + ln.lower().replace("(", " ")  # "search failed (402 Client Error…" → " 402"
         if "twitterapi.io" in l and (" 401" in l or " 403" in l or "unauthorized" in l or "forbidden" in l):
             return ("twitterapi.io rejected your key. Copy it again from twitterapi.io/dashboard "
                     "and save it under API keys.")

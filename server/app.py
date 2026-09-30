@@ -308,8 +308,9 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         db.set_onboarded(uid)
         for n, v in (cfg.preview_keys or {}).items():
             db.set_key(uid, n, box.seal(v))
-        if not (worker.paths(uid)["out"] / "index.html").exists():
-            db.queue(uid)
+        run = db.run(uid)
+        if run["state"] in ("error", "new") or not worker._has_read(uid):
+            db.queue(uid)  # e.g. after fixing a preview key: redeploying retries right away
         return uid
 
     preview_uid = ensure_preview()

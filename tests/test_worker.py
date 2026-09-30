@@ -86,3 +86,11 @@ def test_legacy_hour_pt(tmp_path):
     out = subprocess.run([sys.executable, "-c", "from pipeline import config; print(config.SLACK['hour'], config.TIMEZONE)"],
                          cwd=ROOT, env=env, check=True, capture_output=True, text=True).stdout.split()
     assert out == ["10", "America/Los_Angeles"]
+
+
+def test_empty_run_explains_itself():
+    from server.worker import empty_reason
+    msg = empty_reason("fetched 812 tweets\njudged 812 tweets\nnothing passed the filter; leaving the page as it was")
+    assert "812 tweets" in msg and "Wider net" in msg
+    msg = empty_reason("  search failed (402 Payment Required): x\nfetched 0 tweets\nnothing passed the filter")
+    assert "try again in 30 minutes" in msg
