@@ -400,7 +400,7 @@
     var before = me && me.status.last_run_at;
     TL.api("PUT", "/api/settings", { settings: s }).then(function (r) {
       settings = r.settings; fill(settings);
-      return TL.api("POST", "/api/run", {}).then(function () { say("Saved. Your page rebuilds with the new settings in a few minutes."); watchRun(before); },
+      return TL.api("POST", "/api/run", {}).then(function (st) { say("Saved. " + (st.message || "Your page rebuilds in a few minutes.")); watchRun(before); },
         function (e) { say("Saved. " + e.message); });
     }).catch(function (e) { say(e.message, true); }).finally(function () { btn.disabled = false; });
   };

@@ -1,0 +1,20 @@
+# docker compose up --build   → http://localhost:8000
+# Put SECRET_KEY and BASE_URL in .env (see .env.example) before exposing it beyond localhost.
+services:
+  timeline:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      BASE_URL: ${BASE_URL:-http://localhost:8000}
+      SECRET_KEY: ${SECRET_KEY:-}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      MAX_CONCURRENT_RUNS: ${MAX_CONCURRENT_RUNS:-3}
+      REFRESH_HOURS: ${REFRESH_HOURS:-3}
+      TIMELINE_DEMO: ${TIMELINE_DEMO:-0}
+    volumes:
+      - timeline-data:/data
+    restart: unless-stopped
+
+volumes:
+  timeline-data:

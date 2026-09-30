@@ -1,6 +1,6 @@
 """The daily recap: the thesis, what's new today, and the themes, as a small feed.
 
-build.py publishes it as public/recap.json and public/recap.md every update, for Slack
+build.py publishes it as recap.json and recap.md next to the page every update, for Slack
 and for personal agents (Instinct, Meta Muse) that fetch a URL on a daily schedule.
 """
 from __future__ import annotations
@@ -30,12 +30,15 @@ def _plain(text: str, n: int) -> str:
 
 
 def _links() -> tuple[str, dict]:
-    """Page base URL (relative when PAGE_URL isn't set, e.g. locally) and the feed links."""
-    base = config.PAGE_URL
-    if base and not base.endswith("/"):
-        base += "/"
+    """Page URL (relative when PAGE_URL isn't set, e.g. locally) and the feed links.
+
+    The feed lives at TIMELINE_RECAP_URL when set (a private, token URL that agents can
+    read without signing in), else next to the page."""
+    def slash(u: str) -> str:
+        return u if not u or u.endswith("/") else u + "/"
+    base, feed = slash(config.PAGE_URL), slash(config.RECAP_URL)
     page = base or "index.html"
-    return page, {"page": page, "recap_json": base + "recap.json", "recap_md": base + "recap.md"}
+    return page, {"page": page, "recap_json": feed + "recap.json", "recap_md": feed + "recap.md"}
 
 
 def recap(state: dict, now: datetime | None = None) -> dict:

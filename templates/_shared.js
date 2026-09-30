@@ -341,7 +341,7 @@ var TL = (function () {
     if (o.sendNow) c.body.append(h("div", { class: "btn-row", style: "margin-top:12px" }, [
       h("button", { class: "btn", type: "button", text: "Send today's recap now", onclick: function () {
         if (!me.keys.slack_webhook) { tell("Connect a webhook first.", "err"); return; }
-        tell("Starting…"); TL.api("POST", "/api/run", { slack: "now" }).then(function () { tell("It posts after this update finishes, in a few minutes.", "ok"); })
+        tell("Starting…"); TL.api("POST", "/api/run", { slack: "now" }).then(function (st) { tell((st.message || "Updating now.") + " Your recap posts to Slack when it's done.", "ok"); })
           .catch(function (e) { tell(e.message, "err"); });
       } }), test && h("button", { class: "btn", type: "button", text: "Send test", onclick: test })]));
     c.body.append(note);

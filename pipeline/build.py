@@ -1,4 +1,4 @@
-"""Render the weekly state into public/index.html (+ data.json, recap.json, recap.md)."""
+"""Render the weekly state into index.html (+ data.json, recap.json, recap.md) in the out dir."""
 from __future__ import annotations
 
 import json
@@ -83,15 +83,16 @@ def build_site(state: dict, out_dir: Path, demo: bool = False, now: datetime | N
         latest=latest,
         thesis_html=_thesis_html(latest["thesis"], themes) if latest else "",
         updated_iso=latest["updated_at"] if latest else None,
-        updated_label=f"{_local(latest['updated_at']):%a %-I:%M %p} PT" if latest else None,
+        updated_label=f"{_local(latest['updated_at']):%a %-I:%M %p %Z}" if latest else None,
         themes=themes,
         history=history,
         known_stories=(latest or {}).get("known_stories", []),
         near_misses=[{"reason": m["reason"], "tweet": tweets[m["id"]]}
                      for m in (latest or {}).get("near_misses", []) if m["id"] in tweets][:30],
         demo=demo,
-        repo=config.REPO,
         settings=config.SETTINGS,
+        timezone=config.TIMEZONE,  # IANA name, e.g. "America/Los_Angeles"
+        page_url=config.PAGE_URL,
         recap=recap,
         slack_status={"last_post": state.get("slack_last_post"), "last_error": state.get("slack_last_error")},
     )

@@ -1,15 +1,26 @@
-"""Loads settings.json (what the page's Settings panel edits) plus a few fixed knobs.
+"""Loads one profile's settings plus a few fixed knobs.
 
-Interests, searches, thresholds, and Slack schedule live in settings.json at the repo
-root. Edit them there or from the Settings panel on the page; this file only reads them.
+Each run works on one profile. The server points these env vars at that user's files;
+unset, they fall back to the repo itself (settings.json, data/, public/), so
+`python -m pipeline.run --demo` works on its own:
+
+  TIMELINE_SETTINGS   the profile's settings.json
+  TIMELINE_DATA       its state dir (week.json, archive/, panel.json)
+  TIMELINE_OUT        where the page is built (index.html, data.json, recap.*)
+  PAGE_URL            the page's public URL (links in the recap and Slack)
+  TIMELINE_RECAP_URL  base URL of the recap feed (recap.md / recap.json); defaults to PAGE_URL
 """
 import hashlib
 import json
 import os
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
-SETTINGS_PATH = Path(__file__).resolve().parent.parent / "settings.json"
+ROOT = Path(__file__).resolve().parent.parent
+SETTINGS_PATH = Path(os.getenv("TIMELINE_SETTINGS") or ROOT / "settings.json")
 SETTINGS = json.loads(SETTINGS_PATH.read_text())
+DATA_DIR = Path(os.getenv("TIMELINE_DATA") or ROOT / "data")
+OUT_DIR = Path(os.getenv("TIMELINE_OUT") or ROOT / "public")
 
 # ---------------------------------------------------------------------------
 # What to pull from X each run
@@ -87,13 +98,28 @@ TWEETS_PER_THEME_SHOWN = 6
 # ---------------------------------------------------------------------------
 # Slack
 # ---------------------------------------------------------------------------
-SLACK = {"enabled": False, "frequency": "daily", "hour_pt": 8, "weekdays_only": True, "top_tweets": 5,
+SLACK = {"enabled": False, "frequency": "daily", "weekdays_only": True, "top_tweets": 5,
          **SETTINGS.get("slack", {})}
+# Local hour (in TIMEZONE) for the daily post; older settings called it hour_pt.
+SLACK["hour"] = int(SLACK.get("hour", SLACK.get("hour_pt", 8)))
 
 # ---------------------------------------------------------------------------
 # Week boundaries and page
 # ---------------------------------------------------------------------------
-TIMEZONE = "America/Los_Angeles"  # week starts Monday 00:00 in this zone
+DEFAULT_TIMEZONE = "America/Los_Angeles"
+
+
+def _timezone(name) -> str:
+    try:
+        ZoneInfo(str(name))
+        return str(name)
+    except Exception:
+        return DEFAULT_TIMEZONE
+
+
+# IANA zone for this profile: the week starts Monday 00:00 here, and times and the daily
+# Slack hour are local to it.
+TIMEZONE = _timezone(SETTINGS.get("timezone") or DEFAULT_TIMEZONE)
 SITE_TITLE = "This week on the timeline"
 PAGE_URL = os.getenv("PAGE_URL", "")
-REPO = os.getenv("GITHUB_REPOSITORY", "")  # owner/name, set by GitHub Actions
+RECAP_URL = os.getenv("TIMELINE_RECAP_URL", "") or PAGE_URL

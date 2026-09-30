@@ -1,0 +1,241 @@
+{
+  "preset": {
+    "id": "ai_engineer",
+    "name": "AI engineer",
+    "tagline": "Models, evals, agents, and coding tools that matter",
+    "description": "For people who build with LLMs: the launches, evals, agent and coding-tool news, open models, and papers engineers are actually discussing, without the fundraising gossip."
+  },
+  "focus": {
+    "audience": "an AI engineer who builds products with LLMs and wants to keep up with the field",
+    "care_about": [
+      "New model and AI tool launches, with benchmarks, pricing, and hands-on reactions from people who tried them",
+      "Evals and benchmarks: how models are measured, what actually works, and surprising results",
+      "Agents and agent frameworks: tool calling, MCP, memory, orchestration, and real agents in production",
+      "AI coding tools and developer workflows: Claude Code, Cursor, Codex, and how engineers actually use them",
+      "Open-weights models, local inference, and the tooling around them (Hugging Face, vLLM, llama.cpp, MLX)",
+      "Papers and research that practitioners are discussing, and practical techniques: prompting, context engineering, RAG, fine-tuning, inference speed and cost"
+    ],
+    "skip": [
+      "Fundraising, valuations, revenue gossip, and hype threads with no technical substance",
+      "Politics, regulation, lawsuits, and macro or stock-market talk",
+      "Crypto and token shilling"
+    ]
+  },
+  "topics": [
+    {
+      "key": "model_launches",
+      "label": "Model launches",
+      "description": "New AI models and model updates from labs or open-source teams, with benchmarks, pricing, and first reactions",
+      "include": true,
+      "share": 0.22
+    },
+    {
+      "key": "coding_tools",
+      "label": "Coding tools",
+      "description": "AI coding tools and developer workflows: Claude Code, Cursor, Codex, coding agents, IDEs, and how engineers use them",
+      "include": true,
+      "share": 0.18
+    },
+    {
+      "key": "agents",
+      "label": "Agents",
+      "description": "Agents and agent frameworks: tool calling, MCP, memory, orchestration, computer use, and agents in production",
+      "include": true,
+      "share": 0.15
+    },
+    {
+      "key": "evals",
+      "label": "Evals & benchmarks",
+      "description": "Evals, benchmarks, leaderboards, and careful comparisons of what models can and can't do",
+      "include": true,
+      "share": 0.12
+    },
+    {
+      "key": "open_models",
+      "label": "Open models",
+      "description": "Open-weights models, local inference, quantization, and open-source AI tooling",
+      "include": true,
+      "share": 0.13
+    },
+    {
+      "key": "research",
+      "label": "Papers & research",
+      "description": "Research papers and findings practitioners are discussing: reasoning, RL, training, interpretability, architecture",
+      "include": true,
+      "share": 0.12
+    },
+    {
+      "key": "techniques",
+      "label": "Techniques",
+      "description": "Practical how-tos: prompting, context engineering, RAG, fine-tuning, inference speed and cost, production lessons",
+      "include": true,
+      "share": 0.08
+    },
+    {
+      "key": "ai_business",
+      "label": "AI business",
+      "description": "Fundraising, valuations, revenue, acquisitions, and hires at AI companies",
+      "include": false,
+      "share": 0
+    },
+    {
+      "key": "policy",
+      "label": "Policy",
+      "description": "Politics, government, regulation, lawsuits, and AI safety incidents",
+      "include": false,
+      "share": 0
+    },
+    {
+      "key": "other",
+      "label": "Other",
+      "description": "Anything else",
+      "include": false,
+      "share": 0
+    }
+  ],
+  "searches": [
+    "(\"new model\" OR \"open weights\" OR \"open-weights\" OR \"just released\" OR \"now available\") (LLM OR model OR weights OR API) min_faves:500 lang:en -filter:replies",
+    "(\"Claude Code\" OR Cursor OR Codex OR Windsurf OR \"coding agent\" OR \"vibe coding\" OR \"AI coding\") min_faves:300 lang:en -filter:replies",
+    "(agent OR agents OR agentic OR MCP OR \"tool calling\" OR \"computer use\") (framework OR eval OR built OR shipped OR \"open source\" OR production) min_faves:300 lang:en -filter:replies",
+    "(evals OR eval OR benchmark OR \"SWE-bench\" OR LMArena OR leaderboard OR ARC-AGI) (model OR LLM OR models) min_faves:200 lang:en -filter:replies",
+    "(arxiv.org OR \"new paper\" OR \"our paper\" OR \"paper is out\") (LLM OR transformer OR RL OR reasoning OR model OR training) min_faves:300 lang:en -filter:replies",
+    "(\"Hugging Face\" OR huggingface.co OR llama.cpp OR vLLM OR Ollama OR MLX OR GGUF OR \"run locally\") min_faves:200 lang:en -filter:replies",
+    "(RAG OR \"fine-tuning\" OR finetuning OR \"context engineering\" OR \"prompt engineering\" OR \"inference cost\" OR distillation) (LLM OR model OR agents) min_faves:300 lang:en -filter:replies"
+  ],
+  "watchlist": [
+    "karpathy",
+    "simonw",
+    "swyx",
+    "jeremyphoward",
+    "_akhaliq",
+    "OfficialLoganK",
+    "hwchase17",
+    "HamelHusain",
+    "eugeneyan",
+    "natolambert",
+    "jxnlco",
+    "rauchg",
+    "mckaywrigley",
+    "amasad"
+  ],
+  "watchlist_min_faves": 20,
+  "thresholds": {
+    "min_signal": 1.8,
+    "min_relevance": 0.6,
+    "max_bait": 0.5
+  },
+  "writer_model": "anthropic/claude-sonnet-5",
+  "timezone": "America/Los_Angeles",
+  "slack": {
+    "enabled": false,
+    "frequency": "daily",
+    "hour": 8,
+    "weekdays_only": true,
+    "top_tweets": 5
+  },
+  "ranking": {
+    "per_author_max": 2,
+    "breakout_weight": 0.3,
+    "mainstream_penalty": 0.1,
+    "account_groups": {
+      "OpenAI": [
+        "OpenAI",
+        "OpenAIDevs",
+        "ChatGPTapp",
+        "sama",
+        "OpenAINewsroom"
+      ],
+      "Anthropic": [
+        "AnthropicAI",
+        "claudeai",
+        "ClaudeDevs",
+        "DarioAmodei"
+      ],
+      "Google": [
+        "Google",
+        "GoogleDeepMind",
+        "GoogleAIStudio",
+        "GeminiApp",
+        "GoogleAI",
+        "sundarpichai"
+      ],
+      "Meta": [
+        "Meta",
+        "AIatMeta",
+        "finkd"
+      ],
+      "xAI": [
+        "xai",
+        "grok",
+        "elonmusk"
+      ],
+      "Microsoft": [
+        "Microsoft",
+        "satyanadella",
+        "code",
+        "GitHub"
+      ],
+      "Nvidia": [
+        "nvidia",
+        "NVIDIAAI"
+      ]
+    },
+    "breadth_weight": 1.0
+  },
+  "tracked": {
+    "accounts": [
+      "cursor_ai",
+      "huggingface",
+      "LangChainAI",
+      "OpenRouterAI",
+      "ollama",
+      "vllm_project",
+      "modal_labs",
+      "replicate"
+    ],
+    "beat_baseline_by": 3.0,
+    "min_signal": 1.0,
+    "min_likes": 25
+  },
+  "panel": {
+    "groups": [
+      {
+        "name": "AI builders",
+        "share": 0.75,
+        "accounts": [
+          "karpathy",
+          "swyx",
+          "simonw",
+          "jeremyphoward",
+          "hwchase17",
+          "_akhaliq",
+          "OfficialLoganK",
+          "mckaywrigley",
+          "amasad",
+          "eugeneyan",
+          "HamelHusain",
+          "jxnlco",
+          "rauchg"
+        ]
+      },
+      {
+        "name": "research",
+        "share": 0.25,
+        "accounts": [
+          "natolambert",
+          "rasbt",
+          "srush_nlp",
+          "DrJimFan",
+          "tri_dao",
+          "giffmana"
+        ]
+      }
+    ],
+    "min_overlap": 2,
+    "max_accounts": 300,
+    "include": [],
+    "exclude": [],
+    "refresh_days": 7
+  },
+  "known_stories": []
+}

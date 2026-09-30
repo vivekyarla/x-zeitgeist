@@ -3,18 +3,16 @@
 Built from anchor accounts (settings.json → panel.anchors): an account joins the panel
 when at least `min_overlap` anchors follow it. Those are the people the scene itself
 pays attention to, so stories are discovered by who is posting and reacting, not by
-guessing keywords. Rebuilt every `refresh_days`; saved to data/panel.json.
+guessing keywords. Rebuilt every `refresh_days`; saved to panel.json in the data dir.
 """
 from __future__ import annotations
 
 import collections
 import json
 from datetime import datetime, timedelta
-from pathlib import Path
-
 from . import config
 
-PANEL_PATH = Path(__file__).resolve().parent.parent / "data" / "panel.json"
+PANEL_PATH = config.DATA_DIR / "panel.json"
 
 
 def load() -> dict:
@@ -77,7 +75,7 @@ def refresh(src, now: datetime, force: bool = False) -> dict:
         chosen.setdefault(h.lower().lstrip("@"), {"handle": h.lstrip("@"), "group": "added", "overlap": 0, "followers": 0})
     accounts = [a for k, a in chosen.items() if k not in exclude]
     panel = {"built_at": now.isoformat(), "settings": _settings_key(), "anchors_loaded": loaded, "accounts": accounts}
-    PANEL_PATH.parent.mkdir(exist_ok=True)
+    PANEL_PATH.parent.mkdir(parents=True, exist_ok=True)
     PANEL_PATH.write_text(json.dumps(panel, indent=1))
     by_group = collections.Counter(a["group"] for a in accounts)
     print(f"  panel: {len(accounts)} accounts {dict(by_group)} from {len(loaded)} anchors")

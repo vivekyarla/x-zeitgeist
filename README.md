@@ -1,82 +1,138 @@
 # This week on the timeline
 
-A page that shows the marketing team what tech, AI, SF, and sales Twitter is talking about this week, with a 1–2 sentence thesis that updates every three hours.
+A page that shows you what your corner of Twitter is talking about this week, with a 1–2 sentence thesis that updates every three hours.
+
+Everyone gets their own: sign up, pick a starting point (AI engineering, startups and SF, GTM and sales, marketing, AI business, or the original AI-startup-marketing mix), tune it, and paste in your own API keys. Your page, your daily recap, and your costs are yours alone. Nobody edits anyone else's settings.
 
 ## How it works
 
-Every 3 hours a GitHub Action runs `python -m pipeline.run`:
+Every 3 hours the server runs `python -m pipeline.run` once for each person, in its own process, with only that person's settings and keys:
 
-1. **Fetch** (`pipeline/sources.py`): runs the searches and watchlist in `pipeline/config.py` against twitterapi.io, limited to tweets since Monday 00:00 PT.
-2. **Judge** (`pipeline/judge.py`): sends each *new* tweet to Jev once (through Vercel AI Gateway, or TypeSafe directly if `TYPESAFE_API_KEY` is set), asking five questions in one call: is it on-topic, which topic, how much signal (0–4 rubric), is it bait, and would marketing care. Tweets that clear the thresholds are ranked, with Jev's scores weighted most and engagement breaking ties.
+1. **Fetch** (`pipeline/sources.py`): reads the timeline panel (accounts your anchor accounts follow), plus your searches, watchlist, and tracked companies, from twitterapi.io, limited to tweets since Monday 00:00 in your time zone.
+2. **Judge** (`pipeline/judge.py`): sends each *new* tweet to Jev once (through Vercel AI Gateway, or TypeSafe directly if you add a TypeSafe key), asking in one call: is it on-topic for you, which topic, how much signal (0–4 rubric), is it bait, and would you care. Tweets that clear your thresholds are ranked, with Jev's scores weighted most and engagement breaking ties.
 3. **Synthesize** (`pipeline/synthesize.py`): sends the top 60 to Claude through Vercel AI Gateway, which writes the thesis and groups tweets into 3–5 themes. It sees its previous thesis, so the read evolves instead of starting over.
-4. **Publish** (`pipeline/build.py`): renders `public/index.html` (plus `public/data.json` for a future Notion sync, and `recap.json`/`recap.md`, the daily recap for Slack and agents) and deploys to GitHub Pages. Weekly state is committed to `data/week.json`; on Monday the old week moves to `data/archive/`.
+4. **Publish** (`pipeline/build.py`): renders your page (plus `data.json`, and `recap.json`/`recap.md`, the daily recap for Slack and agents). Your weekly state is kept in your data folder; on Monday the old week moves to `archive/`.
 
-## Setup (about 15 minutes)
+The web app (`server/`) handles accounts, settings, keys, and scheduling. The pipeline doesn't know about any of that: the server points it at one person's files with environment variables (see [Running the pipeline by hand](#running-the-pipeline-by-hand)).
 
-1. Push this folder to a new GitHub repo.
-2. Add two repo secrets (or add them later from Settings → API keys on the page) (Settings → Secrets and variables → Actions):
-   - `TWITTERAPI_IO_KEY` from twitterapi.io/dashboard
-   - `AI_GATEWAY_API_KEY` from vercel.com → AI Gateway → API Keys. Used for both Jev and Claude. (Optional: add `TYPESAFE_API_KEY` from console.typesafe.ai to send Jev calls to TypeSafe directly.)
-3. Settings → Pages → Source: **GitHub Actions**.
-4. Actions → "Update timeline page" → **Run workflow** to do the first run. After that it runs on its own.
-
-## Preview locally
+## Run it locally
 
 ```bash
 pip install -r requirements.txt
-python -m pipeline.run --demo          # sample data, no keys needed → public/index.html
-export TWITTERAPI_IO_KEY=... AI_GATEWAY_API_KEY=...
-python -m pipeline.run                 # a real update
-python -m pipeline.run --build-only    # re-render from saved state (after template edits)
+TIMELINE_DEMO=1 uvicorn server.app:app --reload
 ```
 
-## Onboarding a teammate
+Open http://localhost:8000, sign up, and go through setup. With `TIMELINE_DEMO=1` nothing calls an API: keys aren't checked, and your page is built from sample data (`pipeline/demo_state.json`) with your settings. Drop `TIMELINE_DEMO=1` and add real keys to do real runs.
 
-Send them the page link. On their first visit a short **Guide** opens (you can reopen it from the header at any time). It walks through how the page works, then:
+Everything lands in `./var` (set `DATA_DIR` to move it).
 
-- **Your view** (just them, saved in their browser): light or dark, and topics to hide on their screen.
-- **Focus, Topic mix, Filter, Sources** (team): the same settings as the Settings panel, in plain language with presets. Nothing is saved until the last step, which shows a summary of the changes.
-- **Daily recap**: connect Slack for the team, or set up Instinct or Muse for themselves.
+## Deploy
 
-Saving team changes needs a GitHub token with access to this repo (see below). Anyone without one can still use Your view and set up Instinct or Muse, or copy the new settings and commit them on GitHub.
+It's one small container: a web server with a background scheduler, one SQLite file, and one data folder. Any host that runs a Docker image with a persistent disk works: Fly.io, Railway, Render, or your own box.
+
+```bash
+cp .env.example .env      # set BASE_URL and SECRET_KEY
+docker compose up -d --build
+```
+
+On a platform:
+
+1. Deploy from this repo's `Dockerfile` (it runs `uvicorn server.app:app --host 0.0.0.0 --port 8000` as a non-root user).
+2. Attach a **persistent volume at `/data`**. Every account, key, and page lives there; without a volume, a redeploy wipes everyone. Some platforms mount volumes owned by root; if the app can't write to `/data`, make it writable by uid 10001 (or use the platform's run-as-root option).
+3. Set the env vars:
+   - `BASE_URL`: the public URL, e.g. `https://timeline.example.com`. Links in recaps and Slack come from it, and cookies are marked secure when it's https.
+   - `SECRET_KEY`: a long random string (`python -c 'import secrets; print(secrets.token_urlsafe(48))'`). The server refuses to start without it unless `BASE_URL` is localhost or `TIMELINE_DEMO=1`. Changing it signs everyone out and makes saved keys unreadable, so people would re-enter them.
+   - Optional: `ENCRYPTION_KEY` (a Fernet key, so key encryption doesn't depend on `SECRET_KEY`), `MAX_CONCURRENT_RUNS` (default 3), `REFRESH_HOURS` (default 3), `FORWARDED_ALLOW_IPS=*` behind the platform's proxy so the login rate limit sees real client IPs.
+4. Health check: `GET /healthz`.
+
+Run one instance. Several processes against the same volume won't double-run anyone (each run takes a lease in the database), but one is plenty: runs are mostly waiting on APIs.
+
+## Your keys, your costs
+
+Each person adds their own keys under **API keys** (during setup, or later from the page). They're encrypted at rest, only ever handed to that person's own runs, and never shown again after saving (the page just says whether each one is set).
+
+- **twitterapi.io** (required): from twitterapi.io/dashboard.
+- **Vercel AI Gateway** (required): vercel.com → AI Gateway → API Keys. Used for both Jev and Claude.
+- **TypeSafe** (optional): from console.typesafe.ai, to send Jev calls to TypeSafe directly.
+- **Slack webhook** (optional): for the daily post.
+
+**Check and save** tests a key with one tiny call before you save it.
+
+Rough cost per person, with the default 3-hour refresh:
+
+- twitterapi.io: ~6 queries + watchlist + panel × 2 pages × 8 runs/day ≈ 2,500 tweets/day ≈ **$10–15/month**.
+- Jev: only new tweets are judged, a few hundred tokens each ≈ **well under $1/month**.
+- Claude via AI Gateway: 8 calls/day with ~15K tokens in ≈ **$10–20/month** on a Sonnet-class model.
+
+More searches, a bigger watchlist, or more panel anchors cost more. Settings are capped (40 searches, 300 accounts per list, 100 panel anchors) so a typo can't run up a bill.
+
+## Presets
+
+Setup starts from a preset in `pipeline/presets/`. Each is a complete settings file plus a `"preset"` block (id, name, tagline, description):
+
+| id | For |
+|---|---|
+| `ai_startup_marketing` | The original page: tech and AI conversations, startup and SF moments, and GTM and marketing, for the marketing team at an AI startup. Used as the default until someone picks a preset. |
+| `ai_engineer` | Model and tool launches, evals, agents, coding tools, open models, and papers people discuss. |
+| `startup_culture` | Founders, VC, YC, big raises and ARR milestones, the SF scene, and culture debates. |
+| `gtm_sales` | Signal-based selling, outbound, GTM engineering, AI SDRs, and sales tools (Clay, Monaco, Gong, …). |
+| `marketing_brand` | Launch videos, campaigns, positioning, content, and brand. |
+| `ai_business` | Labs, launches, revenue and valuations, M&A, and compute deals. |
+
+To add one, drop a new JSON file in that folder; `tests/test_presets.py` checks it against the same validator the settings API uses. `settings.json` at the repo root is the default profile the pipeline uses when run on its own.
 
 ## Tuning
 
-Interests, topics, searches, thresholds, the writer model, and the Slack schedule live in `settings.json`. Edit them from the **Settings** button on the page (connect a fine-grained GitHub token for this repo with read/write on Contents, Secrets, and Actions), or edit the file directly. Saving from the page commits `settings.json` and starts an update; any change to the interests or topics re-judges the week's saved tweets automatically.
+Everything is in **Settings** on your page: who it's for, the topic mix, how picky the filter is, sources (searches, watchlist, tracked companies, panel anchors), and your time zone. Saving rebuilds your page; any change to your interests or topics re-judges the week's saved tweets.
 
 - **Too much noise?** Raise the min signal (e.g. 2.2) or min relevance, or raise `min_faves` in the searches.
 - **Missing stuff?** Add searches or watchlist accounts, or lower the min signal.
 - **Change the focus:** edit "Focus on" and "Skip", and the topics (unchecked topics never make the page).
-- **Pin Jev** once thresholds feel right: set `JEV_MODEL=jev-1.13.0` (or whatever is current), so `jev-latest` updates don't shift scores under you.
-
-- **Company accounts** (Clay, Monaco, Gong, …): add them under Settings → Searches → Tracked companies. Their posts count when they beat that account's usual likes (3× its median and at least 25 likes by default), instead of needing to go broadly viral.
+- **Company accounts** (Clay, Monaco, Gong, …): add them as tracked companies. Their posts count when they beat that account's usual likes (3× its median and at least 25 likes by default), instead of needing to go broadly viral.
 - **Topic mix:** each topic's share sets roughly how much of the read it gets; the Filtered out tab shows the best tweets that just missed, and why.
-- **Try a change safely:** push it to a branch named `preview/...`. The "Preview a tuning change" workflow does a full dry run against this week's data and uploads the built page plus `compare.json` (before vs after) as an artifact, without saving or deploying anything.
+- **Pin Jev** once thresholds feel right: set `JEV_MODEL=jev-1.13.0` (or whatever is current) on the server, so `jev-latest` updates don't shift scores under you.
 
-## Slack
+## Daily recap
 
-On the page, open Settings → **Daily recap** (or step 7 of the Guide):
+Every update also publishes `recap.md` and `recap.json`: the thesis, up to five tweets new in the last 24 hours, the themes, and the link to your page.
 
-1. **Create the Slack app** opens Slack with an app manifest already filled in. Pick the workspace, click Create, then Install to Workspace and choose the channel.
-2. Copy the webhook URL from the app's Incoming Webhooks page, paste it, and click **Send test** to check it before saving. It's stored as the `SLACK_WEBHOOK_URL` secret.
-3. Turn posting on and pick how often: once a day after a set hour (PT), when the thesis changes, or every update. "Send today's recap now" posts after one immediate update.
+**Slack.** Under **Daily recap**, create a Slack app (the page fills in the manifest for you), install it to a channel, paste the webhook URL, and click **Send test**. Then turn posting on and pick how often: once a day after an hour you choose (in your time zone), when the thesis changes, or every update. The daily post is checked every hour from saved state, without fetching anything, so a 9am post lands just after 9. If Slack says no (a revoked webhook, an archived channel), the reason and how to fix it shows on your page.
 
-The daily post is checked every hour by the "Deliver the daily read" workflow (`python -m pipeline.run --deliver`), which posts from saved state without fetching anything, so a 9am post lands before 10am instead of at the next 3-hourly update. Failed posts are retried (rate limits and Slack outages), and if Slack still says no, the reason and how to fix it (e.g. a revoked webhook or archived channel) is saved to `data/week.json` and shown on the page.
+**Instinct and Muse.** Personal agents can't be pushed to, but they can read a URL on a daily schedule. Your recap has a private link, `https://<your server>/r/<token>/recap.md`, that works without signing in. The **Daily recap** tab gives you a one-tap setup message that asks your agent to read it every morning and send you the thesis, today's recap, and the link. Anyone with the link can read your recap, so treat it like a password; **Profile → Reset** (next to the recap link) replaces it.
 
-## Instinct and Muse
+## Moving your profile
 
-Personal agents like Instinct and Meta Muse can't be pushed to, but they can run a daily task that reads a URL. Every update publishes `recap.md` (and `recap.json`) next to the page: the thesis, up to five tweets new in the last 24 hours, the themes, and the link. Settings → **Daily recap** (and the Guide) gives a one-tap setup message that asks your agent to read `<page>/recap.md` every morning and send you the thesis, today's recap, and the link.
+- **One profile:** Profile → **Export profile** downloads `timeline-profile.json` (your settings, and your keys only if you ask for them). Import it on any other install, or into another account.
+- **The whole install:** stop the server and copy `DATA_DIR`: `timeline.db` (accounts, settings, encrypted keys, run state) and `users/<id>/` (each person's page and weekly state). Keep the same `SECRET_KEY` (or `ENCRYPTION_KEY`) on the new host, or saved keys can't be decrypted.
 
-Every Jev verdict is saved in `data/week.json`, so you can look at what got filtered out and adjust thresholds from real data.
+## Security notes
 
-## Costs (rough)
+- Passwords are hashed with scrypt. Sessions are signed, httponly, same-site cookies. Login and signup are rate-limited per IP.
+- API keys are encrypted with Fernet (derived from `SECRET_KEY` with HKDF, or `ENCRYPTION_KEY`). The API never returns them (except in an export you ask to include keys in), and they're scrubbed from run logs.
+- Each run gets a fresh environment: a few system variables plus that one person's paths and keys. Nothing from the server's environment or other accounts leaks in.
+- Per-user files live under `users/<numeric id>/`; no path is ever built from user input.
+- Settings are validated and size-capped before they're saved, since they drive paid API calls.
+- Pages only show public tweets, but your page and settings are visible only to you once signed in. The recap link is the one thing that's readable without an account.
 
-- twitterapi.io: ~6 queries + watchlist × 2 pages × 8 runs/day ≈ 2,500 tweets/day ≈ **$10–15/month**.
-- Jev: only new tweets are judged, a few hundred tokens each ≈ **well under $1/month**.
-- Claude via AI Gateway: 8 calls/day with ~15K tokens in ≈ **$10–20/month** on a Sonnet-class model.
-- GitHub Actions and Pages: free at this volume.
+## Running the pipeline by hand
 
-## Notes
+```bash
+python -m pipeline.run --demo          # sample data, no keys → public/index.html
+export TWITTERAPI_IO_KEY=... AI_GATEWAY_API_KEY=...
+python -m pipeline.run                 # a real update of the default profile (settings.json, data/)
+python -m pipeline.run --build-only    # re-render from saved state (after template edits)
+python -m pipeline.run --dry-run       # full update, saves nothing, writes compare.json (before vs after)
+```
 
-- GitHub Pages sites are public unless your org is on GitHub Enterprise Cloud (which can restrict Pages to org members). The page only shows public tweets, but keep that in mind.
-- Swapping to the official X API later: write a class with the same `search()` method in `sources.py` that returns the same normalized dicts, and use it in `run.fetch()`.
+Point it at any profile with `TIMELINE_SETTINGS` (settings file), `TIMELINE_DATA` (state folder), `TIMELINE_OUT` (where the page goes), `PAGE_URL`, and `TIMELINE_RECAP_URL`. That's exactly what the server does for each person.
+
+## Development
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+The tests run in `TIMELINE_DEMO` mode and need no keys. CI runs them on every push (`.github/workflows/test.yml`).
+
+Swapping to the official X API later: write a class with the same `search()` method in `sources.py` that returns the same normalized dicts, and use it in `run.fetch()`.

@@ -1,4 +1,10 @@
 {
+  "preset": {
+    "id": "ai_startup_marketing",
+    "name": "AI startup marketer",
+    "tagline": "What tech, AI, SF, and sales Twitter is talking about",
+    "description": "The original page: the week's biggest tech and AI conversations, startup and SF moments, and what GTM and marketing teams are doing, for the marketing team at an AI startup."
+  },
   "focus": {
     "audience": "the marketing team at an AI startup in San Francisco",
     "care_about": [

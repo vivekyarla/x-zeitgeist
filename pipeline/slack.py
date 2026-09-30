@@ -1,11 +1,12 @@
 """Post the thesis, today's recap, and the page link to a Slack channel via an incoming webhook.
 
-Set SLACK_WEBHOOK_URL (a repo secret) and turn Slack on in settings.json. How often it
-posts is `slack.frequency`:
-  "daily"        once a day, on the first update at or after `hour_pt` (optionally weekdays only)
+Set SLACK_WEBHOOK_URL (each user's own webhook) and turn Slack on in their settings. How
+often it posts is `slack.frequency`:
+  "daily"        once a day, on the first update at or after `hour` in the profile's
+                 `timezone` (optionally weekdays only)
   "on_change"    whenever the thesis changes
   "every_update" every run (every 3 hours)
-The daily post is checked hourly by the deliver workflow (`run --deliver`), so it lands
+The daily post is checked hourly by the server's worker (`run --deliver`), so it lands
 within the hour instead of waiting for the next 3-hourly update.
 """
 from __future__ import annotations
@@ -63,7 +64,7 @@ def due(state: dict, now: datetime, thesis_changed: bool, deliver: bool = False)
         last = state.get("slack_last_post")
         already = last and datetime.fromisoformat(last).astimezone(ZoneInfo(config.TIMEZONE)).date() == local.date()
         # The latest read is at most 3 hours old, so posting it as soon as the hour comes is fine.
-        return local.hour >= int(s["hour_pt"]) and not already
+        return local.hour >= int(s["hour"]) and not already
     return False
 
 

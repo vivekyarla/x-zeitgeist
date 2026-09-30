@@ -1,0 +1,214 @@
+{
+  "preset": {
+    "id": "marketing_brand",
+    "name": "Marketing & brand",
+    "tagline": "Launch videos, campaigns, positioning, and content",
+    "description": "The best marketing in tech this week: launch videos, campaigns and stunts, positioning and landing pages, and the content and growth playbooks that are working."
+  },
+  "focus": {
+    "audience": "a marketer at a tech company who wants to see the best launches, campaigns, and brand work",
+    "care_about": [
+      "Launch videos and product launches that were marketed well, and why they worked",
+      "Ad campaigns, billboards, stunts, and rebrands from tech companies",
+      "Positioning, messaging, landing pages, and copy, with real examples",
+      "Content and social strategy that's working: founder-led content, short video, newsletters, community",
+      "Growth and demand gen playbooks with real numbers",
+      "How marketers use AI: tools, workflows, and AI-made creative"
+    ],
+    "skip": [
+      "Engagement bait ('comment TEMPLATE and I'll send it') and generic marketing platitudes",
+      "Politics, regulation, macro, and stock moves",
+      "Infrastructure, chips, and technical AI research"
+    ]
+  },
+  "topics": [
+    {
+      "key": "launch_videos",
+      "label": "Launch videos",
+      "description": "Launch videos and product launches that were marketed well: films, demos, teasers, and launch-day playbooks",
+      "include": true,
+      "share": 0.2
+    },
+    {
+      "key": "campaigns",
+      "label": "Campaigns & stunts",
+      "description": "Ad campaigns, billboards, out-of-home, stunts, and rebrands from tech companies",
+      "include": true,
+      "share": 0.2
+    },
+    {
+      "key": "positioning",
+      "label": "Positioning",
+      "description": "Positioning, messaging, landing pages, homepages, naming, and copywriting",
+      "include": true,
+      "share": 0.15
+    },
+    {
+      "key": "content_social",
+      "label": "Content & social",
+      "description": "Content and social strategy: founder-led content, short video, newsletters, podcasts, community, and creators",
+      "include": true,
+      "share": 0.2
+    },
+    {
+      "key": "growth",
+      "label": "Growth & demand gen",
+      "description": "Growth and demand gen: paid, SEO, lifecycle, conversion, and B2B marketing playbooks with numbers",
+      "include": true,
+      "share": 0.13
+    },
+    {
+      "key": "ai_marketing",
+      "label": "AI for marketers",
+      "description": "How marketers use AI: tools, workflows, AI-generated creative and video, and what it changes",
+      "include": true,
+      "share": 0.12
+    },
+    {
+      "key": "industry_finance",
+      "label": "Infra & finance",
+      "description": "Infrastructure and markets: data centers, compute buildout, chips supply, power, bonds and debt, public-company earnings, stock moves, macro",
+      "include": false,
+      "share": 0
+    },
+    {
+      "key": "policy",
+      "label": "Policy",
+      "description": "Politics, government, regulation, lawsuits, and AI safety incidents",
+      "include": false,
+      "share": 0
+    },
+    {
+      "key": "other",
+      "label": "Other",
+      "description": "Anything else",
+      "include": false,
+      "share": 0
+    }
+  ],
+  "searches": [
+    "(\"launch video\" OR \"launch film\" OR \"our launch\" OR \"we just launched\" OR \"launch day\") (startup OR AI OR app OR SaaS OR product) min_faves:300 lang:en -filter:replies",
+    "(\"ad campaign\" OR billboard OR billboards OR stunt OR \"brand campaign\" OR rebrand OR \"new brand\" OR \"Super Bowl ad\") min_faves:300 lang:en -filter:replies",
+    "(positioning OR messaging OR \"landing page\" OR homepage OR copywriting) (startup OR SaaS OR B2B OR AI) min_faves:150 lang:en -filter:replies",
+    "(\"content strategy\" OR \"founder-led content\" OR \"short-form video\" OR UGC OR newsletter OR \"LinkedIn content\") (brand OR startup OR B2B OR marketing) min_faves:150 lang:en -filter:replies",
+    "(\"demand gen\" OR \"B2B marketing\" OR \"paid social\" OR SEO OR \"growth marketing\" OR CAC OR \"conversion rate\") min_faves:150 lang:en -filter:replies",
+    "(marketers OR marketing) (AI OR ChatGPT OR Claude OR Midjourney OR Veo OR Sora) (workflow OR tool OR prompt OR ad) min_faves:300 lang:en -filter:replies"
+  ],
+  "watchlist": [
+    "codyschneider",
+    "antinertia",
+    "fivosaresti",
+    "kristaletz",
+    "lennysan",
+    "harrydry"
+  ],
+  "watchlist_min_faves": 20,
+  "thresholds": {
+    "min_signal": 1.8,
+    "min_relevance": 0.6,
+    "max_bait": 0.5
+  },
+  "writer_model": "anthropic/claude-sonnet-5",
+  "timezone": "America/Los_Angeles",
+  "slack": {
+    "enabled": false,
+    "frequency": "daily",
+    "hour": 8,
+    "weekdays_only": true,
+    "top_tweets": 5
+  },
+  "ranking": {
+    "per_author_max": 2,
+    "breakout_weight": 0.35,
+    "mainstream_penalty": 0.4,
+    "account_groups": {
+      "OpenAI": [
+        "OpenAI",
+        "OpenAIDevs",
+        "ChatGPTapp",
+        "sama",
+        "OpenAINewsroom"
+      ],
+      "Anthropic": [
+        "AnthropicAI",
+        "claudeai",
+        "ClaudeDevs",
+        "DarioAmodei"
+      ],
+      "Google": [
+        "Google",
+        "GoogleDeepMind",
+        "GoogleAIStudio",
+        "GeminiApp",
+        "GoogleAI",
+        "sundarpichai"
+      ],
+      "Meta": [
+        "Meta",
+        "AIatMeta",
+        "finkd"
+      ],
+      "xAI": [
+        "xai",
+        "grok",
+        "elonmusk"
+      ],
+      "Microsoft": [
+        "Microsoft",
+        "satyanadella",
+        "code",
+        "GitHub"
+      ],
+      "Nvidia": [
+        "nvidia",
+        "NVIDIAAI"
+      ]
+    },
+    "breadth_weight": 1.0
+  },
+  "tracked": {
+    "accounts": [
+      "figma",
+      "linear",
+      "vercel",
+      "NotionHQ",
+      "stripe"
+    ],
+    "beat_baseline_by": 3.0,
+    "min_signal": 1.0,
+    "min_likes": 25
+  },
+  "panel": {
+    "groups": [
+      {
+        "name": "marketers",
+        "share": 0.7,
+        "accounts": [
+          "codyschneider",
+          "antinertia",
+          "fivosaresti",
+          "kristaletz",
+          "lennysan",
+          "harrydry"
+        ]
+      },
+      {
+        "name": "brands",
+        "share": 0.3,
+        "accounts": [
+          "figma",
+          "linear",
+          "vercel",
+          "NotionHQ",
+          "stripe"
+        ]
+      }
+    ],
+    "min_overlap": 2,
+    "max_accounts": 300,
+    "include": [],
+    "exclude": [],
+    "refresh_days": 7
+  },
+  "known_stories": []
+}

@@ -15,7 +15,8 @@ from . import slack
 from .build import build_site
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA = ROOT / "data"
+DATA = config.DATA_DIR    # TIMELINE_DATA, default data/
+OUT = config.OUT_DIR      # TIMELINE_OUT, default public/
 STATE = DATA / "week.json"
 
 
@@ -31,7 +32,7 @@ def load_state(ws: datetime) -> dict:
         if state["week_start"] == ws.isoformat():
             return state
         # New week: archive last week's state.
-        (DATA / "archive").mkdir(exist_ok=True)
+        (DATA / "archive").mkdir(parents=True, exist_ok=True)
         shutil.move(STATE, DATA / "archive" / f"{state['week_start'][:10]}.json")
     return {"week_start": ws.isoformat(), "tweets": {}, "thesis_history": [], "latest": None}
 
@@ -237,7 +238,7 @@ def main() -> None:
     ap.add_argument("--demo", action="store_true", help="render sample data, no API calls")
     ap.add_argument("--build-only", action="store_true", help="re-render the page from saved state")
     ap.add_argument("--slack", choices=["auto", "now", "skip"], default="auto",
-                    help="auto: post if the schedule in settings.json says so; now: post regardless")
+                    help="auto: post if the profile's Slack schedule says so; now: post regardless")
     ap.add_argument("--deliver", action="store_true",
                     help="only post the daily Slack read if it's due, from saved state (no fetching, no build)")
     ap.add_argument("--week", help="replay a past week (its Monday, YYYY-MM-DD) from scratch; implies --dry-run")
@@ -251,11 +252,11 @@ def main() -> None:
         until = min(ws + timedelta(days=7), datetime.now(timezone.utc))
         state = {"week_start": ws.isoformat(), "tweets": {}, "thesis_history": [], "latest": None}
         update(state, until, until=until, replay=True)
-        (ROOT / "public").mkdir(exist_ok=True)
-        (ROOT / "public" / "compare.json").write_text(json.dumps(
+        OUT.mkdir(parents=True, exist_ok=True)
+        (OUT / "compare.json").write_text(json.dumps(
             compare({}, [], state), indent=1, ensure_ascii=False))
-        build_site(state, ROOT / "public")
-        print(f"replay of week {args.week}: built public/ and public/compare.json; nothing saved or posted")
+        build_site(state, OUT)
+        print(f"replay of week {args.week}: built {OUT}/ and compare.json; nothing saved or posted")
         return
     if args.deliver:  # hourly, so the daily post lands on time between 3-hourly updates
         now = datetime.now(timezone.utc)
@@ -265,7 +266,7 @@ def main() -> None:
                 slack.post(state, now)
         else:
             print("slack: nothing due")
-        DATA.mkdir(exist_ok=True)
+        DATA.mkdir(parents=True, exist_ok=True)
         STATE.write_text(json.dumps(state, indent=1, ensure_ascii=False))
         return
     if args.demo:
@@ -277,11 +278,11 @@ def main() -> None:
             before = json.loads(json.dumps(state.get("latest") or {}))
             before_top = [state["tweets"][i] for i in before.get("top_ids", []) if i in state["tweets"]]
             update(state, now)
-            (ROOT / "public").mkdir(exist_ok=True)
-            (ROOT / "public" / "compare.json").write_text(json.dumps(
+            OUT.mkdir(parents=True, exist_ok=True)
+            (OUT / "compare.json").write_text(json.dumps(
                 compare(before, before_top, state), indent=1, ensure_ascii=False))
-            build_site(state, ROOT / "public")
-            print("dry run: built public/ and public/compare.json; nothing saved or posted")
+            build_site(state, OUT)
+            print(f"dry run: built {OUT}/ and compare.json; nothing saved or posted")
             return
         changed = False
         try:
@@ -291,11 +292,11 @@ def main() -> None:
                 if state.get("latest"):
                     slack.post(state, now)
         finally:  # keep Jev verdicts even if a later step fails
-            DATA.mkdir(exist_ok=True)
+            DATA.mkdir(parents=True, exist_ok=True)
             STATE.write_text(json.dumps(state, indent=1, ensure_ascii=False))
 
-    build_site(state, ROOT / "public", demo=args.demo)
-    print("built public/index.html")
+    build_site(state, OUT, demo=args.demo)
+    print(f"built {OUT / 'index.html'}")
 
 
 def compare(before: dict, before_top: list[dict], state: dict) -> dict:
