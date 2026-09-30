@@ -14,8 +14,8 @@ RUN useradd --system --uid 10001 --home-dir /app --shell /usr/sbin/nologin timel
 # Starts as root only to fix the volume's owner, then runs the server as `timeline`.
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
-# Every account, key, and page lives here: mount a persistent volume.
-VOLUME /data
+# Every account, key, and page lives in /data: mount a persistent volume there (docker-compose
+# does; on Railway attach a volume at /data). No VOLUME line, because Railway rejects Dockerfiles that have one.
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
     CMD python -c "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:%s/healthz' % os.getenv('PORT', '8000'), timeout=4)"
