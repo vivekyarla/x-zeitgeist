@@ -44,3 +44,14 @@ def test_secret_key_required_in_production(monkeypatch, tmp_path):
     monkeypatch.setenv("BASE_URL", "https://timeline.example.com")
     monkeypatch.setenv("SECRET_KEY", "x" * 40)
     assert config_mod.load().secure_cookies
+
+
+def test_base_url_defaults_to_railway_domain(monkeypatch, tmp_path):
+    from server import config
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("SECRET_KEY", "test-secret-key-that-is-long-enough")
+    monkeypatch.delenv("BASE_URL", raising=False)
+    monkeypatch.setenv("RAILWAY_PUBLIC_DOMAIN", "timeline-production.up.railway.app")
+    assert config.load().base_url == "https://timeline-production.up.railway.app"
+    monkeypatch.setenv("BASE_URL", "https://timeline.rox.com/")
+    assert config.load().base_url == "https://timeline.rox.com"

@@ -68,7 +68,9 @@ def is_local(base_url: str) -> bool:
 
 def load() -> Config:
     data_dir = Path(os.getenv("DATA_DIR") or ROOT / "var").resolve()
-    base_url = (os.getenv("BASE_URL") or "http://localhost:8000").rstrip("/")
+    # On Railway, default to the public domain it assigns, so BASE_URL is only needed for a custom domain.
+    railway = os.getenv("RAILWAY_PUBLIC_DOMAIN", "").strip()
+    base_url = (os.getenv("BASE_URL") or (f"https://{railway}" if railway else "http://localhost:8000")).rstrip("/")
     demo = _truthy(os.getenv("TIMELINE_DEMO"))
     secret = os.getenv("SECRET_KEY", "").strip()
     if not secret:

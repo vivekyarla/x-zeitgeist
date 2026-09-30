@@ -35,6 +35,17 @@ cp .env.example .env      # set BASE_URL and SECRET_KEY
 docker compose up -d --build
 ```
 
+### Railway (about $5–8 a month)
+
+`railway.json` sets the build (this repo's `Dockerfile`), one replica, and the `/healthz` check. The server listens on Railway's `$PORT` and uses the domain Railway assigns as `BASE_URL`, so you only set `BASE_URL` for a custom domain.
+
+1. New project → **Deploy from GitHub repo** → this repo, and pick the branch to deploy.
+2. On the service: **Settings → Networking → Generate Domain** (e.g. `timeline-production.up.railway.app`).
+3. Right-click the service → **Attach volume**, mount path `/data`.
+4. **Variables** → Raw editor, paste `SECRET_KEY`, `ENCRYPTION_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `ALLOWED_EMAIL_DOMAINS`, `PREVIEW_TWITTERAPI_IO_KEY`, `PREVIEW_AI_GATEWAY_API_KEY`, and `FORWARDED_ALLOW_IPS=*`, then deploy.
+
+It redeploys on every push to that branch. Keep it at one replica: the scheduler runs inside the server.
+
 ### Fly.io (about $4 a month)
 
 `fly.toml` is ready: one always-on `shared-cpu-1x` machine with 512 MB (about $3.30/month) and a 1 GB volume (about $0.15/month). API costs are separate and land on each person's own keys, plus the example page on yours.
