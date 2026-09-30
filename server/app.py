@@ -475,6 +475,8 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         email = body.email.strip().lower()
         if not EMAIL.match(email) or email.endswith(".invalid"):
             raise ApiError(422, "That doesn't look like an email address.")
+        if cfg.allowed_domains and email.rsplit("@", 1)[1] not in cfg.allowed_domains:
+            raise ApiError(403, f"Sign up with your {' or '.join('@' + d for d in cfg.allowed_domains)} email.")
         if len(body.password) < 8:
             raise ApiError(422, "Use a password with at least 8 characters.")
         uid = db.create_user(email, hash_password(body.password), default_settings(), recap_token())

@@ -121,3 +121,12 @@ def test_google_links_existing_password_account(tmp_path, monkeypatch):
     sign_in(c, monkeypatch)
     me = c.get("/api/me").json()
     assert me["email"] == "ana@rox.com" and me["auth"] == "password"  # same account, now also Google
+
+
+def test_password_signup_limited_to_allowed_domains(tmp_path, monkeypatch):
+    app = make_app(tmp_path, monkeypatch, ALLOWED_EMAIL_DOMAINS="rox.com")
+    c = TestClient(app)
+    r = c.post("/api/signup", json={"email": "ana@gmail.com", "password": "long enough pw"})
+    assert r.status_code == 403 and "@rox.com" in r.json()["error"]
+    assert c.post("/api/signup", json={"email": "Ana@Rox.com", "password": "long enough pw"}).status_code == 201
+    assert "@rox.com" in c.get("/login").text

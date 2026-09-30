@@ -82,7 +82,7 @@ What it can see: those three scopes are Google's basic sign-in scopes, marked no
 
 If your Workspace admin restricts third-party apps, they may need to mark the OAuth client as trusted (Admin console → Security → API controls → App access control). An Internal app in your own org is usually allowed by default.
 
-Once Google is set up, email/password sign-up turns off (`PASSWORD_LOGIN=1` turns it back on). An existing password account is linked the first time someone signs in with Google using the same address.
+Without Google set up, people sign up with email and password instead, and `ALLOWED_EMAIL_DOMAINS` limits sign-up to those domains (the address isn't verified, so this keeps outsiders out rather than proving ownership). Once Google is set up, email/password sign-up turns off (`PASSWORD_LOGIN=1` turns it back on). An existing password account is linked the first time someone signs in with Google using the same address.
 
 ## The example page
 

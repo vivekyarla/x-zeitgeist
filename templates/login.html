@@ -31,6 +31,7 @@
       <div class="field"><label for="email">Email</label><input class="inp" id="email" type="email" autocomplete="email" required></div>
       <div class="field"><label for="password">Password</label><input class="inp" id="password" type="password" autocomplete="current-password" minlength="8" required>
         <p class="hint" id="pw-hint" hidden>At least 8 characters.</p></div>
+      {% if domains and not google %}<p class="hint" id="domain-hint" hidden style="margin:-8px 0 16px">Use your @{{ domains | join(' or @') }} email.</p>{% endif %}
       <button class="btn primary" type="submit" id="go">Sign in</button>
       <p class="switch" id="switch"></p>
       {% endif %}
@@ -52,6 +53,7 @@
     $("go").textContent = up ? "Create account" : "Sign in";
     $("password").autocomplete = up ? "new-password" : "current-password";
     $("pw-hint").hidden = !up;
+    if ($("domain-hint")) $("domain-hint").hidden = !up;
     var sw = $("switch"); sw.innerHTML = "";
     sw.append(up ? "Already have an account? " : "New here? ",
       TL.h("button", { type: "button", text: up ? "Sign in" : "Create an account", onclick: function () {
