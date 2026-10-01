@@ -300,11 +300,15 @@ def create_app(cfg: Config | None = None) -> FastAPI:
                     db.set_key(user["id"], n, None)
             return None
         p = next((x for x in presets if x["id"] == cfg.preview_preset), None) or \
-            next(x for x in presets if x["id"] == "ai_startup_marketing")
+            next(x for x in presets if x["id"] == "sf_tech")
         settings = validate(p["settings"])
         settings["slack"]["enabled"] = False
         uid = user["id"] if user else db.create_user(PREVIEW_EMAIL, "", settings, recap_token())
-        changed = bool(user) and json.loads(user["settings"]) != settings
+        old = json.loads(user["settings"]) if user else None
+        changed = bool(user) and old != settings
+        if old and [t["key"] for t in old["topics"]] != [t["key"] for t in settings["topics"]]:
+            # A different feed: start its week over, so the old thesis doesn't carry into the new one.
+            (worker.paths(uid)["data"] / "week.json").unlink(missing_ok=True)
         db.set_settings(uid, settings)
         db.set_onboarded(uid)
         for n, v in (cfg.preview_keys or {}).items():
@@ -318,7 +322,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     db.cap_leases(LEASE)  # a run cut off by the last redeploy is picked up again within minutes
     preview_uid = ensure_preview()
-    preview_name = next((x["name"] for x in presets if x["id"] == cfg.preview_preset), "AI startup marketer")
+    preview_name = next((x["name"] for x in presets if x["id"] == cfg.preview_preset), "SF tech culture")
 
     # -- pages -----------------------------------------------------------------
     def render(name: str, user, fallback: str) -> str:

@@ -34,7 +34,7 @@ def test_ai_business_includes_infra():
 
 def test_original_profile_is_the_default_preset():
     presets = {p["id"]: p for p in load_presets()}
-    assert list(presets)[0] == "ai_startup_marketing"
+    assert list(presets)[:2] == ["sf_tech", "ai_startup_marketing"]  # the general feed is offered first
     assert presets["ai_startup_marketing"]["settings"] == validate(json.loads((ROOT / "settings.json").read_text()))
 
 
@@ -44,3 +44,12 @@ def test_gtm_tracks_the_original_companies():
     assert s["tracked"]["accounts"] == orig
     anchors = {h for g in s["panel"]["groups"] for h in g["accounts"]}
     assert set(orig) | {"jasonlk", "samdblond", "RobHoffman_"} <= anchors
+
+
+def test_example_page_feed_is_general():
+    from server import config
+    s = {p["id"]: p for p in load_presets()}["sf_tech"]["settings"]
+    shown = {t["key"] for t in s["topics"] if t["include"]}
+    assert {"gtm_marketing", "engineering"}.isdisjoint(shown) and "launches" in shown
+    assert not s["tracked"]["accounts"] and s["thresholds"]["min_likes"] >= 1000
+    assert config.Config.__dataclass_fields__["preview_preset"].default == "sf_tech"

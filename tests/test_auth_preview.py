@@ -130,3 +130,13 @@ def test_password_signup_limited_to_allowed_domains(tmp_path, monkeypatch):
     assert r.status_code == 403 and "@rox.com" in r.json()["error"]
     assert c.post("/api/signup", json={"email": "Ana@Rox.com", "password": "long enough pw"}).status_code == 201
     assert "@rox.com" in c.get("/login").text
+
+
+def test_switching_the_example_feed_starts_its_week_over(tmp_path, monkeypatch):
+    app = make_app(tmp_path, monkeypatch, PREVIEW_PRESET="ai_startup_marketing")
+    uid = app.state.db.user_by_email("preview@timeline.invalid")["id"]
+    week = app.state.worker.paths(uid)["data"] / "week.json"
+    week.parent.mkdir(parents=True, exist_ok=True)
+    week.write_text('{"latest": {"thesis": "GTM teams are copying Clay"}}')  # what a real run leaves
+    app2 = make_app(tmp_path, monkeypatch, PREVIEW_PRESET="sf_tech")
+    assert not week.exists() and app2.state.db.run(uid)["state"] == "queued"

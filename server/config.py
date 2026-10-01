@@ -39,7 +39,7 @@ class Config:
     allowed_domains: tuple[str, ...] = ()  # Google Workspace domains allowed to sign in; empty = any
     password_login: bool = True
     preview_keys: dict | None = None       # the owner's keys for the public example page
-    preview_preset: str = "ai_startup_marketing"
+    preview_preset: str = "sf_tech"
 
     @property
     def google(self) -> bool:
@@ -116,5 +116,5 @@ def load() -> Config:
         allowed_domains=domains,
         password_login=password_login,
         preview_keys=pk if all(pk.values()) else None,
-        preview_preset=os.getenv("PREVIEW_PRESET", "ai_startup_marketing").strip() or "ai_startup_marketing",
+        preview_preset=os.getenv("PREVIEW_PRESET", "sf_tech").strip() or "sf_tech",
     )

@@ -86,7 +86,7 @@ Without Google set up, people sign up with email and password instead, and `ALLO
 
 ## The example page
 
-Signed-out visitors land on `/preview/`: a real page built from one preset (`PREVIEW_PRESET`, default `ai_startup_marketing`) on **your** keys (`PREVIEW_TWITTERAPI_IO_KEY` and `PREVIEW_AI_GATEWAY_API_KEY`), refreshed on the same schedule as everyone else. It has no settings and no sign-in, and a "Make your own" button. It costs about what one person's page does ($20–35/month). Leave either key empty to turn it off.
+Signed-out visitors land on `/preview/`: a real page built from one preset (`PREVIEW_PRESET`, default `sf_tech`) on **your** keys (`PREVIEW_TWITTERAPI_IO_KEY` and `PREVIEW_AI_GATEWAY_API_KEY`), refreshed on the same schedule as everyone else. It has no settings and no sign-in, and a "Make your own" button. It costs about what one person's page does ($20–35/month). Leave either key empty to turn it off.
 
 Run one instance. Several processes against the same volume won't double-run anyone (each run takes a lease in the database), but one is plenty: runs are mostly waiting on APIs.
 
@@ -115,6 +115,7 @@ Setup starts from a preset in `pipeline/presets/`. Each is a complete settings f
 
 | id | For |
 |---|---|
+| `sf_tech` | SF tech culture: the most-talked-about tech, AI, and startup posts (launches, raises, viral builds, founder and VC culture, the SF scene), without deep engineering or GTM and marketing. The example page uses it. |
 | `ai_startup_marketing` | The original page: tech and AI conversations, startup and SF moments, and GTM and marketing, for the marketing team at an AI startup. Used as the default until someone picks a preset. |
 | `ai_engineer` | Model and tool launches, evals, agents, coding tools, open models, and papers people discuss. |
 | `startup_culture` | Founders, VC, YC, big raises and ARR milestones, the SF scene, and culture debates. |

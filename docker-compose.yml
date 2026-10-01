@@ -17,7 +17,7 @@ services:
       ALLOWED_EMAIL_DOMAINS: ${ALLOWED_EMAIL_DOMAINS:-}
       PREVIEW_TWITTERAPI_IO_KEY: ${PREVIEW_TWITTERAPI_IO_KEY:-}
       PREVIEW_AI_GATEWAY_API_KEY: ${PREVIEW_AI_GATEWAY_API_KEY:-}
-      PREVIEW_PRESET: ${PREVIEW_PRESET:-ai_startup_marketing}
+      PREVIEW_PRESET: ${PREVIEW_PRESET:-sf_tech}
     volumes:
       - timeline-data:/data
     restart: unless-stopped

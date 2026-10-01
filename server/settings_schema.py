@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 
 PRESETS_DIR = Path(__file__).resolve().parent.parent / "pipeline" / "presets"
 DEFAULT_PRESET = "ai_startup_marketing"
-PRESET_ORDER = ["ai_startup_marketing", "ai_engineer", "startup_culture", "gtm_sales", "marketing_brand", "ai_business"]
+PRESET_ORDER = ["sf_tech", "ai_startup_marketing", "ai_engineer", "startup_culture", "gtm_sales", "marketing_brand", "ai_business"]
 
 MAX_JSON_BYTES = 200_000
 MAX_STR = 2000
