@@ -138474,136 +138474,118 @@
   }
  ],
  "latest": {
-  "thesis": "OpenAI's **dots and GPT-6 Astra**{1} launch collides with Google's **Gemini 4 Argon**{1}, as **AMD's World Labs buy**{2} and Nvidia's Hugging Face deal fuel acquisition chatter, the **Cognition-Factory feud**{3} escalates with a Khosla conflict callout, and ElevenLabs ships an **AI SDR/AE stack**{4} that closes deals.",
+  "thesis": "Google's **Gemini 4 Argon**{1} launches alongside OpenAI's GPT-6 Astra as the **Cognition-Factory feud**{2} draws a Khosla conflict callout, AMD's **World Labs acquisition**{3} marks a wave of consolidation, and ElevenLabs' **AI SDR/AE stack**{5} shows GTM teams what's working.",
   "themes": [
    {
-    "name": "Frontier model launch collision",
-    "summary": "OpenAI's dots/GPT-6 Astra, Google's Gemini 4 Argon, Claude Sonnet 5.5, and Meta's new Enterprise Platform all launched in the same week, forcing side-by-side agentic and enterprise comparisons across tech Twitter.",
+    "name": "Frontier model launches collide",
+    "summary": "Google's Gemini 4 Argon, OpenAI's dots/GPT-6 Astra and DevDay slate, and Claude Sonnet 5.5 all shipped this week, with Tavus's Griffin and Ideogram 4.5 adding to the pile of launches people are benchmarking against each other.",
     "tweet_ids": [
-     "2104499465055023424",
-     "2104633115620823187",
      "2105387952478277979",
-     "2104550609403695581",
      "2105388084154056939",
      "2104984504133918973",
-     "2104572127617994917",
-     "2105327223431737780",
-     "2105704169009246248",
+     "2104981170685616361",
+     "2104633115620823187",
      "2105045716884197745",
-     "2104614327802282271",
-     "2104624129626309024"
+     "2105704169009246248",
+     "2105327223431737780"
     ]
    },
    {
-    "name": "Big AI acquisitions and raises",
-    "summary": "AMD bought World Labs for $8.2B with Fei-Fei Li becoming chief scientist, Nvidia acquired Hugging Face, Salesforce bought Listen Labs, and ElevenLabs' employee tender valued it at $22B as acquisition chatter dominates startup Twitter.",
+    "name": "Cognition vs Factory feud",
+    "summary": "Factory fired a co-founder over Cognition dealings and a founder's tweet alleging Khosla Ventures dehumanized both teams while backing both competitors turned the rivalry into SF's biggest drama of the week.",
     "tweet_ids": [
-     "2104732723432874110",
+     "2105335179502064038",
+     "2105422823938527682",
+     "2105461474755850693"
+    ]
+   },
+   {
+    "name": "Acquisitions, raises and big hires",
+    "summary": "AMD bought World Labs for $8.2B with Fei-Fei Li as chief scientist, ElevenLabs' employee tender hit a $22B valuation, Salesforce acquired Listen Labs, and YC added two new General Partners, all signaling a busy week for consolidation and talent moves.",
+    "tweet_ids": [
      "2104665621120311465",
+     "2104732723432874110",
      "2104665313170354674",
-     "2104960836796342729",
      "2105316745783206208",
      "2105025703490298016",
      "2105025780019597345",
      "2104901412987748860",
-     "2105374956288700456",
-     "2105311718226415766"
-    ]
-   },
-   {
-    "name": "SF founder and VC drama",
-    "summary": "The Cognition-Factory feud escalated with a termination and a Khosla conflict-of-interest callout, while YC named two new GPs, giving tech Twitter its biggest founder/VC culture moment of the week.",
-    "tweet_ids": [
-     "2105335179502064038",
-     "2105422823938527682",
-     "2105461474755850693",
      "2105719763435389051",
      "2105717194260963472",
-     "2105728925741760984",
-     "2105049055256805813",
-     "2105691922484605179",
-     "2104647531267490244"
+     "2105713377217855518"
     ]
    },
    {
-    "name": "AI SDR and GTM stacks",
-    "summary": "Teams are shipping AI SDR/AE stacks like ElevenLabs' AI AE closing deals, coding-agent-built cold outreach, and AEO tracking playbooks that GTM and marketing people are screenshotting and copying.",
-    "tweet_ids": [
-     "2104576879415988453",
-     "2105378925937647933",
-     "2104661812046356677",
-     "2104975455334150583",
-     "2104889390526791915",
-     "2104702109329535382",
-     "2105071858823393301",
-     "2105659003162247485",
-     "2105311708000428278",
-     "2104942193496768863",
-     "2105043144975011982"
-    ]
-   },
-   {
-    "name": "Viral AI builds and workflows",
-    "summary": "People are breaking a 217-year-old cipher with GPT-6 Astra, modding any game with Claude Code, and coding motion-graphics videos for $35, showing how far everyday agentic AI use has gone.",
+    "name": "Viral AI builds",
+    "summary": "People are using frontier models to break a 217-year-old cipher, mod any video game, render motion graphics entirely in code, and even build a full open-world game with Perplexity's Opus-powered computer, showing what's possible beyond chat.",
     "tweet_ids": [
      "2105167567706816690",
-     "2105161487509852622",
      "2104941391272956125",
-     "2105104089013223425",
-     "2104965415164399895",
-     "2103846928027160609",
+     "2105161487509852622",
      "2104970447041486998",
-     "2105357092697821300",
-     "2105382518698737729",
-     "2104598248501699067",
-     "2104959648482701686",
-     "2104975408319926389"
+     "2105104089013223425",
+     "2103846928027160609"
+    ]
+   },
+   {
+    "name": "GTM playbooks that work",
+    "summary": "ElevenLabs is running an AI SDR and AI AE that's already closed deals, Clay rolled out a company-wide AI writing policy, and founders are sharing cold-outreach stacks, AEO trackers, and TAM-building agents that are actually converting.",
+    "tweet_ids": [
+     "2105378925937647933",
+     "2104576879415988453",
+     "2105374956288700456",
+     "2104702109329535382",
+     "2105071858823393301",
+     "2104975455334150583",
+     "2105659003162247485",
+     "2104942193496768863"
     ]
    }
   ],
   "top_ids": [
+   "2105704169009246248",
    "2104633115620823187",
    "2105387952478277979",
    "2104499465055023424",
    "2105335179502064038",
    "2104823812042940713",
+   "2105388084154056939",
+   "2105025703490298016",
    "2104901412987748860",
    "2104984504133918973",
-   "2105388084154056939",
-   "2105704169009246248",
+   "2105719763435389051",
    "2105311718226415766",
-   "2105025703490298016",
+   "2105684868550045751",
    "2105316745783206208",
    "2104572127617994917",
    "2104981170685616361",
-   "2105719763435389051",
    "2105186912634057086",
-   "2104665621120311465",
+   "2104966339156984000",
    "2105327223431737780",
+   "2105095660450320571",
+   "2105717194260963472",
+   "2104665621120311465",
    "2104732723432874110",
    "2105045716884197745",
-   "2104624129626309024",
-   "2104550609403695581",
-   "2104614327802282271",
+   "2105713377217855518",
    "2104665313170354674",
+   "2105167567706816690",
    "2105025780019597345",
    "2104949571789148416",
-   "2104960836796342729",
    "2104941391272956125",
-   "2105717194260963472",
-   "2105167567706816690",
    "2104942193496768863",
    "2105422823938527682",
    "2104975408319926389",
    "2105691922484605179",
    "2104647531267490244",
+   "2105728925741760984",
    "2105382518698737729",
    "2104576879415988453",
    "2104598248501699067",
    "2105357092697821300",
    "2104959648482701686",
-   "2105161487509852622",
    "2105679649225286084",
+   "2105161487509852622",
    "2104970447041486998",
    "2105374956288700456",
    "2105104089013223425",
@@ -138614,19 +138596,18 @@
    "2105071858823393301",
    "2104661812046356677",
    "2104975455334150583",
-   "2105728925741760984",
    "2104889390526791915",
    "2105049055256805813",
    "2105370680485417401",
    "2105461474755850693",
-   "2105043144975011982",
    "2105659003162247485",
+   "2105043144975011982",
    "2105311708000428278"
   ],
-  "updated_at": "2026-10-01T20:21:29.157707+00:00",
+  "updated_at": "2026-10-05T05:40:18.959920+00:00",
   "stats": {
    "scanned": 3727,
-   "kept": 410
+   "kept": 411
   },
   "near_misses": [
    {
@@ -138650,7 +138631,15 @@
     "reason": "ranked below the top 60"
    },
    {
-    "id": "2104966339156984000",
+    "id": "2104624129626309024",
+    "reason": "ranked below the top 60"
+   },
+   {
+    "id": "2104550609403695581",
+    "reason": "ranked below the top 60"
+   },
+   {
+    "id": "2104614327802282271",
     "reason": "ranked below the top 60"
    },
    {
@@ -138662,7 +138651,7 @@
     "reason": "topic: Policy"
    },
    {
-    "id": "2105684868550045751",
+    "id": "2104960836796342729",
     "reason": "ranked below the top 60"
    },
    {
@@ -138674,15 +138663,15 @@
     "reason": "ranked below the top 60"
    },
    {
-    "id": "2105095660450320571",
-    "reason": "ranked below the top 60"
-   },
-   {
     "id": "2104542892073095398",
     "reason": "ranked below the top 60"
    },
    {
     "id": "2104674280063824071",
+    "reason": "ranked below the top 60"
+   },
+   {
+    "id": "2105428405571428785",
     "reason": "ranked below the top 60"
    },
    {
@@ -138695,10 +138684,6 @@
    },
    {
     "id": "2104989671617122366",
-    "reason": "ranked below the top 60"
-   },
-   {
-    "id": "2105428405571428785",
     "reason": "ranked below the top 60"
    },
    {
@@ -138722,6 +138707,10 @@
     "reason": "ranked below the top 60"
    },
    {
+    "id": "2105348199892598886",
+    "reason": "ranked below the top 60"
+   },
+   {
     "id": "2105019377586467067",
     "reason": "ranked below the top 60"
    },
@@ -138730,11 +138719,15 @@
     "reason": "ranked below the top 60"
    },
    {
-    "id": "2105348199892598886",
+    "id": "2105709935074185546",
     "reason": "ranked below the top 60"
    },
    {
     "id": "2104720330686435656",
+    "reason": "ranked below the top 60"
+   },
+   {
+    "id": "2105689236623986864",
     "reason": "ranked below the top 60"
    },
    {
@@ -138746,11 +138739,11 @@
     "reason": "ranked below the top 60"
    },
    {
-    "id": "2105713377217855518",
+    "id": "2105152056382345544",
     "reason": "ranked below the top 60"
    },
    {
-    "id": "2105152056382345544",
+    "id": "2105358708599619790",
     "reason": "ranked below the top 60"
    },
    {
@@ -138770,24 +138763,12 @@
     "reason": "ranked below the top 60"
    },
    {
-    "id": "2105358708599619790",
-    "reason": "ranked below the top 60"
-   },
-   {
     "id": "2105397216374403561",
     "reason": "ranked below the top 60"
    },
    {
-    "id": "2104552290501775403",
-    "reason": "ranked below the top 60"
-   },
-   {
-    "id": "2105316356035854537",
-    "reason": "ranked below the top 60"
-   },
-   {
-    "id": "2104711708153618621",
-    "reason": "ranked below the top 60"
+    "id": "2105687435912856033",
+    "reason": "25 likes, under 33 (3x its usual 11)"
    }
   ],
   "known_stories": []
