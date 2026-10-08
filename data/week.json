@@ -5,52 +5,52 @@
  "latest": null,
  "baselines": {
   "clay": {
-   "at": "2026-10-07T01:38:02.744745+00:00",
+   "at": "2026-10-07T06:01:03.831740+00:00",
    "n": 0,
    "error": "402 Client Error: Payment Required for url: https://api.twitterapi.io/twitter/user/last_tweets?userName=clay&includeRepl"
   },
   "monacogtm": {
-   "at": "2026-10-07T01:38:02.744745+00:00",
+   "at": "2026-10-07T06:01:03.831740+00:00",
    "n": 0,
    "error": "402 Client Error: Payment Required for url: https://api.twitterapi.io/twitter/user/last_tweets?userName=MonacoGTM&includ"
   },
   "gong_io": {
-   "at": "2026-10-07T01:38:02.744745+00:00",
+   "at": "2026-10-07T06:01:03.831740+00:00",
    "n": 0,
    "error": "402 Client Error: Payment Required for url: https://api.twitterapi.io/twitter/user/last_tweets?userName=gong_io&includeR"
   },
   "attio": {
-   "at": "2026-10-07T01:38:02.744745+00:00",
+   "at": "2026-10-07T06:01:03.831740+00:00",
    "n": 0,
    "error": "402 Client Error: Payment Required for url: https://api.twitterapi.io/twitter/user/last_tweets?userName=attio&includeRep"
   },
   "unifygtm": {
-   "at": "2026-10-07T01:38:02.744745+00:00",
+   "at": "2026-10-07T06:01:03.831740+00:00",
    "n": 0,
    "error": "402 Client Error: Payment Required for url: https://api.twitterapi.io/twitter/user/last_tweets?userName=unifygtm&include"
   },
   "commonroomhq": {
-   "at": "2026-10-07T01:38:02.744745+00:00",
+   "at": "2026-10-07T06:01:03.831740+00:00",
    "n": 0,
    "error": "402 Client Error: Payment Required for url: https://api.twitterapi.io/twitter/user/last_tweets?userName=CommonRoomHQ&inc"
   },
   "useapolloio": {
-   "at": "2026-10-07T01:38:02.744745+00:00",
+   "at": "2026-10-07T06:01:03.831740+00:00",
    "n": 0,
    "error": "402 Client Error: Payment Required for url: https://api.twitterapi.io/twitter/user/last_tweets?userName=useapolloio&incl"
   },
   "heyreach_io": {
-   "at": "2026-10-07T01:38:02.744745+00:00",
+   "at": "2026-10-07T06:01:03.831740+00:00",
    "n": 0,
    "error": "402 Client Error: Payment Required for url: https://api.twitterapi.io/twitter/user/last_tweets?userName=heyreach_io&incl"
   },
   "instantlyai": {
-   "at": "2026-10-07T01:38:02.744745+00:00",
+   "at": "2026-10-07T06:01:03.831740+00:00",
    "n": 0,
    "error": "402 Client Error: Payment Required for url: https://api.twitterapi.io/twitter/user/last_tweets?userName=InstantlyAI&incl"
   },
   "outreach_io": {
-   "at": "2026-10-07T01:38:02.744745+00:00",
+   "at": "2026-10-07T06:01:03.831740+00:00",
    "n": 0,
    "error": "402 Client Error: Payment Required for url: https://api.twitterapi.io/twitter/user/last_tweets?userName=outreach_io&incl"
   }
