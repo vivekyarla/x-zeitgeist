@@ -1,0 +1,266 @@
+# Handoff: "This week on the timeline"
+
+A multi-user web app. Each person signs in, picks a feed, and connects **their own** API keys. Every 3 hours the app reads what X (Twitter) is posting about their topics, filters it with an AI judge, has Claude write a 1–2 sentence thesis about the week grouped into themes, and serves it as their private page. It can also send them a daily recap through Slack, Instinct or Muse. A public example page shows a real feed before anyone signs up.
+
+- **Repo:** `vivekyarla/x-zeitgeist`. All current work is on branch **`claude/relaxed-archimedes-pqcr5e`**, which isn't merged. `main` still has the old single-team GitHub Pages version and its scheduled workflow.
+- **Owner:** vivek@rox.com. Users are the Rox team; sign-up is limited to `@rox.com`.
+- **Hosting:** Railway, deployed from that branch. Every push redeploys automatically.
+
+---
+
+## 1. Current deployment state
+
+| Item | State |
+|---|---|
+| Host | Railway, 1 replica, US West, Dockerfile build (`railway.json`), volume mounted at `/data` |
+| Public URL | Railway-generated `*.up.railway.app` domain (the owner has it; it isn't in the repo). `BASE_URL` defaults to `https://$RAILWAY_PUBLIC_DOMAIN` |
+| Port | App listens on `$PORT` (set to `8080` in Railway) |
+| Sign-in | **Email + password for now**, limited to `@rox.com` by `ALLOWED_EMAIL_DOMAINS`. Google sign-in is built but **not configured**: the owner lacks permission to create a Google Cloud project in Rox's org and is waiting on a Workspace admin |
+| Example page | Live at `/preview/`, running preset `sf_tech` on the owner's keys (`PREVIEW_*` env) |
+| Railway variables | `SECRET_KEY`, `ENCRYPTION_KEY`, `ALLOWED_EMAIL_DOMAINS=rox.com`, `PREVIEW_TWITTERAPI_IO_KEY`, `PREVIEW_AI_GATEWAY_API_KEY`, `FORWARDED_ALLOW_IPS=*`, `PORT=8080` |
+| To turn on Google later | Create an OAuth client (Web app, consent screen **Internal**, redirect `https://<domain>/auth/google/callback`), then add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in Railway. Password sign-up turns off automatically, and existing accounts link by email on first Google sign-in |
+
+**Never change `ENCRYPTION_KEY`**: every saved API key becomes unreadable. Changing `SECRET_KEY` only signs everyone out, as long as `ENCRYPTION_KEY` is set.
+
+---
+
+## 2. Architecture
+
+```
+Browser ──► FastAPI (server/app.py) ── SQLite (DATA_DIR/timeline.db: users, encrypted keys, run state)
+              │  serves templates (login / onboarding / building) and each user's built page
+              │
+              └─ Worker thread (server/worker.py), inside the same process
+                   every ~20s: queue users whose next run is due; run up to MAX_CONCURRENT_RUNS
+                   each run = subprocess `python -m pipeline.run` with ONLY that user's keys in env
+                   hourly: `python -m pipeline.run --deliver` for users with Slack on
+                        │
+                        ▼
+                 pipeline/ (writes DATA_DIR/users/<id>/{settings.json, data/, public/})
+                   sources.py → twitterapi.io   judge.py → Jev (via Vercel AI Gateway)
+                   synthesize.py → Claude (via Vercel AI Gateway)   build.py → index.html, recap.md/json
+```
+
+- **One container, one process.** The scheduler lives inside the web server, so the machine must stay up. Run exactly one instance; SQLite is local to the volume.
+- **Per-user isolation:** each run is a separate subprocess. Its environment is built from an allowlist (PATH, HOME, LANG, PYTHONPATH, TZ, CA and proxy vars) plus that user's own keys, so a run can never see another user's keys or server secrets.
+- **Leases:** each run or delivery takes a lease on the user's `runs` row. Leases last 3 minutes and are renewed every 60 seconds while the subprocess runs. On startup, the server shortens any longer leftover lease, so a run cut off by a redeploy is picked up again within minutes.
+- **Scheduling rules:**
+  - A successful run schedules the next one `REFRESH_HOURS` (3h) later.
+  - A failed or empty run retries in 30 minutes.
+  - `POST /api/run` never refuses a request:
+    - Already queued: the queued run picks up the latest settings.
+    - Running: sets `rerun`, so another run starts right after.
+    - Within 10 minutes of the last run: schedules a run for when the 10 minutes are up.
+
+### Data on disk (the whole install is portable: this folder)
+```
+DATA_DIR/                      (/data on Railway)
+  timeline.db                  SQLite (WAL)
+  .secret_key                  only when running locally without SECRET_KEY
+  users/<id>/settings.json     written from the DB before each run
+  users/<id>/data/week.json    this week's tweets, Jev verdicts, thesis history, Slack status
+  users/<id>/data/archive/     previous weeks
+  users/<id>/data/panel.json   cached "timeline panel" of accounts
+  users/<id>/data/last_run.log redacted output of the last run
+  users/<id>/public/           index.html, data.json, recap.json, recap.md
+```
+
+### DB schema (server/db.py)
+- `users(id, email UNIQUE NOCASE, pw_hash ("" for Google-only), created_at, onboarded, settings JSON, recap_token UNIQUE, google_sub UNIQUE)`
+- `keys(user_id, name, value = Fernet ciphertext, updated_at)`. Names: `twitterapi_io`, `ai_gateway`, `typesafe`, `slack_webhook`
+- `runs(user_id, state new|queued|running|ready|error, slack_mode, queued_at, started_at, last_run_at, next_run_at, last_error, last_deliver_at, lease_until, lease_owner, rerun)`
+- New columns are added with guarded `ALTER TABLE` in `DB.__init__`; there's no migration framework.
+
+---
+
+## 3. The pipeline (per user, per run)
+
+`pipeline/run.py` reads its paths and keys from env: `TIMELINE_SETTINGS`, `TIMELINE_DATA`, `TIMELINE_OUT`, `PAGE_URL`, `TIMELINE_RECAP_URL`, `TWITTERAPI_IO_KEY`, `AI_GATEWAY_API_KEY`, optional `TYPESAFE_API_KEY` and `SLACK_WEBHOOK_URL`. With no env it falls back to the repo's `settings.json`, `data/` and `public/`.
+
+1. **Fetch** (`sources.py`, `panel.py`): twitterapi.io advanced search, limited to this week (Monday 00:00 in the user's `timezone`).
+   - **Panel:** accounts followed by at least `min_overlap` of each group's anchor accounts. Rebuilt weekly or when the groups change. Its posts, quotes and retweets are fetched every run, and a story's "reach" is how many panel accounts are on it.
+   - **Also fetched:** the settings' X `searches`, the `watchlist`, and `tracked` company accounts (with a daily baseline of each account's median likes).
+2. **Judge** (`judge.py`): each *new* tweet goes to **Jev** once, through Vercel AI Gateway (`typesafe-ai/jev`, or TypeSafe directly when that key is set). Jev returns topic, relevance, signal (0–4), bait, and how useful it is for marketing.
+   - Saved verdicts are re-judged when the focus or topics change (`JUDGE_VERSION` hash).
+3. **Filter** (`judge.why_not`) — a tweet is dropped if any of these apply:
+   - Its topic is excluded (`include: false`), or it's over `max_bait`, or under `min_relevance`.
+   - **Tracked company accounts:** they must beat `beat_baseline_by` (3×) their median likes **and** reach `tracked.min_likes` **and** `tracked.min_signal`.
+   - **Everyone else:** they must reach `thresholds.min_likes` (the floor that keeps small accounts' 100-like posts out) and `min_signal`.
+4. **Rank and select:**
+   - **Rank:** Jev's scores, times engagement (blending raw likes with likes relative to follower count by `breakout_weight`), times panel reach (`breadth_weight`), minus `mainstream_penalty` for big-lab news.
+   - **Select** 60 tweets: one per story, at most `per_author_max` per account (`account_groups` treats @OpenAI, @sama and so on as one), with each topic filled toward its `share`.
+5. **Write** (`synthesize.py`): Claude (`writer_model`, default `anthropic/claude-sonnet-5`, via AI Gateway) writes the thesis and 3–5 themes. It sees the previous thesis, so the read evolves through the week.
+6. **Build** (`build.py`): Jinja renders `templates/index.html` plus `data.json`, `recap.json` and `recap.md`.
+7. **Deliver:** see the Slack section under Features.
+
+**Output that matters for debugging.** The pipeline prints lines like `fetched N tweets`, `judged N tweets (...)`, `search failed (401 ...)` and `nothing passed the filter`. The worker copies those lines into the server log as `user <id>: ...`, so Railway's Deploy Logs show them; the example page is usually user 1. The worker also turns failures into one plain sentence with `humanize()` / `empty_reason()`, such as "twitterapi.io rejected your key" or "out of credits". A run that finishes with no thesis counts as an error.
+
+---
+
+## 4. Features
+
+### Accounts and sign-in (`server/app.py`, `server/google.py`, `server/security.py`)
+- **Password accounts:** scrypt hashes, signed session cookie (Starlette `SessionMiddleware`, 30 days, httponly, samesite=lax, secure over https), and a per-IP rate limit on login and signup.
+  - Sign-up is limited to `ALLOWED_EMAIL_DOMAINS`.
+  - The `.invalid` domain is reserved and can't be used.
+- **Google:**
+  - **Flow:** OpenID Connect authorization-code flow with PKCE, state and nonce.
+  - **Permissions:** scopes `openid email profile` only, `access_type=online` (no refresh token), and the access token is discarded.
+  - **Checks on the ID token:** issuer, audience, nonce, expiry and `email_verified`. With `ALLOWED_EMAIL_DOMAINS` set, it also requires Google's `hd` claim to match, so only Workspace-managed accounts get in.
+  - **Accounts:** an existing account is linked by email.
+  - **Passwords:** once Google is configured, password sign-up turns off unless `PASSWORD_LOGIN=1`.
+- **No password reset exists.**
+
+### Example page (`/preview/`)
+- **What it is:** a system profile (`preview@timeline.invalid`, which can't sign in), built from `PREVIEW_PRESET` (default `sf_tech`) on the owner's `PREVIEW_*` keys.
+- **Access:** public and read-only, with a "Make your own" banner. Signed-out visitors to `/` land here.
+- **On every startup, `ensure_preview()`:**
+  - Re-applies the preset and reseals the keys.
+  - Rebuilds if the settings changed, the last run failed, or the page is empty.
+  - Starts the week over if the topics changed.
+  - Logs each key's length and last 4 characters, so you can compare against the provider dashboards.
+- **Off switch:** leave either `PREVIEW_*` key empty to turn it off.
+
+### Onboarding (`templates/onboarding.html`, `/welcome`)
+1. Welcome, with how it works and the cost.
+2. Pick a preset, then choose "use as is" or "fine-tune it".
+3. *Optional fine-tune:*
+   - **Focus:** written-for, focus-on and skip lists.
+   - **Topic mix:** on/off switches and share sliders, with a live bar.
+   - **Filter:** Sharper, Balanced or Wider presets, plus minimum likes and exact numbers.
+   - **Accounts:** watchlist and tracked companies.
+4. **API keys (required):** twitterapi.io and Vercel AI Gateway, each checked live; TypeSafe is optional.
+5. **Daily recap:** time zone, Slack, Instinct and Muse.
+6. **Build:** `POST /api/onboarding/complete` queues the first run, and `/app/` shows `building.html` (progress, and on failure the reason with inline key repair) until the page exists.
+
+Each step saves the settings (`PUT /api/settings`), so a reload resumes where the person left off. They can also import a profile export on the welcome step.
+
+### The page and its Settings (`templates/index.html`, served at `/app/`)
+- **The page:** thesis with phrases linked to their themes, "Earlier this week" history, a "New today" list, then themes with tweet cards (X embeds with a fallback card, plus Jev's signal meter).
+- **Settings tabs:**
+  - **Feed:** apply a preset, focus, topics (label, description, include, share), filter (signal, relevance, bait, **min likes**), ranking, writer model.
+  - **Sources:** panel groups and anchors, panel size and overlap, always/never lists, "stories we should have caught" (`label | regex | week`), X searches, watchlist, tracked companies and their bar.
+  - **Filtered out:** the best near-misses and why, plus where each expected story ended up.
+  - **Daily recap.**
+  - **API keys:** replace or re-check keys; values are never shown.
+  - **Profile:** appearance (light/dark, stored per device), export (keys only if ticked) and import, private recap link with copy and reset, sign out, delete account (a password, or for Google accounts, typing your email).
+- **Save and refresh:** `PUT /api/settings`, then `POST /api/run`, then the page polls status and offers a reload when the new read is ready.
+
+### Presets (`pipeline/presets/*.json`)
+Each preset is a full settings object plus `"preset": {id, name, tagline, description}`. Display order comes from `PRESET_ORDER` in `server/settings_schema.py`. Applying a preset keeps the person's Slack settings and time zone, and sets `preset_id`.
+
+| id | For | Non-tracked min likes | Tracked bar (likes / signal) |
+|---|---|---|---|
+| `sf_tech` *(example page, listed first)* | The most-shared tech, AI and startup posts; GTM, marketing and deep engineering are hidden topics; no tracked companies; mainstream penalty 0.1 | 1000 | n/a |
+| `ai_startup_marketing` | The original team feed: tech, AI and SF plus GTM and marketing. Equals the root `settings.json`, which is also new users' starting settings before they pick | 500 | 150 / 1.6 |
+| `ai_engineer` | Models, evals, agents, coding tools | 300 | 100 / 1.5 |
+| `startup_culture` | Founders, VC, YC, SF | 500 | 100 / 1.5 |
+| `gtm_sales` | GTM, outbound, sales tools; tracks Clay, Monaco, Gong and others | 250 | 75 / 1.4 |
+| `marketing_brand` | Launch videos, campaigns, positioning | 300 | 100 / 1.5 |
+| `ai_business` | Labs, money, compute deals (infra topic on) | 500 | 200 / 1.6 |
+
+Profiles **copy** a preset when it's applied, so later preset edits don't reach existing users until they re-apply it. Only the example page re-applies its preset on startup.
+
+### Settings validation (`server/settings_schema.py`)
+`validate()` is used by `PUT /api/settings`, import and presets.
+- **Cleanup:** drops unknown keys, fills defaults (for example `thresholds.min_likes` = 300 when missing), and accepts legacy `slack.hour_pt` as `hour`.
+- **Caps** (one user's settings drive paid calls on their own keys): ≤ 40 searches, ≤ 300 handles per list, ≤ 100 panel anchors in total, strings ≤ 2,000 characters, and length-capped regexes.
+- **Topic shares:** included topics must add up to 50–150%; if they're all zero, they're split evenly.
+
+### Daily recap
+- **`recap.md` / `recap.json`:** written every build. They contain the thesis, up to 5 "New today" tweets (first seen in the last 24h, topped up with the best of the week and flagged `new`), the themes and the page link.
+- **Private recap URL:** `/r/<token>/recap.md|json`. It's public by unguessable token, can be reset in Profile, and the token is hidden from access logs.
+- **Slack** (per user, their own incoming webhook, stored as the `slack_webhook` key):
+  - **Setup:** "Create the Slack app" opens Slack with a prefilled manifest; the person pastes the webhook, and the server sends a real test post (`POST /api/slack/test`).
+  - **Schedule:** daily after `slack.hour` in the user's time zone (optionally weekdays only), when the thesis changes, or every update.
+  - **Delivery:** the worker runs `--deliver` hourly so daily posts land on time. Posts retry on 429 and 5xx, and failures are saved as a plain sentence (`slack_last_error`) shown in Settings.
+- **Instinct / Muse:** these consumer AI agents have no API for other apps to push messages into. The UI gives a one-tap setup message ("every weekday at 8:00 AM, read `<recap url>` and send me …") via an `sms:` link for Instinct, or `muse.ai` / `wa.me` plus copy for Muse. Setup state is remembered per browser only (`localStorage` `tl_deliver`).
+
+---
+
+## 5. HTTP surface (`server/app.py`)
+
+| Route | Auth | Notes |
+|---|---|---|
+| `GET /healthz` (also HEAD) | – | `{"ok": true}` |
+| `GET /` | – | Signed out: `/preview/` (or `/login` if no preview). Signed in: `/welcome` or `/app/` |
+| `GET /preview/`, `/preview/{data.json,recap.json,recap.md}` | – | Example page |
+| `GET /login`, `GET /welcome`, `GET /app/`, `GET /app/{file}` | session for welcome/app | `/app/` shows `building.html` until the page exists |
+| `GET /r/{token}/{recap.md,recap.json}` | token | Private recap feed |
+| `GET /auth/google`, `GET /auth/google/callback` | – | OIDC; errors redirect to `/login?error=` |
+| `POST /api/signup`, `/api/login`, `/api/logout` | – | 403 when Google-only |
+| `GET /api/me` | session | `{email, auth, demo, onboarded, settings, keys: {name: bool}, status, recap_url, page_url, slack}` |
+| `GET /api/presets` | – | `[{id, name, tagline, description, settings}]` |
+| `PUT /api/settings {settings}` | session | Validated; 422 `{error}` |
+| `PUT /api/keys {...}` | session | `""` deletes; values are never returned |
+| `POST /api/keys/check {...}` | session | Live checks: twitterapi.io search, AI Gateway `/v1/credits` (falling back to a 1-token completion) |
+| `POST /api/slack/test {webhook?}` | session | |
+| `POST /api/onboarding/complete` | session | Requires both keys; queues the first run |
+| `POST /api/run {slack: auto\|now}` | session | Never refused (see scheduling rules); returns status plus `message` |
+| `GET /api/status` | session | `{state, last_run_at, next_run_at, last_error, has_page}` |
+| `GET /api/export[?keys=1]`, `POST /api/import {profile}` | session | `{"format":"timeline-profile","version":1,...}` |
+| `POST /api/recap/rotate`, `DELETE /api/account {password \| confirm}` | session | |
+
+All errors are JSON `{"error": "<a sentence for a person>"}`.
+
+---
+
+## 6. Frontend
+
+- **No build step and no framework.** Server-rendered Jinja templates plus inline JS.
+- **Shared pieces** are pulled in with `{% include %}`:
+  - `_base.css`: the design tokens and all styles, with light and dark themes.
+  - `_theme.js`: applies the theme before first paint.
+  - `_shared.js`: the `TL` component library, covering the API client, list, tag, mix and filter editors, the preset picker, key cards and the delivery cards.
+- **Templates:** `login.html`, `onboarding.html`, `building.html`, and `index.html` (rendered by the **pipeline**, not the server, and served as a static file per user).
+- **Look:** serif (Newsreader) and sans (Inter), warm neutral palette, hairline rules with corner dots.
+- **Watch out:** a literal `{#` inside template JS starts a Jinja comment.
+
+---
+
+## 7. Running, testing, deploying
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+TIMELINE_DEMO=1 uvicorn server.app:app --reload     # no keys needed: checks skipped, pages built from pipeline/demo_state.json
+pytest -q                                            # 46 tests; CI: .github/workflows/test.yml
+python -m pipeline.run --demo                        # render one page from sample data into ./public
+```
+
+- **Docker:**
+  - Base image `python:3.12-slim`.
+  - `docker-entrypoint.sh` starts as root only to `chown` the mounted `/data`, then drops to uid 10001 with `setpriv`.
+  - The start command listens on `${PORT:-8000}`.
+  - **No `VOLUME` line:** Railway rejects Dockerfiles that have one.
+- **Railway:** `railway.json` sets the Dockerfile build, `numReplicas: 1`, the `/healthz` health check and restart on failure.
+- **Fly.io:** an alternative config is in `fly.toml`.
+- **docker-compose:** works for self-hosting.
+- **Env reference:** `.env.example`. Notable variables: `MAX_CONCURRENT_RUNS` (3), `REFRESH_HOURS` (3), `TIMELINE_WORKER=0` (turns the scheduler off; the tests use it), `RATE_LIMIT`, `KEY_CHECK_MODEL`.
+
+---
+
+## 8. Known gaps and unverified pieces
+
+- **Google sign-in** is untested against real Google, because the owner can't create the OAuth client yet. The flow is covered by tests with a mocked token exchange.
+- **The AI Gateway key check** uses `GET https://ai-gateway.vercel.sh/v1/credits` (with a fallback completion on `openai/gpt-4.1-nano`). Neither has been confirmed against Vercel. If valid keys get rejected at onboarding, look here first.
+- **Accounts:** no password reset and no email verification. The domain limit on password sign-up keeps outsiders out but doesn't prove someone owns the address.
+- **Preset edits don't reach existing profiles** (profiles copy a preset).
+- **Instinct / Muse** setup isn't confirmed server-side, since the app can't see whether the agent scheduled the task.
+- **Single instance only:** SQLite plus an in-process scheduler. Scaling past one box would mean moving to Postgres and a separate worker.
+- **`main` still runs the old GitHub Pages workflow** (`update.yml` commits `data/week.json` every 3h). The branch deletes those workflows; merging the branch stops it. The branch also still has the old team-mode `data/` folder, which the new app doesn't use.
+- **Costs:**
+  - Railway: about $5–8 a month.
+  - Each user, on their own keys: about $20–35 a month (twitterapi.io about $10–15, AI Gateway about $10–20).
+  - The example page costs the owner about the same as one user.
+
+## 9. Where to look for common tasks
+
+| Task | Files |
+|---|---|
+| Change what makes a page (filters/ranking) | `pipeline/judge.py` (`why_not`, `rank_all`, `select`), `pipeline/config.py` |
+| Add or tune a preset | `pipeline/presets/*.json`, `PRESET_ORDER` in `server/settings_schema.py`, `tests/test_presets.py` |
+| Add a settings field | `server/settings_schema.py` (validate + default), `pipeline/config.py` (read it), `templates/index.html` (`fill`/`collect`), `templates/_shared.js` if it's in onboarding |
+| Scheduler, runs, error messages | `server/worker.py` (`run_user`, `humanize`, `empty_reason`, leases), `server/db.py` |
+| Routes and auth | `server/app.py`, `server/google.py`, `server/security.py`, `server/config.py` |
+| Page design | `templates/_base.css`, `templates/index.html` |
+| Slack message / recap format | `pipeline/slack.py`, `pipeline/recap.py` |
