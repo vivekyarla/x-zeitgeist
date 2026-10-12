@@ -58,7 +58,7 @@
       "name": "Dan",
       "full_name": "Daniel Chen",
       "x": "dychen3",
-      "role": "At Rox via the Quilt acquisition; ex-founder and ex-Sequoia partner",
+      "role": "At Rox since it acquired his company Quilt; ex-founder and ex-Sequoia partner",
       "label": "Ex-founder, ex-Sequoia",
       "profile": "Older and more experienced: two-time founder (Hero.app, acquired by People.ai in 2021; Quilt, AI assistants for technical sales and solutions teams, acquired by Rox in 2025) and a former Sequoia partner. Credible on venture and startup strategy, founder lessons, M&A, enterprise sales and presales, and how AI changes selling to enterprises.",
       "engage_on": [
@@ -86,16 +86,16 @@
     },
     {
       "name": "Brian",
-      "full_name": "Brian",
+      "full_name": "Brian Xu",
       "x": "",
-      "role": "Engineer at Rox",
+      "role": "Engineer at Rox (agents)",
       "label": "Engineer",
-      "profile": "Younger engineer shipping product at an AI-native startup. Engages as a builder: AI coding tools and workflows, shipping fast, agent engineering, new launches developers are trying, and SF engineering culture.",
+      "profile": "Younger engineer, Stanford. Works on Rox's agents with Gopal, rearchitecting how the agent pulls the right signals out of customer and market data. Engages as a builder: agent engineering and signal extraction, retrieval and data pipelines for agents, AI coding tools and workflows, new developer launches, and SF engineering culture.",
       "engage_on": [
+        "agent engineering and signal extraction",
+        "retrieval and data pipelines for agents",
         "AI coding tools and workflows",
         "new developer launches people are trying",
-        "agent engineering",
-        "shipping fast at startups",
         "SF engineering culture"
       ]
     }
