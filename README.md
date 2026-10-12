@@ -109,6 +109,23 @@ Rough cost per person, with the default 3-hour refresh:
 
 More searches, a bigger watchlist, or more panel anchors cost more. Settings are capped (40 searches, 300 accounts per list, 100 panel anchors) so a typo can't run up a bill.
 
+## Daily engagement DM
+
+A Slack bot DMs one person (`ENGAGE_DM_EMAIL`) every day at `ENGAGE_TIME` (11:00 Pacific by default): for each teammate in `engage.json`, two or three tweets and a topic from today that they'd credibly engage with, each with a few words of why.
+
+How it picks (`pipeline/engage.py`):
+1. Fetches the last 24 hours from `engage.json`'s searches and accounts (research, agents and dev tools, data infrastructure, startups and VC, AI for sales, SF builders).
+2. Keeps originals from prominent-ish authors: at least `min_followers` (1,500), or a bio tying them to a company in `prominent_orgs` (Ramp, Cognition, OpenAI, Anthropic, …; short names like Ramp only count as an @handle). Drops the team's own posts and anything under `min_likes`.
+3. Ranks by engagement per hour today, not total likes, so it catches what's climbing now.
+4. One Claude call (`model`) matches tweets and topics to each person's profile in `engage.json` and writes the reasons. The guidance there rules out politics and anything that would look bad for the company.
+
+Setup:
+1. Create the Slack app from this manifest (opens Slack with the scopes `chat:write`, `im:write`, `users:read`, `users:read.email`): see the link in `docs/HANDOFF.md`, or create an app with those bot scopes. Install it to the workspace (an admin may need to approve it), then copy the **Bot User OAuth Token** (`xoxb-…`).
+2. Set `ENGAGE_SLACK_BOT_TOKEN` and `ENGAGE_DM_EMAIL`. It uses the example page's `PREVIEW_*` keys unless `ENGAGE_*` keys are set.
+3. The first DM goes out right after the deploy, so you can check it; after that, daily. Signed in as `ENGAGE_DM_EMAIL`, `POST /api/engage/run` sends one now and `GET /api/engage/status` shows the last send or error. Locally: `python -m pipeline.engage` prints the message without sending.
+
+Edit `engage.json` to change people, their profiles, sources, thresholds, or how many picks each gets. Cost: about 15 searches and one Claude call a day, a few dollars a month.
+
 ## Presets
 
 Setup starts from a preset in `pipeline/presets/`. Each is a complete settings file plus a `"preset"` block (id, name, tagline, description):

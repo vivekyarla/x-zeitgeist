@@ -1,0 +1,402 @@
+{
+  "about": "Daily Slack DM: for each person, today's tweets and topics worth engaging with. Edit freely; the next run uses it.",
+  "company": "Rox (rox.com): an AI-native revenue platform. Agents research accounts, find prospects, and draft outreach for sellers, on top of a CRM-replacing system of record. ~170 people, SF and Bangalore, valued at $1.2B in March 2026. Competes with Salesforce, HubSpot, Clay, Gong, Apollo, Outreach, and Attio.",
+  "guidance": [
+    "Pick posts where this person can add something real (expertise, a data point, an experience), not just a like.",
+    "Prefer what's tactically dominating today: posts climbing fast from prominent accounts, or the topic everyone in their circle is reacting to.",
+    "Never pick politics, culture-war fights, layoffs-dunking, tragedies, or anything that could look bad for a Rox executive or employee.",
+    "Don't pick Rox's own posts or posts by these six people.",
+    "Competitor posts are fine when there's a smart, non-promotional take; never suggest dunking on competitors or customers."
+  ],
+  "people": [
+    {
+      "name": "Ishan",
+      "full_name": "Ishan Mukherjee",
+      "x": "ishanmkh",
+      "role": "CEO and co-founder of Rox",
+      "label": "CEO",
+      "profile": "Second-time founder; previously Chief Growth Officer at New Relic. Speaks for the company: the future of sales and CRM, AI agents doing real GTM work, enterprise AI adoption, company building, and the AI-native vs incumbent (Salesforce) fight. Senior voice: big-picture takes, not low-level technical debates.",
+      "engage_on": [
+        "enterprise AI adoption and ROI",
+        "future of sales, CRM, and GTM",
+        "AI agents replacing SaaS workflows",
+        "company building and leadership",
+        "big raises, ARR milestones, and market moves in AI apps"
+      ]
+    },
+    {
+      "name": "Shriram",
+      "full_name": "Shriram Sridharan",
+      "x": "shriram_s",
+      "role": "CTO and co-founder of Rox",
+      "label": "CTO",
+      "profile": "Infrastructure veteran: led data infrastructure at Confluent (making Kafka faster and cheaper across clouds) and worked on Amazon Aurora. Credible on databases, distributed systems, data platforms, reliability and cost at scale, the infrastructure behind production agents, and building engineering orgs.",
+      "engage_on": [
+        "databases, streaming, and data infrastructure",
+        "distributed systems and reliability",
+        "agent infrastructure in production: cost, latency, evals",
+        "inference economics",
+        "engineering leadership and hiring"
+      ]
+    },
+    {
+      "name": "Gopal",
+      "full_name": "Gopal Goel",
+      "x": "gopalkgoel1",
+      "role": "Research lead at Rox (Rox Research, agents)",
+      "label": "Research lead",
+      "profile": "Highly technical: MIT math and physics, IMO and IPhO medalist, research background in probability and combinatorics. Leads agents research at Rox, which has started publishing its results. Engages on frontier research with rigor: papers, RL and post-training, reasoning, evals and benchmarks, agent architectures, AI for math.",
+      "engage_on": [
+        "new papers and research results",
+        "RL, post-training, and reasoning models",
+        "evals and benchmarks (and their flaws)",
+        "agent architectures and long-horizon agents",
+        "AI and mathematics"
+      ]
+    },
+    {
+      "name": "Dan",
+      "full_name": "Daniel Chen",
+      "x": "dychen3",
+      "role": "At Rox via the Quilt acquisition; ex-founder and ex-Sequoia partner",
+      "label": "Ex-founder, ex-Sequoia",
+      "profile": "Older and more experienced: two-time founder (Hero.app, acquired by People.ai in 2021; Quilt, AI assistants for technical sales and solutions teams, acquired by Rox in 2025) and a former Sequoia partner. Credible on venture and startup strategy, founder lessons, M&A, enterprise sales and presales, and how AI changes selling to enterprises.",
+      "engage_on": [
+        "venture capital and fundraising",
+        "founder lessons and company strategy",
+        "M&A and acqui-hires",
+        "enterprise sales, solutions engineering, and presales",
+        "market maps of AI apps"
+      ]
+    },
+    {
+      "name": "Taeuk",
+      "full_name": "Taeuk Kang",
+      "x": "",
+      "role": "Founding engineer at Rox",
+      "label": "Founding engineer",
+      "profile": "Younger engineer, Stanford CS. Built LLM agents and RAG at X and data pipelines at Stripe; at Rox built the workflow builder and the inbound lead agent. Engages as a builder: shipping agents in production, coding agents and dev tools, retrieval, voice agents, and SF builder culture.",
+      "engage_on": [
+        "building agents in production",
+        "coding agents and dev tools (Claude Code, Codex, Cursor)",
+        "RAG, retrieval, and context engineering",
+        "voice and realtime agents",
+        "SF builder culture and hackathons"
+      ]
+    },
+    {
+      "name": "Brian",
+      "full_name": "Brian",
+      "x": "",
+      "role": "Engineer at Rox",
+      "label": "Engineer",
+      "profile": "Younger engineer shipping product at an AI-native startup. Engages as a builder: AI coding tools and workflows, shipping fast, agent engineering, new launches developers are trying, and SF engineering culture.",
+      "engage_on": [
+        "AI coding tools and workflows",
+        "new developer launches people are trying",
+        "agent engineering",
+        "shipping fast at startups",
+        "SF engineering culture"
+      ]
+    }
+  ],
+  "exclude_handles": [
+    "rox_ai",
+    "ThisIsRox"
+  ],
+  "searches": [
+    "(paper OR arxiv OR \"new results\" OR benchmark OR evals OR RL OR \"post-training\" OR reasoning) (model OR LLM OR agents) min_faves:150 lang:en -filter:replies",
+    "(\"coding agent\" OR \"Claude Code\" OR Codex OR Cursor OR \"context engineering\" OR MCP OR \"agent harness\" OR \"AI agents\") min_faves:150 lang:en -filter:replies",
+    "(Kafka OR Postgres OR database OR \"distributed systems\" OR inference OR latency OR \"data infrastructure\" OR GPUs) (AI OR scale OR production) min_faves:150 lang:en -filter:replies",
+    "(founders OR startup OR VC OR \"Series A\" OR \"Series B\" OR raised OR ARR OR acquisition OR acquires) (AI OR SaaS) min_faves:300 lang:en -filter:replies",
+    "(\"AI SDR\" OR \"sales agent\" OR CRM OR Salesforce OR HubSpot OR GTM OR \"go-to-market\" OR \"revenue team\" OR presales) (AI OR agents) min_faves:75 lang:en -filter:replies",
+    "(\"enterprise AI\" OR \"AI adoption\" OR \"AI ROI\" OR \"systems of record\" OR \"SaaS is dead\" OR \"agents replace\") min_faves:150 lang:en -filter:replies",
+    "(\"founding engineer\" OR hackathon OR \"in SF\" OR \"new grad\" OR \"cracked\" OR \"shipped\" OR \"just launched\") (AI OR agent OR engineer) min_faves:300 lang:en -filter:replies"
+  ],
+  "accounts": [
+    "karpathy",
+    "natolambert",
+    "srush_nlp",
+    "_jasonwei",
+    "polynoamial",
+    "fchollet",
+    "tri_dao",
+    "swyx",
+    "simonw",
+    "hwchase17",
+    "jeremyphoward",
+    "OfficialLoganK",
+    "alexalbert__",
+    "amasad",
+    "mckaywrigley",
+    "sama",
+    "OpenAI",
+    "AnthropicAI",
+    "GoogleDeepMind",
+    "cognition_labs",
+    "ScottWu46",
+    "cursor_ai",
+    "tryramp",
+    "eglyman",
+    "karimatiyeh",
+    "paulg",
+    "garrytan",
+    "pmarca",
+    "levie",
+    "eriktorenberg",
+    "deedydas",
+    "jasonlk",
+    "rauchg",
+    "patrickc",
+    "benln",
+    "Altimor",
+    "jaltma"
+  ],
+  "prominent_orgs": [
+    {
+      "name": "OpenAI",
+      "handles": [
+        "OpenAI"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Anthropic",
+      "handles": [
+        "AnthropicAI",
+        "claudeai"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Google DeepMind",
+      "handles": [
+        "GoogleDeepMind"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Cognition",
+      "handles": [
+        "cognition_labs",
+        "cognition"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Cursor",
+      "handles": [
+        "cursor_ai",
+        "anysphere"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Ramp",
+      "handles": [
+        "tryramp",
+        "ramp"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Stripe",
+      "handles": [
+        "stripe"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Vercel",
+      "handles": [
+        "vercel"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Replit",
+      "handles": [
+        "Replit"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Perplexity",
+      "handles": [
+        "perplexity_ai"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Databricks",
+      "handles": [
+        "databricks"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Scale AI",
+      "handles": [
+        "scale_AI"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Figma",
+      "handles": [
+        "figma"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Notion",
+      "handles": [
+        "NotionHQ"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Linear",
+      "handles": [
+        "linear"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Meta",
+      "handles": [
+        "AIatMeta",
+        "Meta"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "xAI",
+      "handles": [
+        "xai"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Mistral",
+      "handles": [
+        "MistralAI"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Sequoia",
+      "handles": [
+        "sequoia"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "a16z",
+      "handles": [
+        "a16z"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Y Combinator",
+      "handles": [
+        "ycombinator"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Founders Fund",
+      "handles": [
+        "foundersfund"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Benchmark",
+      "handles": [
+        "benchmark"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Greylock",
+      "handles": [
+        "GreylockVC"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Kleiner Perkins",
+      "handles": [
+        "kleinerperkins"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Lightspeed",
+      "handles": [
+        "lightspeedvp"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Thrive Capital",
+      "handles": [
+        "ThriveCapital"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "General Catalyst",
+      "handles": [
+        "generalcatalyst"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "GV",
+      "handles": [
+        "GVteam"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Salesforce",
+      "handles": [
+        "salesforce"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "HubSpot",
+      "handles": [
+        "HubSpot"
+      ],
+      "match_name": true
+    },
+    {
+      "name": "Clay",
+      "handles": [
+        "clay"
+      ],
+      "match_name": false
+    },
+    {
+      "name": "Gong",
+      "handles": [
+        "gong_io"
+      ],
+      "match_name": false
+    }
+  ],
+  "min_followers": 1500,
+  "min_followers_if_affiliated": 200,
+  "min_likes": 25,
+  "window_hours": 24,
+  "pages_per_search": 2,
+  "candidates_for_model": 120,
+  "picks_per_person": 3,
+  "topics_per_person": 1,
+  "model": "anthropic/claude-sonnet-5"
+}

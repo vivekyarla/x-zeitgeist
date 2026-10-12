@@ -23,7 +23,7 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -43,6 +43,12 @@ DELIVER_TIMEOUT = 5 * 60
 # redeploy mid-run) expires in minutes and the run is picked up again, instead of blocking it.
 LEASE = 180
 RENEW_EVERY = 60
+# The daily engagement DM: start a little before the send time so it lands on time, retry a
+# failed attempt every 15 minutes, and give up for the day mid-afternoon.
+ENGAGE_TIMEOUT = 15 * 60
+ENGAGE_LEAD = 8 * 60
+ENGAGE_RETRY = 15 * 60
+ENGAGE_GIVE_UP_HOUR = 15
 RETRY_AFTER = 30 * 60
 TICK = 20
 LOG_MAX = 200_000
@@ -55,12 +61,13 @@ ENV_ALLOW = ("PATH", "HOME", "LANG", "PYTHONPATH", "LC_ALL", "TZ", "SSL_CERT_FIL
 
 class Worker:
     def __init__(self, cfg: Config, db: DB, box: Box):
+        self._engage_lock = threading.Lock()
         self.cfg, self.db, self.box = cfg, db, box
         self.owner = f"{socket.gethostname()}:{os.getpid()}:{uuid.uuid4().hex[:8]}"
         self._stop = threading.Event()
         self._kick = threading.Event()
         self._thread: threading.Thread | None = None
-        self._pool = ThreadPoolExecutor(max_workers=cfg.max_concurrent_runs + 1, thread_name_prefix="run")
+        self._pool = ThreadPoolExecutor(max_workers=cfg.max_concurrent_runs + 2, thread_name_prefix="run")
         self._inflight: set[tuple[str, int]] = set()
         self._lock = threading.Lock()
 
@@ -108,9 +115,10 @@ class Worker:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text[-LOG_MAX:])
 
-    def _exec(self, args: list[str], env: dict, timeout: int, secrets_: list[str]) -> tuple[int | None, str]:
+    def _exec(self, args: list[str], env: dict, timeout: int, secrets_: list[str],
+              module: str = "pipeline.run") -> tuple[int | None, str]:
         try:
-            proc = subprocess.run([sys.executable, "-m", "pipeline.run", *args], cwd=ROOT, env=env,
+            proc = subprocess.run([sys.executable, "-m", module, *args], cwd=ROOT, env=env,
                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
             code, out = proc.returncode, proc.stdout
         except subprocess.TimeoutExpired as e:
@@ -249,7 +257,7 @@ class Worker:
 
         def job():
             try:
-                (self.run_user if kind == "run" else self.deliver_user)(user_id)
+                {"run": self.run_user, "deliver": self.deliver_user, "engage": lambda _: self.run_engage()}[kind](user_id)
             finally:
                 with self._lock:
                     self._inflight.discard((kind, user_id))
@@ -264,10 +272,66 @@ class Worker:
         if free > 0:
             for uid in self.db.queued(free):
                 self._submit("run", uid)
+        if self.cfg.engage and self.engage_due(now):
+            self._submit("engage", 0)
         if not self.cfg.demo:
             for row in self.db.onboarded_users():
                 if self._delivery_due(row, now) and self.db.keys(row["id"]).get("slack_webhook"):
                     self._submit("deliver", row["id"])
+
+    # -- the daily engagement DM ---------------------------------------------
+    def _engage_window(self, now: float) -> tuple[datetime, datetime]:
+        local = datetime.fromtimestamp(now, ZoneInfo(self.cfg.engage_tz))
+        h, m = (int(x) for x in self.cfg.engage_time.split(":"))
+        return local, local.replace(hour=h, minute=m, second=0, microsecond=0) - timedelta(seconds=ENGAGE_LEAD)
+
+    def engage_due(self, now: float) -> bool:
+        if self.db.meta("engage_force") == "1":
+            return True
+        if now - float(self.db.meta("engage_tried_at") or 0) < ENGAGE_RETRY:
+            return False
+        sent = self.db.meta("engage_sent_date")
+        if sent is None:
+            return True  # first time it's set up: send one right away, so it can be checked
+        local, start = self._engage_window(now)
+        if sent == local.date().isoformat() or (self.cfg.engage_weekdays_only and local.weekday() >= 5):
+            return False
+        return start <= local and local.hour < ENGAGE_GIVE_UP_HOUR
+
+    def run_engage(self) -> bool:
+        now = time.time()
+        self.db.set_meta("engage_tried_at", str(now))
+        self.db.set_meta("engage_force", "0")
+        out = self.cfg.data_dir / "engage"
+        out.mkdir(parents=True, exist_ok=True)
+        env = {k: os.environ[k] for k in ENV_ALLOW if os.environ.get(k)}
+        env["PYTHONPATH"] = str(ROOT) + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
+        keys = self.cfg.engage_keys or {}
+        env.update({"PYTHONUNBUFFERED": "1", "TWITTERAPI_IO_KEY": keys.get("twitterapi_io", ""),
+                    "AI_GATEWAY_API_KEY": keys.get("ai_gateway", ""), "SLACK_BOT_TOKEN": self.cfg.engage_slack_token,
+                    "ENGAGE_DM_EMAIL": self.cfg.engage_dm_email, "ENGAGE_DM_USER": self.cfg.engage_dm_user,
+                    "ENGAGE_TIMEZONE": self.cfg.engage_tz, "ENGAGE_OUT": str(out)})
+        with self._engage_lock:
+            code, text = self._exec(["--send"], env, ENGAGE_TIMEOUT,
+                                    [*keys.values(), self.cfg.engage_slack_token], module="pipeline.engage")
+        self._write_log(out / "last_run.log", text)
+        for ln in text.splitlines():
+            if ln.strip().startswith(("fetched", "search failed", "  search failed", "slack", "Traceback",
+                                      "RuntimeError", "SystemExit")) or "eligible" in ln:
+                log.info("engage: %s", ln.strip()[:300])
+        if code == 0:
+            local, start = self._engage_window(time.time())
+            # A first send before today's window doesn't count as today's, so 11am still goes out.
+            prev = self.db.meta("engage_sent_date")
+            self.db.set_meta("engage_sent_date", local.date().isoformat() if local >= start else (prev or "first"))
+            self.db.set_meta("engage_last_error", "")
+            log.info("engage: DM sent")
+            return True
+        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        err = "timed out" if code is None else (lines[-1][:300] if lines else "no output")
+        self.db.set_meta("engage_last_error", err)
+        log.warning("engage: failed: %s", err)
+        return False
 
     def kick(self) -> None:
         self._kick.set()

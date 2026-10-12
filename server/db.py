@@ -25,6 +25,10 @@ CREATE TABLE IF NOT EXISTS keys (
   updated_at REAL NOT NULL,
   PRIMARY KEY (user_id, name)
 );
+CREATE TABLE IF NOT EXISTS meta (
+  key   TEXT PRIMARY KEY,                          -- small server-wide state, e.g. the engagement DM's last send
+  value TEXT
+);
 CREATE TABLE IF NOT EXISTS runs (
   user_id         INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   state           TEXT NOT NULL DEFAULT 'new',     -- new | queued | running | ready | error
@@ -168,6 +172,16 @@ class DB:
                 cur = c.execute("UPDATE runs SET lease_until = ?, lease_owner = ? WHERE user_id = ? AND lease_until < ?",
                                 (now + seconds, owner, user_id, now))
             return cur.rowcount == 1
+
+    def meta(self, key: str) -> str | None:
+        with self.conn() as c:
+            row = c.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+            return row[0] if row else None
+
+    def set_meta(self, key: str, value: str | None) -> None:
+        with self.conn() as c:
+            c.execute("INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                      (key, value))
 
     def cap_leases(self, seconds: float) -> None:
         """Shorten leases longer than `seconds` (left by older versions that held them for 25 minutes)."""

@@ -54,6 +54,7 @@ def normalize(raw: dict, _depth: int = 0) -> dict:
             "followers": int(author.get("followers") or 0),
             "verified": bool(author.get("isBlueVerified")),
             "avatar": author.get("profilePicture") or "",
+            "bio": author.get("description") or "",
         },
     }
 

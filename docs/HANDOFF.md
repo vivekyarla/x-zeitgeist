@@ -176,6 +176,26 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
   - **Delivery:** the worker runs `--deliver` hourly so daily posts land on time. Posts retry on 429 and 5xx, and failures are saved as a plain sentence (`slack_last_error`) shown in Settings.
 - **Instinct / Muse:** these consumer AI agents have no API for other apps to push messages into. The UI gives a one-tap setup message ("every weekday at 8:00 AM, read `<recap url>` and send me …") via an `sms:` link for Instinct, or `muse.ai` / `wa.me` plus copy for Muse. Setup state is remembered per browser only (`localStorage` `tl_deliver`).
 
+### Daily engagement DM (`pipeline/engage.py`, `engage.json`)
+- **What it is:** a Slack bot DMs one person (`ENGAGE_DM_EMAIL`, vivek@rox.com) every day at `ENGAGE_TIME` (11:00 `America/Los_Angeles`). For each of Ishan (CEO), Shriram (CTO), Gopal (research lead), Dan (Daniel Chen: ex-founder, ex-Sequoia), Taeuk (founding engineer) and Brian (engineer), it lists 2–3 of today's tweets and one topic to engage with, each with a reason of 12 words or fewer.
+- **How it picks:**
+  1. Fetches the last 24h from `engage.json` searches and accounts.
+  2. Keeps originals by authors with 1,500+ followers, or 200+ followers and a bio naming a `prominent_orgs` company (short names like Ramp only count as an @handle).
+  3. Drops the team's own posts and anything under 25 likes.
+  4. Ranks by engagement per hour (`score()`) and keeps the top 120, at most 2 per author.
+  5. Makes one Claude call (via AI Gateway) that returns per-person picks and topics as JSON. `clean()` drops made-up ids and trims the reasons.
+  6. Sends Slack Block Kit: `users.lookupByEmail`, then `conversations.open`, then `chat.postMessage`.
+- **Scheduling** (`Worker.engage_due` / `run_engage`):
+  - Starts 8 minutes before `ENGAGE_TIME` and gives up for the day at 3pm.
+  - Retries a failure every 15 minutes.
+  - Sends once right after it's first configured.
+  - State lives in the `meta` table (`engage_sent_date`, `engage_tried_at`, `engage_last_error`, `engage_force`).
+  - Logs go to `DATA_DIR/engage/last_run.log`, and the last picks to `DATA_DIR/engage/last.json`.
+- **Env:** `ENGAGE_SLACK_BOT_TOKEN` (xoxb), `ENGAGE_DM_EMAIL` or `ENGAGE_DM_USER`, optional `ENGAGE_TIME`, `ENGAGE_TIMEZONE`, `ENGAGE_WEEKDAYS_ONLY`, and `ENGAGE_TWITTERAPI_IO_KEY` / `ENGAGE_AI_GATEWAY_API_KEY` (they fall back to the `PREVIEW_*` keys).
+- **Owner-only routes:** `POST /api/engage/run` (send now) and `GET /api/engage/status`. "Owner" means the signed-in email equals `ENGAGE_DM_EMAIL`.
+- **Slack app manifest** (scopes `chat:write`, `im:write`, `users:read`, `users:read.email`): https://api.slack.com/apps?new_app=1&manifest_json=%7B%22display_information%22%3A%7B%22name%22%3A%22Engage%20digest%22%2C%22description%22%3A%22Daily%20picks%20of%20what%20the%20team%20should%20engage%20with%20on%20X%22%7D%2C%22features%22%3A%7B%22bot_user%22%3A%7B%22display_name%22%3A%22Engage%20digest%22%2C%22always_online%22%3Afalse%7D%2C%22app_home%22%3A%7B%22messages_tab_enabled%22%3Atrue%2C%22messages_tab_read_only_enabled%22%3Atrue%7D%7D%2C%22oauth_config%22%3A%7B%22scopes%22%3A%7B%22bot%22%3A%5B%22chat%3Awrite%22%2C%22im%3Awrite%22%2C%22users%3Aread%22%2C%22users%3Aread.email%22%5D%7D%7D%2C%22settings%22%3A%7B%22org_deploy_enabled%22%3Afalse%2C%22socket_mode_enabled%22%3Afalse%2C%22token_rotation_enabled%22%3Afalse%7D%7D
+- **People profiles** are seeded from public info. Brian's is role-only, because his full name and X handle weren't known when this was written.
+
 ---
 
 ## 5. HTTP surface (`server/app.py`)
@@ -200,6 +220,7 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
 | `GET /api/status` | session | `{state, last_run_at, next_run_at, last_error, has_page}` |
 | `GET /api/export[?keys=1]`, `POST /api/import {profile}` | session | `{"format":"timeline-profile","version":1,...}` |
 | `POST /api/recap/rotate`, `DELETE /api/account {password \| confirm}` | session | |
+| `POST /api/engage/run`, `GET /api/engage/status` | session, `ENGAGE_DM_EMAIL` only | Daily engagement DM |
 
 All errors are JSON `{"error": "<a sentence for a person>"}`.
 
@@ -223,7 +244,7 @@ All errors are JSON `{"error": "<a sentence for a person>"}`.
 ```bash
 pip install -r requirements.txt -r requirements-dev.txt
 TIMELINE_DEMO=1 uvicorn server.app:app --reload     # no keys needed: checks skipped, pages built from pipeline/demo_state.json
-pytest -q                                            # 46 tests; CI: .github/workflows/test.yml
+pytest -q                                            # 57 tests; CI: .github/workflows/test.yml
 python -m pipeline.run --demo                        # render one page from sample data into ./public
 ```
 

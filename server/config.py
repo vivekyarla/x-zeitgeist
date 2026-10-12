@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 import secrets
 from dataclasses import dataclass
 from pathlib import Path
@@ -40,6 +41,18 @@ class Config:
     password_login: bool = True
     preview_keys: dict | None = None       # the owner's keys for the public example page
     preview_preset: str = "sf_tech"
+    # The daily engagement DM (pipeline/engage.py): a Slack bot DMs one person picks for the team.
+    engage_slack_token: str = ""
+    engage_dm_email: str = ""
+    engage_dm_user: str = ""
+    engage_time: str = "11:00"
+    engage_tz: str = "America/Los_Angeles"
+    engage_weekdays_only: bool = False
+    engage_keys: dict | None = None
+
+    @property
+    def engage(self) -> bool:
+        return bool(self.engage_slack_token and (self.engage_dm_email or self.engage_dm_user) and self.engage_keys)
 
     @property
     def google(self) -> bool:
@@ -101,6 +114,11 @@ def load() -> Config:
     password_login = _truthy(pw) if pw else not (google_id and google_secret)
     pk = {"twitterapi_io": _env_value("PREVIEW_TWITTERAPI_IO_KEY"),
           "ai_gateway": _env_value("PREVIEW_AI_GATEWAY_API_KEY")}
+    ek = {"twitterapi_io": _env_value("ENGAGE_TWITTERAPI_IO_KEY") or pk["twitterapi_io"],
+          "ai_gateway": _env_value("ENGAGE_AI_GATEWAY_API_KEY") or pk["ai_gateway"]}
+    engage_time = _env_value("ENGAGE_TIME") or "11:00"
+    if not re.fullmatch(r"([01]?\d|2[0-3]):[0-5]\d", engage_time):
+        raise RuntimeError("ENGAGE_TIME should look like 11:00 (24-hour).")
     return Config(
         data_dir=data_dir,
         base_url=base_url,
@@ -117,4 +135,11 @@ def load() -> Config:
         password_login=password_login,
         preview_keys=pk if all(pk.values()) else None,
         preview_preset=os.getenv("PREVIEW_PRESET", "sf_tech").strip() or "sf_tech",
+        engage_slack_token=_env_value("ENGAGE_SLACK_BOT_TOKEN"),
+        engage_dm_email=_env_value("ENGAGE_DM_EMAIL").lower(),
+        engage_dm_user=_env_value("ENGAGE_DM_USER"),
+        engage_time=engage_time,
+        engage_tz=_env_value("ENGAGE_TIMEZONE") or "America/Los_Angeles",
+        engage_weekdays_only=_truthy(os.getenv("ENGAGE_WEEKDAYS_ONLY")),
+        engage_keys=ek if all(ek.values()) else None,
     )

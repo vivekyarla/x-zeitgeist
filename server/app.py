@@ -604,6 +604,36 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         queue_run(uid, body.slack)
         return {**status(uid), "message": "Your page rebuilds in a few minutes."}
 
+    # -- the daily engagement DM (owner only) ----------------------------------
+    def require_engage_owner(request: Request):
+        user = require_user(request)
+        if not cfg.engage_dm_email or user["email"].lower() != cfg.engage_dm_email:
+            raise ApiError(403, "Only the person the engagement DM goes to can do that.")
+        return user
+
+    def engage_status() -> dict:
+        sent, err = db.meta("engage_sent_date"), db.meta("engage_last_error") or None
+        missing = [n for n, ok in (("ENGAGE_SLACK_BOT_TOKEN", cfg.engage_slack_token),
+                                   ("ENGAGE_DM_EMAIL or ENGAGE_DM_USER", cfg.engage_dm_email or cfg.engage_dm_user),
+                                   ("twitterapi.io and AI Gateway keys (ENGAGE_* or PREVIEW_*)", cfg.engage_keys)) if not ok]
+        return {"enabled": cfg.engage, "missing": missing, "time": cfg.engage_time, "timezone": cfg.engage_tz,
+                "last_sent_date": None if sent in (None, "first") else sent, "last_error": err,
+                "last_tried_at": _iso(float(db.meta("engage_tried_at") or 0) or None)}
+
+    @app.get("/api/engage/status")
+    def get_engage_status(request: Request):
+        require_engage_owner(request)
+        return engage_status()
+
+    @app.post("/api/engage/run")
+    def engage_run(request: Request):
+        require_engage_owner(request)
+        if not cfg.engage:
+            raise ApiError(400, "The engagement DM isn't set up. Missing: " + ", ".join(engage_status()["missing"]) + ".")
+        db.set_meta("engage_force", "1")
+        worker.kick()
+        return {**engage_status(), "message": "Building today's picks now. The DM arrives in a few minutes."}
+
     @app.get("/api/status")
     def get_status(request: Request):
         return status(require_user(request)["id"])
