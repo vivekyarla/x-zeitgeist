@@ -65,6 +65,7 @@ class Config:
     intel_url: str = ""
     intel_page_url: str = ""
     intel_push_token: str = ""
+    slack_signing_secret: str = ""  # lets the bot answer @mentions and DMs (POST /slack/events)
 
     @property
     def channel(self) -> bool:
@@ -187,4 +188,5 @@ def load() -> Config:
         intel_url=_env_value("INTEL_URL"),
         intel_page_url=_env_value("INTEL_PAGE_URL"),
         intel_push_token=_env_value("INTEL_PUSH_TOKEN"),
+        slack_signing_secret=_env_value("SLACK_SIGNING_SECRET"),
     )

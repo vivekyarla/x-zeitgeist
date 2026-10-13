@@ -214,6 +214,11 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
 - **Admin routes:** `GET /api/channel/status` and `POST /api/channel/run`.
 - **Tests:** `tests/test_channel.py`.
 
+### Asking the bot (`server/slackbot.py`)
+- `POST /slack/events` (Slack Events API) verifies `SLACK_SIGNING_SECRET`, answers Slack's `url_verification` handshake, ignores retries, and handles `app_mention` and DM `message.im` events in a background thread, since Slack wants a 200 within 3 seconds.
+- **The reply:** it looks up the asker's email (`users.info`) and makes one Claude call grounded in `help_doc()` (how to tweak the GTM report, Settings tabs, common tweaks, admins), which knows whether the asker is an admin. It falls back to fixed steps if the call fails. Mentions are answered in a thread.
+- **Slack app needs:** scopes `app_mentions:read` and `im:history` (on top of `chat:write`, `im:write`, `users:read`, `users:read.email`), the messages tab writable, and event subscriptions to `<BASE_URL>/slack/events` for `app_mention` and `message.im`.
+
 ---
 
 ## 5. HTTP surface (`server/app.py`)
@@ -242,6 +247,7 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
 | `GET /gtm/`, `/gtm/{file}` | – | The GTM archetype's page (admins edit it via `X-Profile: gtm`) |
 | `GET /api/channel/status`, `POST /api/channel/run` | admin (`ADMIN_EMAILS`) | Marketing channel digest |
 | `POST /api/intel` | Bearer `INTEL_PUSH_TOKEN` | Another bot pushes its market-intel report |
+| `POST /slack/events` | Slack signature | The bot answering @mentions and DMs |
 
 All errors are JSON `{"error": "<a sentence for a person>"}`.
 
@@ -265,7 +271,7 @@ All errors are JSON `{"error": "<a sentence for a person>"}`.
 ```bash
 pip install -r requirements.txt -r requirements-dev.txt
 TIMELINE_DEMO=1 uvicorn server.app:app --reload     # no keys needed: checks skipped, pages built from pipeline/demo_state.json
-pytest -q                                            # 76 tests; CI: .github/workflows/test.yml
+pytest -q                                            # 82 tests; CI: .github/workflows/test.yml
 python -m pipeline.run --demo                        # render one page from sample data into ./public
 ```
 

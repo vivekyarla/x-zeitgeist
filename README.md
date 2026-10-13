@@ -142,6 +142,14 @@ Every weekday at `CHANNEL_TIME` (9:30 Pacific by default), the bot posts to `CHA
 
 Signed in as an admin, `POST /api/channel/run` posts now and `GET /api/channel/status` shows the setup and the last post or error. The first post goes out as soon as the archetype's first report exists.
 
+## Asking the bot
+
+When someone @mentions the bot in a channel, or DMs it, it replies (in the thread) with how to do what they asked, mainly how to tweak the GTM report: sign in, open `/gtm/`, which Settings tab does what, and the common tweaks. It knows whether the person is an admin (`ADMIN_EMAILS`) and, if not, who to ask. Answers come from a fixed reference in `server/slackbot.py` (one short Claude call, with a plain fallback if that fails).
+
+Setup, on the same Slack app:
+1. **App Manifest:** add the bot scopes `app_mentions:read` and `im:history`. Under `features.app_home`, set `messages_tab_read_only_enabled` to false. Add `event_subscriptions` with `request_url` `https://<your-domain>/slack/events` and bot events `app_mention` and `message.im`. Save, then reinstall the app.
+2. Copy **Basic Information → Signing Secret** into `SLACK_SIGNING_SECRET`.
+
 ## Presets
 
 Setup starts from a preset in `pipeline/presets/`. Each is a complete settings file plus a `"preset"` block (id, name, tagline, description):

@@ -747,6 +747,29 @@ def create_app(cfg: Config | None = None) -> FastAPI:
                                             "text": text}, ensure_ascii=False))
         return {"ok": True, "chars": len(text)}
 
+    # -- the Slack bot answering @mentions and DMs ---------------------------------
+    @app.post("/slack/events")
+    async def slack_events(request: Request):
+        from . import slackbot
+        body = await request.body()
+        if not cfg.slack_signing_secret or not slackbot.verify(
+                cfg.slack_signing_secret, request.headers.get("x-slack-request-timestamp", ""),
+                request.headers.get("x-slack-signature", ""), body):
+            raise ApiError(401, "Bad signature.")
+        try:
+            data = json.loads(body)
+        except ValueError:
+            raise ApiError(400, "Bad body.")
+        if data.get("type") == "url_verification":  # Slack checking the Request URL when you save it
+            return {"challenge": data.get("challenge")}
+        if request.headers.get("x-slack-retry-num"):  # already handled the first delivery
+            return {"ok": True}
+        token = cfg.channel_slack_token or cfg.engage_slack_token
+        key = (cfg.channel_keys or cfg.engage_keys or cfg.preview_keys or {}).get("ai_gateway")
+        if data.get("type") == "event_callback" and token:
+            slackbot.dispatch(data.get("event") or {}, cfg, token, key)
+        return {"ok": True}
+
     # -- the daily engagement DM (owner only) ----------------------------------
     def require_engage_owner(request: Request):
         user = require_user(request)
