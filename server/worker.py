@@ -50,6 +50,8 @@ ENGAGE_LEAD = 8 * 60
 ENGAGE_RETRY = 15 * 60
 ENGAGE_GIVE_UP_HOUR = 15
 CHANNEL_LEAD = 2 * 60  # the channel digest only summarizes saved reports, so it's quick
+CHANNEL_PREP = 35 * 60  # refresh the archetype's report this long before the post, so it's current
+CHANNEL_FRESH = 60 * 60  # a report newer than this doesn't need the extra refresh
 RETRY_AFTER = 30 * 60
 TICK = 20
 LOG_MAX = 200_000
@@ -277,8 +279,10 @@ class Worker:
                 self._submit("run", uid)
         if self.cfg.engage and self.engage_due(now):
             self._submit("engage", 0)
-        if self.cfg.channel and self.channel_due(now):
-            self._submit("channel", 0)
+        if self.cfg.channel:
+            self.channel_prep(now)
+            if self.channel_due(now) and self.db.run(self.channel_uid)["state"] not in ("queued", "running"):
+                self._submit("channel", 0)  # posts after a pre-post refresh finishes, not mid-run
         if not self.cfg.demo:
             for row in self.db.onboarded_users():
                 if self._delivery_due(row, now) and self.db.keys(row["id"]).get("slack_webhook"):
@@ -321,6 +325,24 @@ class Worker:
             return False  # nothing to summarize until the archetype's first report exists
         return self._daily_due("channel", now, self.cfg.channel_time, self.cfg.channel_tz,
                                self.cfg.channel_weekdays_only, CHANNEL_LEAD)
+
+    def channel_prep(self, now: float) -> None:
+        """On posting days, refresh the archetype's report shortly before the post (its normal
+        3-hourly schedule isn't lined up with the post time)."""
+        uid = self.channel_uid
+        if uid is None:
+            return
+        local, start = self._window(now, self.cfg.channel_time, self.cfg.channel_tz, CHANNEL_PREP)
+        today = local.date().isoformat()
+        if (self.db.meta("channel_prep_date") == today or local < start or local >= start + timedelta(minutes=20)
+                or (self.cfg.channel_weekdays_only and local.weekday() >= 5)):
+            return
+        self.db.set_meta("channel_prep_date", today)
+        run = self.db.run(uid)
+        if run["state"] in ("queued", "running") or now - (run["last_run_at"] or 0) < CHANNEL_FRESH:
+            return
+        self.db.queue(uid)
+        log.info("channel: refreshing the GTM report before the %s post", self.cfg.channel_time)
 
     def _job_env(self, extra: dict) -> dict:
         env = {k: os.environ[k] for k in ENV_ALLOW if os.environ.get(k)}

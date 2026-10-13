@@ -227,3 +227,28 @@ def test_comp_intel_today_json(monkeypatch):
     msg = channel.message(d, REP, intel, "", NOW, "America/Los_Angeles")
     block = msg["blocks"][2]["text"]["text"]
     assert "<https://vivekyarla.github.io/comp-intel/|Full report>" in block and f"<{src}|source>" in block
+
+
+def test_report_is_refreshed_before_the_post(tmp_path, monkeypatch):
+    from zoneinfo import ZoneInfo
+    app = make_app(tmp_path, monkeypatch)
+    w, db = app.state.worker, app.state.db
+    uid = w.channel_uid
+    at = lambda h, m=0, d=13: datetime(2026, 10, d, h, m, tzinfo=ZoneInfo("America/Los_Angeles")).timestamp()
+    db.update_run(uid, state="ready", last_run_at=at(6, 40))
+    w.channel_prep(at(8, 40))
+    assert db.run(uid)["state"] == "ready"           # too early
+    w.channel_prep(at(8, 56))
+    assert db.run(uid)["state"] == "queued"          # 9:30 minus 35 min: refresh now
+    db.update_run(uid, state="ready", last_run_at=at(9, 5))
+    w.channel_prep(at(8, 58))
+    assert db.run(uid)["state"] == "ready"           # once per day
+    db.set_meta("channel_prep_date", None)
+    w.channel_prep(at(8, 57, d=14))                  # next day, but the report is only an hour old
+    db.update_run(uid, state="ready", last_run_at=at(8, 30, d=14))
+    db.set_meta("channel_prep_date", None)
+    w.channel_prep(at(8, 57, d=14))
+    assert db.run(uid)["state"] == "ready"           # fresh enough: no extra run
+    db.set_meta("channel_prep_date", None)
+    w.channel_prep(at(8, 57, d=17))                  # Saturday: no post, no refresh
+    assert db.meta("channel_prep_date") is None

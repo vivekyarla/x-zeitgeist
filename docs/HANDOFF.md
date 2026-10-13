@@ -201,6 +201,7 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
   - It runs every 3h on `CHANNEL_*` keys, falling back to `ENGAGE_*` then `PREVIEW_*`.
   - The page at `/gtm/` is public and read-only.
   - **Admin editing:** admins (`ADMIN_EMAILS`, default `ENGAGE_DM_EMAIL`) edit it from that page. The page's JS sets `TL.profile = "gtm"`, which sends `X-Profile: gtm`, and `acting()` in `server/app.py` maps the request onto the archetype for `/api/me`, `PUT /api/settings`, `POST /api/run` and `/api/status`. Every other route rejects that header.
+- **Freshness:** `channel_prep()` refreshes the archetype's report 35 minutes before the post if it's more than an hour old (its normal 3-hourly schedule isn't aligned to the post), and the post waits for that run to finish.
 - **The post:** each weekday at `CHANNEL_TIME` (09:30, starting 2 minutes early), it posts to `CHANNEL_SLACK_CHANNEL` with the engagement bot's token (or `CHANNEL_SLACK_BOT_TOKEN`). The bot must be invited to the channel.
   - **Contents:** the thesis, 4–5 bullets with tweet links and a "Full report" link, then a "Market intel" section (2–3 items, and 1–2 "Also trending" items).
   - **How it's made:** one Claude call over the archetype's saved week (top tweets, with today's first) plus the intel text. `clean()` keeps only real tweet ids and drops the intel sections when there's no intel.
@@ -262,7 +263,7 @@ All errors are JSON `{"error": "<a sentence for a person>"}`.
 ```bash
 pip install -r requirements.txt -r requirements-dev.txt
 TIMELINE_DEMO=1 uvicorn server.app:app --reload     # no keys needed: checks skipped, pages built from pipeline/demo_state.json
-pytest -q                                            # 70 tests; CI: .github/workflows/test.yml
+pytest -q                                            # 71 tests; CI: .github/workflows/test.yml
 python -m pipeline.run --demo                        # render one page from sample data into ./public
 ```
 
