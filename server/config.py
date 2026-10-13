@@ -56,6 +56,7 @@ class Config:
     channel_slack_token: str = ""
     channel_slack_channel: str = ""
     channel_time: str = "09:30"
+    channel_evening: str = "20:00"  # a second daily refresh of the archetype; "" turns it off
     channel_tz: str = "America/Los_Angeles"
     channel_weekdays_only: bool = True
     channel_preset: str = "gtm_marketing"
@@ -136,7 +137,9 @@ def load() -> Config:
           "ai_gateway": _env_value("ENGAGE_AI_GATEWAY_API_KEY") or pk["ai_gateway"]}
     engage_time = _env_value("ENGAGE_TIME") or "11:00"
     channel_time = _env_value("CHANNEL_TIME") or "09:30"
-    for name, v in (("ENGAGE_TIME", engage_time), ("CHANNEL_TIME", channel_time)):
+    channel_evening = os.getenv("CHANNEL_EVENING_REFRESH", "20:00").strip()
+    for name, v in (("ENGAGE_TIME", engage_time), ("CHANNEL_TIME", channel_time),
+                    ("CHANNEL_EVENING_REFRESH", channel_evening or "00:00")):
         if not re.fullmatch(r"([01]?\d|2[0-3]):[0-5]\d", v):
             raise RuntimeError(f"{name} should look like 11:00 (24-hour).")
     ck = {"twitterapi_io": _env_value("CHANNEL_TWITTERAPI_IO_KEY") or ek["twitterapi_io"],
@@ -170,6 +173,7 @@ def load() -> Config:
         channel_slack_token=_env_value("CHANNEL_SLACK_BOT_TOKEN") or _env_value("ENGAGE_SLACK_BOT_TOKEN"),
         channel_slack_channel=_env_value("CHANNEL_SLACK_CHANNEL").lstrip("#"),
         channel_time=channel_time,
+        channel_evening=channel_evening,
         channel_tz=_env_value("CHANNEL_TIMEZONE") or _env_value("ENGAGE_TIMEZONE") or "America/Los_Angeles",
         channel_weekdays_only=_truthy(os.getenv("CHANNEL_WEEKDAYS_ONLY", "1")),
         channel_preset=_env_value("CHANNEL_PRESET") or "gtm_marketing",

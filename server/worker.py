@@ -330,22 +330,26 @@ class Worker:
                                self.cfg.channel_weekdays_only, CHANNEL_LEAD)
 
     def channel_prep(self, now: float) -> None:
-        """On posting days, refresh the archetype's report shortly before the post (its normal
-        3-hourly schedule isn't lined up with the post time)."""
+        """The archetype refreshes twice on posting days: shortly before the morning post, and in the
+        evening (CHANNEL_EVENING_REFRESH), instead of every few hours."""
         uid = self.channel_uid
         if uid is None:
             return
-        local, start = self._window(now, self.cfg.channel_time, self.cfg.channel_tz, CHANNEL_PREP)
-        today = local.date().isoformat()
-        if (self.db.meta("channel_prep_date") == today or local < start or local >= start + timedelta(minutes=20)
-                or (self.cfg.channel_weekdays_only and local.weekday() >= 5)):
-            return
-        self.db.set_meta("channel_prep_date", today)
-        run = self.db.run(uid)
-        if run["state"] in ("queued", "running") or now - (run["last_run_at"] or 0) < CHANNEL_FRESH:
-            return
-        self.db.queue(uid)
-        log.info("channel: refreshing the GTM report before the %s post", self.cfg.channel_time)
+        slots = [("channel_prep_date", self.cfg.channel_time, CHANNEL_PREP)]
+        if self.cfg.channel_evening:
+            slots.append(("channel_evening_date", self.cfg.channel_evening, 0))
+        for key, at, lead in slots:
+            local, start = self._window(now, at, self.cfg.channel_tz, lead)
+            today = local.date().isoformat()
+            if (self.db.meta(key) == today or local < start or local >= start + timedelta(minutes=20)
+                    or (self.cfg.channel_weekdays_only and local.weekday() >= 5)):
+                continue
+            self.db.set_meta(key, today)
+            run = self.db.run(uid)
+            if run["state"] in ("queued", "running") or now - (run["last_run_at"] or 0) < CHANNEL_FRESH:
+                continue
+            self.db.queue(uid)
+            log.info("channel: refreshing the GTM report (%s)", "before the post" if lead else "evening")
 
     def _job_env(self, extra: dict) -> dict:
         env = {k: os.environ[k] for k in ENV_ALLOW if os.environ.get(k)}

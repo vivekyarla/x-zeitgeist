@@ -268,3 +268,21 @@ def test_archetype_runs_once_a_day(tmp_path, monkeypatch):
     uid2 = db.user_by_email("vivek@rox.com")["id"]
     db.set_onboarded(uid2); db.queue(uid2)
     assert w.run_user(uid2) and db.run(uid2)["next_run_at"]  # personal pages keep refreshing
+
+
+def test_evening_refresh(tmp_path, monkeypatch):
+    from zoneinfo import ZoneInfo
+    app = make_app(tmp_path, monkeypatch)
+    w, db = app.state.worker, app.state.db
+    uid = w.channel_uid
+    at = lambda h, m=0, d=13: datetime(2026, 10, d, h, m, tzinfo=ZoneInfo("America/Los_Angeles")).timestamp()
+    db.update_run(uid, state="ready", last_run_at=at(9))
+    w.channel_prep(at(19, 50))
+    assert db.run(uid)["state"] == "ready"
+    w.channel_prep(at(20, 5))
+    assert db.run(uid)["state"] == "queued"
+    app2 = make_app(tmp_path / "b", monkeypatch, CHANNEL_EVENING_REFRESH="")
+    w2, db2 = app2.state.worker, app2.state.db
+    db2.update_run(w2.channel_uid, state="ready", last_run_at=at(9))
+    w2.channel_prep(at(20, 5))
+    assert db2.run(w2.channel_uid)["state"] == "ready"   # turned off
