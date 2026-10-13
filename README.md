@@ -86,7 +86,7 @@ Without Google set up, people sign up with email and password instead, and `ALLO
 
 ## The example page
 
-Signed-out visitors land on `/preview/`: a real page built from one preset (`PREVIEW_PRESET`, default `sf_tech`) on **your** keys (`PREVIEW_TWITTERAPI_IO_KEY` and `PREVIEW_AI_GATEWAY_API_KEY`), refreshed on the same schedule as everyone else. It has no settings and no sign-in, and a "Make your own" button. It costs about what one person's page does ($20–35/month). Leave either key empty to turn it off.
+Signed-out visitors land on `/preview/`: a real page built from one preset (`PREVIEW_PRESET`, default `sf_tech`) on **your** keys (`PREVIEW_TWITTERAPI_IO_KEY` and `PREVIEW_AI_GATEWAY_API_KEY`), refreshed twice a day at `PREVIEW_REFRESH_TIMES` (08:30 and 20:00 Pacific). It has no settings and no sign-in, and a "Make your own" button. It costs about what one person's page does ($20–35/month). Leave either key empty to turn it off.
 
 Run one instance. Several processes against the same volume won't double-run anyone (each run takes a lease in the database), but one is plenty: runs are mostly waiting on APIs.
 
@@ -128,7 +128,7 @@ Edit `engage.json` to change people, their profiles, sources, thresholds, or how
 
 ## Marketing channel digest
 
-Every weekday at `CHANNEL_TIME` (9:30 Pacific by default), the bot posts to `CHANNEL_SLACK_CHANNEL`:
+Every weekday at `CHANNEL_TIME` (9:30 Pacific by default), the bot posts to `CHANNEL_SLACK_CHANNEL`. That's a channel ID, or, to test it first, an email address, which sends it as a DM from the bot. Changing the destination posts once right away.
 - **GTM zeitgeist:** the thesis in one line, 4–5 bullets on what's moving today with tweet links, and a link to the full report.
 - **Market intel:** 2–3 market developments and 1–2 other trends from a market-intelligence bot's latest report, with a link to it.
 

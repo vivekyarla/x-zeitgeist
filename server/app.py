@@ -343,6 +343,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     db.cap_leases(LEASE)  # a run cut off by the last redeploy is picked up again within minutes
     preview_uid = ensure_preview()
+    worker.preview_uid = preview_uid
 
     # The marketing channel's archetype: created once from CHANNEL_PRESET, then edited by admins at
     # /gtm/ (never re-applied, so tweaks stick). Runs on the owner's keys like the example page.

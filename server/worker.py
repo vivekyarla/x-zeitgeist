@@ -66,6 +66,7 @@ class Worker:
     def __init__(self, cfg: Config, db: DB, box: Box):
         self._engage_lock = threading.Lock()
         self.channel_uid: int | None = None  # set by the app once the GTM archetype exists
+        self.preview_uid: int | None = None  # set by the app once the example page exists
         self.cfg, self.db, self.box = cfg, db, box
         self.owner = f"{socket.gethostname()}:{os.getpid()}:{uuid.uuid4().hex[:8]}"
         self._stop = threading.Event()
@@ -193,7 +194,8 @@ class Worker:
                                    next_run_at=now if rerun else now + RETRY_AFTER, slack_mode="auto")
             else:
                 # The GTM archetype runs once a day, just before its channel post (channel_prep), not every few hours.
-                daily = user_id == self.channel_uid
+                # The GTM archetype and the example page refresh at set times (fixed_time_prep), not every few hours.
+                daily = user_id == self.channel_uid or (user_id == self.preview_uid and bool(self.cfg.preview_times))
                 self.db.update_run(user_id, state="ready", last_run_at=now, last_error=None, rerun=0,
                                    next_run_at=now if rerun else None if daily else now + self.cfg.refresh_hours * 3600,
                                    slack_mode="auto")
@@ -282,6 +284,8 @@ class Worker:
                 self._submit("run", uid)
         if self.cfg.engage and self.engage_due(now):
             self._submit("engage", 0)
+        if self.preview_uid is not None and self.cfg.preview_times:
+            self.preview_prep(now)
         if self.cfg.channel:
             self.channel_prep(now)
             if self.channel_due(now) and self.db.run(self.channel_uid)["state"] not in ("queued", "running"):
@@ -326,30 +330,45 @@ class Worker:
     def channel_due(self, now: float) -> bool:
         if self.channel_uid is None or not self._has_read(self.channel_uid):
             return False  # nothing to summarize until the archetype's first report exists
+        if self.db.meta("channel_target") != self.cfg.channel_slack_channel:
+            # A new destination (e.g. from a test DM to the team channel): post there right away once.
+            self.db.set_meta("channel_target", self.cfg.channel_slack_channel)
+            self.db.set_meta("channel_sent_date", None)
+            self.db.set_meta("channel_tried_at", None)
         return self._daily_due("channel", now, self.cfg.channel_time, self.cfg.channel_tz,
                                self.cfg.channel_weekdays_only, CHANNEL_LEAD)
 
     def channel_prep(self, now: float) -> None:
         """The archetype refreshes twice on posting days: shortly before the morning post, and in the
         evening (CHANNEL_EVENING_REFRESH), instead of every few hours."""
-        uid = self.channel_uid
-        if uid is None:
-            return
         slots = [("channel_prep_date", self.cfg.channel_time, CHANNEL_PREP)]
         if self.cfg.channel_evening:
             slots.append(("channel_evening_date", self.cfg.channel_evening, 0))
+        self._fixed_refresh(self.channel_uid, slots, self.cfg.channel_tz, self.cfg.channel_weekdays_only, "GTM report", now)
+
+    def preview_prep(self, now: float) -> None:
+        """The example page refreshes at PREVIEW_REFRESH_TIMES (08:30 and 20:00 PT), every day."""
+        slots = [(f"preview_refresh_{t}", t, 0) for t in self.cfg.preview_times]
+        self._fixed_refresh(self.preview_uid, slots, "America/Los_Angeles", False, "example page", now)
+
+    def _fixed_refresh(self, uid, slots, tz: str, weekdays_only: bool, what: str, now: float | None = None) -> None:
+        """Queue one run of `uid` in each slot (meta key, HH:MM, lead seconds) once a day, within 20 minutes
+        of its time, unless it ran in the last hour."""
+        if uid is None:
+            return
+        now = time.time() if now is None else now
         for key, at, lead in slots:
-            local, start = self._window(now, at, self.cfg.channel_tz, lead)
+            local, start = self._window(now, at, tz, lead)
             today = local.date().isoformat()
             if (self.db.meta(key) == today or local < start or local >= start + timedelta(minutes=20)
-                    or (self.cfg.channel_weekdays_only and local.weekday() >= 5)):
+                    or (weekdays_only and local.weekday() >= 5)):
                 continue
             self.db.set_meta(key, today)
             run = self.db.run(uid)
             if run["state"] in ("queued", "running") or now - (run["last_run_at"] or 0) < CHANNEL_FRESH:
                 continue
             self.db.queue(uid)
-            log.info("channel: refreshing the GTM report (%s)", "before the post" if lead else "evening")
+            log.info("refreshing the %s (%s)", what, at)
 
     def _job_env(self, extra: dict) -> dict:
         env = {k: os.environ[k] for k in ENV_ALLOW if os.environ.get(k)}

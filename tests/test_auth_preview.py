@@ -140,3 +140,21 @@ def test_switching_the_example_feed_starts_its_week_over(tmp_path, monkeypatch):
     week.write_text('{"latest": {"thesis": "GTM teams are copying Clay"}}')  # what a real run leaves
     app2 = make_app(tmp_path, monkeypatch, PREVIEW_PRESET="sf_tech")
     assert not week.exists() and app2.state.db.run(uid)["state"] == "queued"
+
+
+def test_example_page_refreshes_twice_a_day(tmp_path, monkeypatch):
+    import time
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    app = make_app(tmp_path, monkeypatch)
+    w, db = app.state.worker, app.state.db
+    uid = w.preview_uid
+    assert w.run_user(uid) and db.run(uid)["next_run_at"] is None   # no 3-hourly refreshes
+    db.queue_due(time.time() + 10 * 3600, ())
+    assert db.run(uid)["state"] == "ready"
+    at = lambda h, m=0: datetime(2026, 10, 18, h, m, tzinfo=ZoneInfo("America/Los_Angeles")).timestamp()  # a Sunday
+    db.update_run(uid, last_run_at=at(2))
+    w.preview_prep(at(8, 10)); assert db.run(uid)["state"] == "ready"
+    w.preview_prep(at(8, 35)); assert db.run(uid)["state"] == "queued"   # 08:30, weekends too
+    db.update_run(uid, state="ready", last_run_at=at(8, 40))
+    w.preview_prep(at(20, 5)); assert db.run(uid)["state"] == "queued"   # 20:00

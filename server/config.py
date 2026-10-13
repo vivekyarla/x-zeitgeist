@@ -41,6 +41,7 @@ class Config:
     password_login: bool = True
     preview_keys: dict | None = None       # the owner's keys for the public example page
     preview_preset: str = "sf_tech"
+    preview_times: tuple[str, ...] = ("08:30", "20:00")  # the example page refreshes at these times (PT), every day
     # The daily engagement DM (pipeline/engage.py): a Slack bot DMs one person picks for the team.
     engage_slack_token: str = ""
     engage_dm_email: str = ""
@@ -138,6 +139,10 @@ def load() -> Config:
     engage_time = _env_value("ENGAGE_TIME") or "11:00"
     channel_time = _env_value("CHANNEL_TIME") or "09:30"
     channel_evening = os.getenv("CHANNEL_EVENING_REFRESH", "20:00").strip()
+    preview_times = tuple(t.strip() for t in os.getenv("PREVIEW_REFRESH_TIMES", "08:30,20:00").split(",") if t.strip())
+    for t in preview_times:
+        if not re.fullmatch(r"([01]?\d|2[0-3]):[0-5]\d", t):
+            raise RuntimeError("PREVIEW_REFRESH_TIMES should look like 08:30,20:00 (24-hour, Pacific).")
     for name, v in (("ENGAGE_TIME", engage_time), ("CHANNEL_TIME", channel_time),
                     ("CHANNEL_EVENING_REFRESH", channel_evening or "00:00")):
         if not re.fullmatch(r"([01]?\d|2[0-3]):[0-5]\d", v):
@@ -162,6 +167,7 @@ def load() -> Config:
         password_login=password_login,
         preview_keys=pk if all(pk.values()) else None,
         preview_preset=os.getenv("PREVIEW_PRESET", "sf_tech").strip() or "sf_tech",
+        preview_times=preview_times,
         engage_slack_token=_env_value("ENGAGE_SLACK_BOT_TOKEN"),
         engage_dm_email=_env_value("ENGAGE_DM_EMAIL").lower(),
         engage_dm_user=_env_value("ENGAGE_DM_USER"),

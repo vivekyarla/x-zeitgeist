@@ -114,6 +114,7 @@ DATA_DIR/                      (/data on Railway)
 ### Example page (`/preview/`)
 - **What it is:** a system profile (`preview@timeline.invalid`, which can't sign in), built from `PREVIEW_PRESET` (default `sf_tech`) on the owner's `PREVIEW_*` keys.
 - **Access:** public and read-only, with a "Make your own" banner. Signed-out visitors to `/` land here.
+- **Schedule:** it refreshes at `PREVIEW_REFRESH_TIMES` (08:30 and 20:00 Pacific, every day) via `preview_prep()` / `_fixed_refresh()`, not every 3h.
 - **On every startup, `ensure_preview()`:**
   - Re-applies the preset and reseals the keys.
   - Rebuilds if the settings changed, the last run failed, or the page is empty.
@@ -202,6 +203,7 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
   - The page at `/gtm/` is public and read-only.
   - **Admin editing:** admins (`ADMIN_EMAILS`, default `ENGAGE_DM_EMAIL`) edit it from that page. The page's JS sets `TL.profile = "gtm"`, which sends `X-Profile: gtm`, and `acting()` in `server/app.py` maps the request onto the archetype for `/api/me`, `PUT /api/settings`, `POST /api/run` and `/api/status`. Every other route rejects that header.
 - **Twice a day:** the archetype doesn't refresh every 3h. After each run its `next_run_at` is left empty, and `channel_prep()` queues one run 35 minutes before each post and one at `CHANNEL_EVENING_REFRESH` (20:00; empty turns it off). Both happen on posting days only, and are skipped if it ran in the last hour. The post waits for that run to finish. Admins can still force a run with Save and refresh on `/gtm/`. The comp-intel brief is produced once a day by the Grok bot (about 9:00 PT) and read once per post.
+- **Destination:** `CHANNEL_SLACK_CHANNEL` is a channel ID, or an email or user ID (resolved to a DM from the bot; used for testing). When it changes, `channel_due()` resets the sent date so the next post goes out right away.
 - **The post:** each weekday at `CHANNEL_TIME` (09:30, starting 2 minutes early), it posts to `CHANNEL_SLACK_CHANNEL` with the engagement bot's token (or `CHANNEL_SLACK_BOT_TOKEN`). The bot must be invited to the channel.
   - **Contents:** the thesis, 4–5 bullets with tweet links and a "Full report" link, then a "Market intel" section (2–3 items, and 1–2 "Also trending" items).
   - **How it's made:** one Claude call over the archetype's saved week (top tweets, with today's first) plus the intel text. `clean()` keeps only real tweet ids and drops the intel sections when there's no intel.
@@ -263,7 +265,7 @@ All errors are JSON `{"error": "<a sentence for a person>"}`.
 ```bash
 pip install -r requirements.txt -r requirements-dev.txt
 TIMELINE_DEMO=1 uvicorn server.app:app --reload     # no keys needed: checks skipped, pages built from pipeline/demo_state.json
-pytest -q                                            # 73 tests; CI: .github/workflows/test.yml
+pytest -q                                            # 76 tests; CI: .github/workflows/test.yml
 python -m pipeline.run --demo                        # render one page from sample data into ./public
 ```
 

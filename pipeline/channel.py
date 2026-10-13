@@ -268,9 +268,16 @@ CHANNEL_ERRORS = {
 
 
 def post(msg: dict) -> None:
+    """Post to CHANNEL_SLACK_CHANNEL: a channel id (C…) or name, or, for testing, an email address or
+    user id (U…), which DMs that person from the bot instead."""
+    token = os.environ["SLACK_BOT_TOKEN"].strip()
     channel = os.environ["CHANNEL_SLACK_CHANNEL"].strip().lstrip("#")
     try:
-        _slack("chat.postMessage", os.environ["SLACK_BOT_TOKEN"].strip(), channel=channel, **msg)
+        if "@" in channel:
+            channel = _slack("users.lookupByEmail", token, email=channel)["user"]["id"]
+        if channel[:1] in ("U", "W"):
+            channel = _slack("conversations.open", token, users=channel)["channel"]["id"]
+        _slack("chat.postMessage", token, channel=channel, **msg)
     except SlackError as e:
         raise RuntimeError("slack: " + CHANNEL_ERRORS.get(e.code, str(e))) from None
     print("slack: posted")

@@ -286,3 +286,44 @@ def test_evening_refresh(tmp_path, monkeypatch):
     db2.update_run(w2.channel_uid, state="ready", last_run_at=at(9))
     w2.channel_prep(at(20, 5))
     assert db2.run(w2.channel_uid)["state"] == "ready"   # turned off
+
+
+def test_post_can_dm_a_person_for_testing(monkeypatch):
+    from pipeline import engage
+    calls = []
+
+    class R:
+        status_code, headers = 200, {"content-type": "application/json"}
+        def __init__(self, b): self.b = b
+        def json(self): return self.b
+
+    def fake(method, url, **kw):
+        name = url.rsplit("/", 1)[1]
+        calls.append((name, kw.get("params") or kw.get("json")))
+        return R({"ok": True, "user": {"id": "U9"}} if name == "users.lookupByEmail" else
+                 {"ok": True, "channel": {"id": "D9"}} if name == "conversations.open" else {"ok": True})
+    monkeypatch.setattr(engage.requests, "request", fake)
+    monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-1")
+    monkeypatch.setenv("CHANNEL_SLACK_CHANNEL", "vivek@rox.com")
+    channel.post({"text": "x", "blocks": []})
+    assert [c[0] for c in calls] == ["users.lookupByEmail", "conversations.open", "chat.postMessage"]
+    assert calls[-1][1]["channel"] == "D9"
+    calls.clear()
+    monkeypatch.setenv("CHANNEL_SLACK_CHANNEL", "C0123")
+    channel.post({"text": "x", "blocks": []})
+    assert [c[0] for c in calls] == ["chat.postMessage"] and calls[0][1]["channel"] == "C0123"
+
+
+def test_switching_destination_posts_right_away(tmp_path, monkeypatch):
+    from zoneinfo import ZoneInfo
+    app = make_app(tmp_path, monkeypatch, CHANNEL_SLACK_CHANNEL="vivek@rox.com")
+    w, db = app.state.worker, app.state.db
+    d = w.paths(w.channel_uid)["data"]; d.mkdir(parents=True, exist_ok=True)
+    (d / "week.json").write_text(json.dumps({"latest": {"thesis": "x"}}))
+    at = lambda h, m=0: datetime(2026, 10, 13, h, m, tzinfo=ZoneInfo("America/Los_Angeles")).timestamp()
+    assert w.channel_due(at(14))                      # first time: right away (the test DM)
+    db.set_meta("channel_sent_date", "2026-10-13"); db.set_meta("channel_tried_at", str(at(14)))
+    assert not w.channel_due(at(15))                  # done for today
+    app2 = make_app(tmp_path, monkeypatch, CHANNEL_SLACK_CHANNEL="C0123")   # switch to the team channel
+    assert app2.state.worker.channel_due(at(15, 5))   # posts there right away, once
+    assert db.meta("channel_target") == "C0123"
