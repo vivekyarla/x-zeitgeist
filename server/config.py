@@ -50,6 +50,9 @@ class Config:
     engage_tz: str = "America/Los_Angeles"
     engage_weekdays_only: bool = False
     engage_keys: dict | None = None
+    follow_enabled: bool = True     # weekly follow recommendations (pipeline/follow.py), same bot and DM
+    follow_day: int = 0             # Monday
+    follow_time: str = "11:15"
 
     # The marketing channel digest (pipeline/channel.py): a separate, editable archetype profile
     # (served at /gtm/) summarized in a Slack channel, plus market intel from another bot's site.
@@ -140,6 +143,13 @@ def load() -> Config:
     engage_time = _env_value("ENGAGE_TIME") or "11:00"
     channel_time = _env_value("CHANNEL_TIME") or "09:30"
     channel_evening = os.getenv("CHANNEL_EVENING_REFRESH", "20:00").strip()
+    days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+    follow_day = (_env_value("FOLLOW_DAY") or "mon").lower()[:3]
+    if follow_day not in days:
+        raise RuntimeError("FOLLOW_DAY should be a weekday name, e.g. mon.")
+    follow_time = _env_value("FOLLOW_TIME") or "11:15"
+    if not re.fullmatch(r"([01]?\d|2[0-3]):[0-5]\d", follow_time):
+        raise RuntimeError("FOLLOW_TIME should look like 11:15 (24-hour).")
     preview_times = tuple(t.strip() for t in os.getenv("PREVIEW_REFRESH_TIMES", "08:30,20:00").split(",") if t.strip())
     for t in preview_times:
         if not re.fullmatch(r"([01]?\d|2[0-3]):[0-5]\d", t):
@@ -176,6 +186,9 @@ def load() -> Config:
         engage_tz=_env_value("ENGAGE_TIMEZONE") or "America/Los_Angeles",
         engage_weekdays_only=_truthy(os.getenv("ENGAGE_WEEKDAYS_ONLY")),
         engage_keys=ek if all(ek.values()) else None,
+        follow_enabled=_truthy(os.getenv("FOLLOW_ENABLED", "1")),
+        follow_day=days.index(follow_day),
+        follow_time=follow_time,
         admin_emails=admins,
         channel_slack_token=_env_value("CHANNEL_SLACK_BOT_TOKEN") or _env_value("ENGAGE_SLACK_BOT_TOKEN"),
         channel_slack_channel=_env_value("CHANNEL_SLACK_CHANNEL").lstrip("#"),

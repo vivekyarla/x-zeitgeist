@@ -791,6 +791,16 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         require_engage_owner(request)
         return engage_status()
 
+    @app.post("/api/engage/follow/run")
+    def follow_run(request: Request):
+        require_engage_owner(request)
+        if not cfg.engage:
+            raise ApiError(400, "The engagement DM isn't set up. Missing: " + ", ".join(engage_status()["missing"]) + ".")
+        db.set_meta("follow_force", "1")
+        worker.kick()
+        return {"message": "Building this week's follow recommendations. The DM arrives in about 5 minutes.",
+                "last_sent_date": db.meta("follow_sent_date"), "last_error": db.meta("follow_last_error") or None}
+
     @app.post("/api/engage/run")
     def engage_run(request: Request):
         require_engage_owner(request)

@@ -197,6 +197,18 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
 - **Slack app manifest** (scopes `chat:write`, `im:write`, `users:read`, `users:read.email`): https://api.slack.com/apps?new_app=1&manifest_json=%7B%22display_information%22%3A%7B%22name%22%3A%22Engage%20digest%22%2C%22description%22%3A%22Daily%20picks%20of%20what%20the%20team%20should%20engage%20with%20on%20X%22%7D%2C%22features%22%3A%7B%22bot_user%22%3A%7B%22display_name%22%3A%22Engage%20digest%22%2C%22always_online%22%3Afalse%7D%2C%22app_home%22%3A%7B%22messages_tab_enabled%22%3Atrue%2C%22messages_tab_read_only_enabled%22%3Atrue%7D%7D%2C%22oauth_config%22%3A%7B%22scopes%22%3A%7B%22bot%22%3A%5B%22chat%3Awrite%22%2C%22im%3Awrite%22%2C%22users%3Aread%22%2C%22users%3Aread.email%22%5D%7D%7D%2C%22settings%22%3A%7B%22org_deploy_enabled%22%3Afalse%2C%22socket_mode_enabled%22%3Afalse%2C%22token_rotation_enabled%22%3Afalse%7D%7D
 - **People profiles** are seeded from public info and confirmed by the owner. Brian is Brian Xu (Stanford; works on agents with Gopal). Dan is Daniel Chen.
 
+### Weekly follow recommendations (`pipeline/follow.py`)
+- **What it does:** Mondays at `FOLLOW_TIME` (11:15, `FOLLOW_DAY`), it DMs `ENGAGE_DM_EMAIL` 4 accounts per person in `engage.json` to follow, each with a reason of 12 words or fewer. It's sent once right after first setup, like the others.
+- **How it picks:**
+  1. Fetches 7 days of the engage sources (`fetch()` with a 168h window).
+  2. `authors()` keeps accounts with 5,000+ followers (or 1,000+ and a `prominent_orgs` bio), at least 2 posts with 50+ likes, and not the team. It ranks them by summed log engagement and sends the top 150 to the model.
+  3. `already_following()` loads each person's followings via twitterapi.io (from `x` in engage.json; None means unknown).
+  4. `follow_history.json` blocks repeats for 8 weeks.
+  5. One Claude call picks the accounts; `clean()` drops unknown or blocked handles.
+- **Settings:** under `follow` in engage.json. State keys `follow_*` live in `meta`, and logs go to `DATA_DIR/engage/follow_last_run.log`.
+- **Route:** `POST /api/engage/follow/run` (owner) sends one now. `FOLLOW_ENABLED=0` turns it off.
+- **Known gaps:** Taeuk and Brian have no X handle in engage.json, so their existing follows can't be skipped. `shriram_s` was never verified.
+
 ### Marketing channel digest (`pipeline/channel.py`)
 - **The archetype:** a system profile `gtm@timeline.invalid`, created once from `CHANNEL_PRESET` (`gtm_marketing`, a merge of `gtm_sales` and `marketing_brand`) and never re-applied, so admin edits persist.
   - It runs every 3h on `CHANNEL_*` keys, falling back to `ENGAGE_*` then `PREVIEW_*`.
@@ -271,7 +283,7 @@ All errors are JSON `{"error": "<a sentence for a person>"}`.
 ```bash
 pip install -r requirements.txt -r requirements-dev.txt
 TIMELINE_DEMO=1 uvicorn server.app:app --reload     # no keys needed: checks skipped, pages built from pipeline/demo_state.json
-pytest -q                                            # 82 tests; CI: .github/workflows/test.yml
+pytest -q                                            # 88 tests; CI: .github/workflows/test.yml
 python -m pipeline.run --demo                        # render one page from sample data into ./public
 ```
 

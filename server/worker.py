@@ -72,7 +72,7 @@ class Worker:
         self._stop = threading.Event()
         self._kick = threading.Event()
         self._thread: threading.Thread | None = None
-        self._pool = ThreadPoolExecutor(max_workers=cfg.max_concurrent_runs + 3, thread_name_prefix="run")
+        self._pool = ThreadPoolExecutor(max_workers=cfg.max_concurrent_runs + 4, thread_name_prefix="run")
         self._inflight: set[tuple[str, int]] = set()
         self._lock = threading.Lock()
 
@@ -267,7 +267,7 @@ class Worker:
         def job():
             try:
                 {"run": self.run_user, "deliver": self.deliver_user, "engage": lambda _: self.run_engage(),
-                 "channel": lambda _: self.run_channel()}[kind](user_id)
+                 "channel": lambda _: self.run_channel(), "follow": lambda _: self.run_follow()}[kind](user_id)
             finally:
                 with self._lock:
                     self._inflight.discard((kind, user_id))
@@ -284,6 +284,8 @@ class Worker:
                 self._submit("run", uid)
         if self.cfg.engage and self.engage_due(now):
             self._submit("engage", 0)
+        if self.cfg.engage and self.cfg.follow_enabled and self.follow_due(now):
+            self._submit("follow", 0)
         if self.preview_uid is not None and self.cfg.preview_times:
             self.preview_prep(now)
         if self.cfg.channel:
@@ -303,7 +305,8 @@ class Worker:
         h, m = (int(x) for x in at.split(":"))
         return local, local.replace(hour=h, minute=m, second=0, microsecond=0) - timedelta(seconds=lead)
 
-    def _daily_due(self, prefix: str, now: float, at: str, tz: str, weekdays_only: bool, lead: int) -> bool:
+    def _daily_due(self, prefix: str, now: float, at: str, tz: str, weekdays_only: bool, lead: int,
+                   weekday: int | None = None) -> bool:
         if self.db.meta(prefix + "_force") == "1":
             return True
         if now - float(self.db.meta(prefix + "_tried_at") or 0) < ENGAGE_RETRY:
@@ -313,6 +316,8 @@ class Worker:
             return True  # first time it's set up: send one right away, so it can be checked
         local, start = self._window(now, at, tz, lead)
         if sent == local.date().isoformat() or (weekdays_only and local.weekday() >= 5):
+            return False
+        if weekday is not None and local.weekday() != weekday:
             return False
         return start <= local and local.hour < ENGAGE_GIVE_UP_HOUR
 
@@ -326,6 +331,39 @@ class Worker:
     def engage_due(self, now: float) -> bool:
         return self._daily_due("engage", now, self.cfg.engage_time, self.cfg.engage_tz,
                                self.cfg.engage_weekdays_only, ENGAGE_LEAD)
+
+    def follow_due(self, now: float) -> bool:
+        return self._daily_due("follow", now, self.cfg.follow_time, self.cfg.engage_tz, False, ENGAGE_LEAD,
+                               weekday=self.cfg.follow_day)
+
+    def run_follow(self) -> bool:
+        """Weekly follow recommendations, DMed by the engagement bot."""
+        self.db.set_meta("follow_tried_at", str(time.time()))
+        self.db.set_meta("follow_force", "0")
+        out = self.cfg.data_dir / "engage"
+        out.mkdir(parents=True, exist_ok=True)
+        keys = self.cfg.engage_keys or {}
+        env = self._job_env({"TWITTERAPI_IO_KEY": keys.get("twitterapi_io", ""), "AI_GATEWAY_API_KEY": keys.get("ai_gateway", ""),
+                             "SLACK_BOT_TOKEN": self.cfg.engage_slack_token, "ENGAGE_DM_EMAIL": self.cfg.engage_dm_email,
+                             "ENGAGE_DM_USER": self.cfg.engage_dm_user, "ENGAGE_TIMEZONE": self.cfg.engage_tz,
+                             "ENGAGE_OUT": str(out)})
+        with self._engage_lock:
+            code, text = self._exec(["--send"], env, ENGAGE_TIMEOUT,
+                                    [*keys.values(), self.cfg.engage_slack_token], module="pipeline.follow")
+        self._write_log(out / "follow_last_run.log", text)
+        for ln in text.splitlines():
+            if ln.strip().startswith(("fetched", "followings", "search failed", "slack", "Traceback", "RuntimeError",
+                                      "SystemExit")) or "prominent and active" in ln:
+                log.info("follow: %s", ln.strip()[:300])
+        if code == 0:
+            self._daily_done("follow", self.cfg.follow_time, self.cfg.engage_tz, ENGAGE_LEAD)
+            log.info("follow: DM sent")
+            return True
+        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        err = "timed out" if code is None else (lines[-1][:300] if lines else "no output")
+        self.db.set_meta("follow_last_error", err)
+        log.warning("follow: failed: %s", err)
+        return False
 
     def channel_due(self, now: float) -> bool:
         if self.channel_uid is None or not self._has_read(self.channel_uid):
