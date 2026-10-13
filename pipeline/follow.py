@@ -32,6 +32,24 @@ DEFAULTS = {"per_person": 5, "window_days": 7, "min_followers": 5000, "min_follo
             "candidates_for_model": 150}
 
 
+# Bios that read like a company, brand, outlet, or newsletter rather than a person.
+BRAND_BIO = re.compile(
+    r"\b(official (account|twitter|x account|page)|we('re| are| build| help| make| power| bring)|"
+    r"our (platform|product|team|mission|customers|community)|the (platform|company|app|tool|newsletter|podcast) "
+    r"(for|that)|subscribe (to|for)|newsletter|news (and|&) updates|press inquiries)\b", re.I)
+
+
+def is_company(author: dict, cfg: dict) -> bool:
+    """A company/brand account rather than an individual: a known company handle (prominent_orgs, or the
+    company accounts the daily picks watch), or a bio that speaks as a brand."""
+    h = author["handle"].lower()
+    known = {x.lower() for o in cfg.get("prominent_orgs", []) for x in o.get("handles", [])}
+    known |= {"openai", "anthropicai", "googledeepmind", "cognition_labs", "cursor_ai", "tryramp"}
+    if h in known:
+        return True
+    return bool(BRAND_BIO.search(author.get("bio") or ""))
+
+
 def settings(cfg: dict) -> dict:
     return {**DEFAULTS, **(cfg.get("follow") or {})}
 
@@ -45,8 +63,8 @@ def authors(tweets: list[dict], cfg: dict, f: dict) -> list[dict]:
     for t in tweets:
         a = t["author"]
         h = a["handle"]
-        if not h or h.lower() in team or t["likes"] < int(f["min_likes"]):
-            continue
+        if not h or h.lower() in team or t["likes"] < int(f["min_likes"]) or is_company(a, cfg):
+            continue  # individuals only: no company, brand, or media accounts
         e = by.setdefault(h.lower(), {"handle": h, "name": a["name"], "followers": a["followers"],
                                       "bio": a.get("bio") or "", "posts": [], "engagement": 0.0})
         e["followers"] = max(e["followers"], a["followers"])
@@ -101,6 +119,10 @@ SYSTEM = """You recommend X accounts for each person on a startup's team to foll
 You get the company, each person's profile, and candidate accounts: popular accounts (followers, bio,
 company if known) that posted on these topics in the last week, with their best posts. Some candidates are
 marked as not allowed for a given person (they already follow them, or were suggested recently).
+
+Recommend individual people only. Never a company, product, brand, media outlet, newsletter, podcast,
+fund, or community account, even a big one; skip any candidate whose name or bio reads like one.
+(Employees of companies are fine: they're people.)
 
 For each person, pick up to {n} accounts that (1) match their interests and role, (2) are worth following
 for a long time, not just one viral post, and (3) post things this person could credibly reply to or quote,

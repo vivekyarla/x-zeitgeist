@@ -102,3 +102,16 @@ def test_weekly_schedule_and_run(tmp_path, monkeypatch):
 def test_can_be_turned_off(tmp_path, monkeypatch):
     app = make_app(tmp_path, monkeypatch, FOLLOW_ENABLED="0")
     assert not app.state.cfg.follow_enabled
+
+
+def test_individuals_only():
+    cfg, f = engage.load_config(), follow.settings(engage.load_config())
+    assert follow.is_company({"handle": "tryramp", "bio": ""}, cfg)
+    assert follow.is_company({"handle": "acmeai", "bio": "We help revenue teams close faster."}, cfg)
+    assert follow.is_company({"handle": "ainews", "bio": "The newsletter for AI builders. Subscribe for daily updates"}, cfg)
+    assert follow.is_company({"handle": "somebrand", "bio": "Official account of SomeBrand"}, cfg)
+    assert not follow.is_company({"handle": "rampeng", "bio": "eng @tryramp. ex-Stripe. I write about payments"}, cfg)
+    assert not follow.is_company({"handle": "karpathy", "bio": "Building @EurekaLabsAI. Previously Director of AI @ Tesla"}, cfg)
+    tweets = [tw(1, "acmeai", 90_000, 900, "We help revenue teams close faster."), tw(2, "acmeai", 90_000, 900, "We help revenue teams close faster."),
+              tw(3, "person", 20_000, 300, "GTM engineer. Opinions mine."), tw(4, "person", 20_000, 300, "GTM engineer. Opinions mine.")]
+    assert [a["handle"] for a in follow.authors(tweets, cfg, f)] == ["person"]

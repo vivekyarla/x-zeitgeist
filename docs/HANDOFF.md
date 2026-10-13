@@ -201,7 +201,7 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
 - **What it does:** Mondays at `FOLLOW_TIME` (11:15, `FOLLOW_DAY`), it DMs `ENGAGE_DM_EMAIL` 5 accounts per person in `engage.json` to follow, each with a reason of 12 words or fewer. It's sent once right after first setup, like the others.
 - **How it picks:**
   1. Fetches 7 days of the engage sources (`fetch()` with a 168h window).
-  2. `authors()` keeps accounts with 5,000+ followers (or 1,000+ and a `prominent_orgs` bio), at least 2 posts with 50+ likes, and not the team. It ranks them by summed log engagement and sends the top 150 to the model.
+  2. `authors()` keeps accounts with 5,000+ followers (or 1,000+ and a `prominent_orgs` bio), at least 2 posts with 50+ likes, not the team, and individuals only (`is_company()` drops known company handles and brand-voiced bios; the prompt also says people only, though employees count). It ranks them by summed log engagement and sends the top 150 to the model.
   3. `already_following()` loads each person's followings via twitterapi.io (from `x` in engage.json; None means unknown).
   4. `follow_history.json` blocks repeats for 8 weeks.
   5. One Claude call picks the accounts; `clean()` drops unknown or blocked handles.
