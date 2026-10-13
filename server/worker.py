@@ -192,8 +192,11 @@ class Worker:
                 self.db.update_run(user_id, state="error", last_run_at=now, last_error=error, rerun=0,
                                    next_run_at=now if rerun else now + RETRY_AFTER, slack_mode="auto")
             else:
+                # The GTM archetype runs once a day, just before its channel post (channel_prep), not every few hours.
+                daily = user_id == self.channel_uid
                 self.db.update_run(user_id, state="ready", last_run_at=now, last_error=None, rerun=0,
-                                   next_run_at=now if rerun else now + self.cfg.refresh_hours * 3600, slack_mode="auto")
+                                   next_run_at=now if rerun else None if daily else now + self.cfg.refresh_hours * 3600,
+                                   slack_mode="auto")
             log.info("user %s run %s in %.0fs", user_id, "failed" if error else "ok", now - started)
             return error is None
         except Exception:

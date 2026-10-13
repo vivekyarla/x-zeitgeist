@@ -252,3 +252,19 @@ def test_report_is_refreshed_before_the_post(tmp_path, monkeypatch):
     db.set_meta("channel_prep_date", None)
     w.channel_prep(at(8, 57, d=17))                  # Saturday: no post, no refresh
     assert db.meta("channel_prep_date") is None
+
+
+def test_archetype_runs_once_a_day(tmp_path, monkeypatch):
+    import time
+    app = make_app(tmp_path, monkeypatch)
+    w, db = app.state.worker, app.state.db
+    uid = w.channel_uid
+    assert w.run_user(uid)
+    assert db.run(uid)["next_run_at"] is None          # no 3-hourly refreshes
+    db.queue_due(time.time() + 10 * 3600, ())
+    assert db.run(uid)["state"] == "ready"             # the scheduler never picks it up on its own
+    me = TestClient(app)
+    me.post("/api/signup", json={"email": "vivek@rox.com", "password": "long enough pw"})
+    uid2 = db.user_by_email("vivek@rox.com")["id"]
+    db.set_onboarded(uid2); db.queue(uid2)
+    assert w.run_user(uid2) and db.run(uid2)["next_run_at"]  # personal pages keep refreshing

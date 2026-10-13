@@ -132,7 +132,7 @@ Every weekday at `CHANNEL_TIME` (9:30 Pacific by default), the bot posts to `CHA
 - **GTM zeitgeist:** the thesis in one line, 4–5 bullets on what's moving today with tweet links, and a link to the full report.
 - **Market intel:** 2–3 market developments and 1–2 other trends from a market-intelligence bot's latest report, with a link to it.
 
-**The archetype** is its own profile, created once from `CHANNEL_PRESET` (`gtm_marketing`: GTM & sales plus marketing & brand) and served at `/gtm/`. Anyone can read the page. Admins (`ADMIN_EMAILS`) who are signed in see Settings there, and those Settings edit the archetype: Feed, Sources, Filtered out. Edits stick across deploys, and the digest always summarizes the archetype's latest report.
+**The archetype** is its own profile, created once from `CHANNEL_PRESET` (`gtm_marketing`: GTM & sales plus marketing & brand) and served at `/gtm/`. Anyone can read the page. Admins (`ADMIN_EMAILS`) who are signed in see Settings there, and those Settings edit the archetype: Feed, Sources, Filtered out. Edits stick across deploys, and the digest always summarizes the archetype's latest report. To save API costs it refreshes once a day, about 35 minutes before the post, instead of every 3 hours.
 
 **Market intel** comes from whichever of these is available:
 1. **Pushed:** the other bot POSTs its report to `/api/intel` with `Authorization: Bearer $INTEL_PUSH_TOKEN`. The body is JSON `{"markdown" | "text" | "html": ..., "url": "<its page>", "title": ...}`, or plain text. A copy pushed in the last 36 hours wins.
