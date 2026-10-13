@@ -39,7 +39,7 @@ def test_already_following():
     cfg, f = engage.load_config(), follow.settings(engage.load_config())
     got = follow.already_following(cfg, f, Src())
     assert got["Ishan"] == {"bigvoice"} and got["Gopal"] == set()
-    assert got["Dan"] is None and got["Taeuk"] is None  # failed fetch, no handle
+    assert got["Dan"] is None and got["Taeuk"] == set()  # a failed fetch is "unknown"; everyone has a handle now
 
 
 def test_clean_blocks_follows_and_repeats():

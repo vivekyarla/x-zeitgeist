@@ -198,7 +198,7 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
 - **People profiles** are seeded from public info and confirmed by the owner. Brian is Brian Xu (Stanford; works on agents with Gopal). Dan is Daniel Chen.
 
 ### Weekly follow recommendations (`pipeline/follow.py`)
-- **What it does:** Mondays at `FOLLOW_TIME` (11:15, `FOLLOW_DAY`), it DMs `ENGAGE_DM_EMAIL` 4 accounts per person in `engage.json` to follow, each with a reason of 12 words or fewer. It's sent once right after first setup, like the others.
+- **What it does:** Mondays at `FOLLOW_TIME` (11:15, `FOLLOW_DAY`), it DMs `ENGAGE_DM_EMAIL` 5 accounts per person in `engage.json` to follow, each with a reason of 12 words or fewer. It's sent once right after first setup, like the others.
 - **How it picks:**
   1. Fetches 7 days of the engage sources (`fetch()` with a 168h window).
   2. `authors()` keeps accounts with 5,000+ followers (or 1,000+ and a `prominent_orgs` bio), at least 2 posts with 50+ likes, and not the team. It ranks them by summed log engagement and sends the top 150 to the model.
@@ -207,7 +207,7 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
   5. One Claude call picks the accounts; `clean()` drops unknown or blocked handles.
 - **Settings:** under `follow` in engage.json. State keys `follow_*` live in `meta`, and logs go to `DATA_DIR/engage/follow_last_run.log`.
 - **Route:** `POST /api/engage/follow/run` (owner) sends one now. `FOLLOW_ENABLED=0` turns it off.
-- **Known gaps:** Taeuk and Brian have no X handle in engage.json, so their existing follows can't be skipped. `shriram_s` was never verified.
+- **Handles:** all six people have X handles in engage.json (confirmed by the owner), so everyone's existing follows are skipped.
 
 ### Marketing channel digest (`pipeline/channel.py`)
 - **The archetype:** a system profile `gtm@timeline.invalid`, created once from `CHANNEL_PRESET` (`gtm_marketing`, a merge of `gtm_sales` and `marketing_brand`) and never re-applied, so admin edits persist.

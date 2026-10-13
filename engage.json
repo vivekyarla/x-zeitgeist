@@ -72,7 +72,7 @@
     {
       "name": "Taeuk",
       "full_name": "Taeuk Kang",
-      "x": "",
+      "x": "taeukkang",
       "role": "Founding engineer at Rox",
       "label": "Founding engineer",
       "profile": "Younger engineer, Stanford CS. Built LLM agents and RAG at X and data pipelines at Stripe; at Rox built the workflow builder and the inbound lead agent. Engages as a builder: shipping agents in production, coding agents and dev tools, retrieval, voice agents, and SF builder culture.",
@@ -87,7 +87,7 @@
     {
       "name": "Brian",
       "full_name": "Brian Xu",
-      "x": "",
+      "x": "XuBriGuy",
       "role": "Engineer at Rox (agents)",
       "label": "Engineer",
       "profile": "Younger engineer, Stanford. Works on Rox's agents with Gopal, rearchitecting how the agent pulls the right signals out of customer and market data. Engages as a builder: agent engineering and signal extraction, retrieval and data pipelines for agents, AI coding tools and workflows, new developer launches, and SF engineering culture.",
@@ -400,7 +400,7 @@
   "topics_per_person": 1,
   "model": "anthropic/claude-sonnet-5",
   "follow": {
-    "per_person": 4,
+    "per_person": 5,
     "window_days": 7,
     "min_followers": 5000,
     "min_followers_if_affiliated": 1000,

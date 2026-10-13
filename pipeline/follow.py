@@ -27,7 +27,7 @@ import requests
 
 from .engage import ENDPOINT, ROOT, _esc, fetch, load_config, org_of, send
 
-DEFAULTS = {"per_person": 4, "window_days": 7, "min_followers": 5000, "min_followers_if_affiliated": 1000,
+DEFAULTS = {"per_person": 5, "window_days": 7, "min_followers": 5000, "min_followers_if_affiliated": 1000,
             "min_posts": 2, "min_likes": 50, "max_following_pages": 10, "repeat_after_weeks": 8,
             "candidates_for_model": 150}
 
