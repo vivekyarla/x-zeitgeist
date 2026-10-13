@@ -203,3 +203,27 @@ def test_admin_channel_routes(tmp_path, monkeypatch):
     assert st["enabled"] and st["channel"] == "C0123" and st["time"] == "09:30" and st["weekdays_only"]
     assert b.get("/api/channel/status").status_code == 403
     assert a.post("/api/channel/run").status_code == 200 and app.state.db.meta("channel_force") == "1"
+
+
+def test_comp_intel_today_json(monkeypatch):
+    """The Grok bot's site (vivekyarla.github.io/comp-intel) renders in the browser from data/today.json:
+    read that, use its market briefing and market direction, and link the page and each item's source."""
+    from pathlib import Path
+    raw = (Path(__file__).parent / "fixtures" / "comp_intel_today.json").read_text()
+    monkeypatch.delenv("INTEL_FILE", raising=False)
+    monkeypatch.setenv("INTEL_URL", "https://vivekyarla.github.io/comp-intel/data/today.json")
+    monkeypatch.setenv("INTEL_PAGE_URL", "https://vivekyarla.github.io/comp-intel/")
+    monkeypatch.setattr(channel.requests, "get", lambda *a, **k: Resp(raw, "application/json; charset=utf-8"))
+    intel, note = channel.load_intel(NOW)
+    assert intel and not note and intel["url"] == "https://vivekyarla.github.io/comp-intel/"
+    assert intel["text"].startswith("As of: 2026-10-13") and "Market direction (trends):" in intel["text"]
+    src = json.loads(raw)["market_briefing"]["bullets"][0]["cites"][0]["url"]
+    assert src in intel["links"]
+    d = channel.clean({"bullets": [{"text": "x", "ids": ["1"]}],
+                       "market": [{"text": "Docusign agreements go native in Agentforce and Slack", "url": src},
+                                  {"text": "Seismic opens content to assistants via MCP", "url": "https://made.up/x"}],
+                       "trends": [{"text": "Accelerating: MCP as the GTM connector"}]}, REP, intel)
+    assert d["market"][0]["url"] == src and d["market"][1]["url"] == ""
+    msg = channel.message(d, REP, intel, "", NOW, "America/Los_Angeles")
+    block = msg["blocks"][2]["text"]["text"]
+    assert "<https://vivekyarla.github.io/comp-intel/|Full report>" in block and f"<{src}|source>" in block

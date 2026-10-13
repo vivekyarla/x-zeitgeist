@@ -67,8 +67,41 @@ def html_text(html: str) -> str:
     return re.sub(r"\n\s*\n+", "\n\n", text).strip()
 
 
+def page_url() -> str:
+    """The human-readable intel page to link to (INTEL_PAGE_URL, else INTEL_URL)."""
+    return os.getenv("INTEL_PAGE_URL", "").strip() or os.getenv("INTEL_URL", "").strip()
+
+
+def brief_text(d: dict) -> tuple[str, list[str]]:
+    """A structured daily brief (like comp-intel's data/today.json) as compact text, plus every
+    source URL it cites (the only links a market item may carry)."""
+    urls: list[str] = []
+
+    def cite(x: dict) -> str:
+        cs = [c.get("url") for c in x.get("cites", []) if c.get("url")]
+        urls.extend(cs)
+        return f" [source: {cs[0]}]" if cs else ""
+    mb = d.get("market_briefing") or {}
+    parts = [f"As of: {d.get('as_of', '?')}"]
+    if mb.get("lede"):
+        parts.append("Market briefing: " + mb["lede"])
+    parts += [f"- {b.get('text', '')}{cite(b)}" for b in mb.get("bullets", [])]
+    if d.get("market_direction"):
+        parts.append("Market direction (trends):")
+        parts += [f"- {x.get('label', '')}: {x.get('text', '')}" for x in d["market_direction"]]
+    if d.get("competitive_moves"):
+        parts.append("Competitive moves:")
+        parts += [f"- {x.get('company', '')}: {x.get('text', '')}{cite(x)}" for x in d["competitive_moves"]]
+    for w in d.get("watch", [])[:1]:
+        parts.append(f"One thing to watch: {w.get('title', '')}. {w.get('body', '')}{cite(w)}")
+    if d.get("biggest_ai_news"):
+        parts.append("Biggest AI news:")
+        parts += [f"- {x.get('title', '')}: {x.get('body', '')}{cite(x)}" for x in d["biggest_ai_news"]]
+    return "\n".join(parts), urls
+
+
 def load_intel(now: datetime) -> tuple[dict | None, str]:
-    """(intel, note). intel = {"text", "url", "source"}; note explains a miss in a line."""
+    """(intel, note). intel = {"text", "url", "source", "links"}; note explains a miss in a line."""
     url = os.getenv("INTEL_URL", "").strip()
     f = os.getenv("INTEL_FILE", "").strip()
     if f and Path(f).exists():
@@ -77,7 +110,8 @@ def load_intel(now: datetime) -> tuple[dict | None, str]:
             at = datetime.fromisoformat(pushed["received_at"])
             if now - at <= INTEL_FRESH and len(pushed.get("text", "")) >= 40:
                 print(f"intel: using the pushed copy from {pushed['received_at']}")
-                return {"text": pushed["text"][:INTEL_CHARS], "url": pushed.get("url") or url, "source": "pushed"}, ""
+                return {"text": pushed["text"][:INTEL_CHARS], "url": pushed.get("url") or page_url(),
+                        "source": "pushed", "links": re.findall(r"https?://[^\s)\]>\"']+", pushed["text"])}, ""
         except (OSError, ValueError, KeyError):
             pass
     if not url:
@@ -92,8 +126,13 @@ def load_intel(now: datetime) -> tuple[dict | None, str]:
         print(f"intel: {url} answered {r.status_code}")
         return None, f"the market intel site answered {r.status_code}"
     ctype = r.headers.get("content-type", "")
-    if "json" in ctype:
-        text = json.dumps(r.json(), ensure_ascii=False, indent=1)
+    links: list[str] = []
+    if "json" in ctype or url.endswith(".json"):
+        data = r.json()
+        if isinstance(data, dict) and ("market_briefing" in data or "market_direction" in data):
+            text, links = brief_text(data)  # a structured daily brief: use its sections directly
+        else:
+            text = json.dumps(data, ensure_ascii=False, indent=1)
     elif "html" in ctype or r.text.lstrip()[:200].lower().startswith(("<!doctype", "<html")):
         text = html_text(r.text)
     else:
@@ -103,7 +142,8 @@ def load_intel(now: datetime) -> tuple[dict | None, str]:
         print(f"intel: {url} has almost no text ({len(text)} chars); it's probably built in the browser with JavaScript")
         return None, "the market intel page has no readable text (it's probably rendered with JavaScript)"
     print(f"intel: fetched {len(text)} chars from {url}")
-    return {"text": text[:INTEL_CHARS], "url": url, "source": "fetched"}, ""
+    links = links or re.findall(r"https?://[^\s)\]>\"']+", text)
+    return {"text": text[:INTEL_CHARS], "url": page_url(), "source": "fetched", "links": links}, ""
 
 
 # ---------------------------------------------------------------------------
@@ -141,14 +181,17 @@ what's new today), and optionally the text of a market-intelligence report from 
 
 Return only JSON:
 {"bullets": [{"text": "<=16 words: what's happening and why it matters to GTM/marketing", "ids": ["<tweet id>", ...]}],
- "market": [{"text": "<=22 words"}],
+ "market": [{"text": "<=22 words", "url": "<the item's source URL from the intel, if it has one>"}],
  "trends": [{"text": "<=18 words"}]}
 
 - bullets: 4-5, most important first, favoring what's new today; each cites 1-2 tweet ids from the input.
   Plain, specific, no hype or emoji; name companies and numbers when the tweets have them.
 - market: the 2-3 most important market developments in the intel report (funding, launches, pricing,
-  competitor moves, buyer behavior). Only from the intel text; empty if there's no intel.
-- trends: 1-2 other trends the intel report identifies that aren't already in market. Empty if none or no intel.
+  competitor moves, buyer behavior). If it has a "Market briefing", use those items first. Copy each
+  item's source URL exactly from the intel. Only from the intel text; empty if there's no intel.
+- trends: 1-2 other trends the intel report identifies that aren't already in market (its "Market
+  direction" section if it has one), e.g. "Accelerating: MCP as the GTM connector, with Seismic and Nimble".
+  Empty if none or no intel.
 - Never invent facts, numbers, or tweet ids."""
 
 
@@ -182,8 +225,10 @@ def clean(out: dict, rep: dict, intel: dict | None) -> dict:
         if b.get("text") and cited:
             bullets.append({"text": words(b["text"], 18), "ids": cited})
     has = bool(intel)
+    allowed = set((intel or {}).get("links") or [])
     return {"bullets": bullets,
-            "market": [{"text": words(x.get("text"), 24)} for x in out.get("market", [])[:3] if has and x.get("text")],
+            "market": [{"text": words(x.get("text"), 24), "url": x["url"] if x.get("url") in allowed else ""}
+                       for x in out.get("market", [])[:3] if has and x.get("text")],
             "trends": [{"text": words(x.get("text"), 20)} for x in out.get("trends", [])[:2] if has and x.get("text")]}
 
 
@@ -199,10 +244,10 @@ def message(d: dict, rep: dict, intel: dict | None, intel_note: str, now: dateti
         links = " ".join(f"<{by_id[i]['url']}|@{_esc(by_id[i]['author'])}>" for i in b["ids"])
         lines.append(f"• {_esc(b['text'])}  {links}")
     blocks = [{"type": "section", "text": {"type": "mrkdwn", "text": "\n".join(lines)[:2990]}}]
-    intel_url = (intel or {}).get("url") or os.getenv("INTEL_URL", "")
+    intel_url = (intel or {}).get("url") or page_url()
     head = "*Market intel*" + (f"  ·  <{intel_url}|Full report>" if intel_url else "")
     if d["market"] or d["trends"]:
-        mi = [head] + [f"• {_esc(x['text'])}" for x in d["market"]]
+        mi = [head] + [f"• {_esc(x['text'])}" + (f"  <{x['url']}|source>" if x.get("url") else "") for x in d["market"]]
         if d["trends"]:
             mi.append("*Also trending*")
             mi += [f"• {_esc(x['text'])}" for x in d["trends"]]

@@ -701,7 +701,8 @@ def create_app(cfg: Config | None = None) -> FastAPI:
             intel = None
         return {"enabled": cfg.channel, "missing": missing, "channel": cfg.channel_slack_channel,
                 "time": cfg.channel_time, "timezone": cfg.channel_tz, "weekdays_only": cfg.channel_weekdays_only,
-                "page_url": cfg.base_url + "/gtm/", "intel_url": cfg.intel_url or None, "intel_pushed": intel,
+                "page_url": cfg.base_url + "/gtm/", "intel_url": cfg.intel_url or None,
+                "intel_page_url": cfg.intel_page_url or cfg.intel_url or None, "intel_pushed": intel,
                 "last_sent_date": None if sent in (None, "first") else sent,
                 "last_error": db.meta("channel_last_error") or None,
                 "last_tried_at": _iso(float(db.meta("channel_tried_at") or 0) or None)}

@@ -136,7 +136,9 @@ Every weekday at `CHANNEL_TIME` (9:30 Pacific by default), the bot posts to `CHA
 
 **Market intel** comes from whichever of these is available:
 1. **Pushed:** the other bot POSTs its report to `/api/intel` with `Authorization: Bearer $INTEL_PUSH_TOKEN`. The body is JSON `{"markdown" | "text" | "html": ..., "url": "<its page>", "title": ...}`, or plain text. A copy pushed in the last 36 hours wins.
-2. **Fetched:** otherwise `INTEL_URL` is fetched at post time. This works when the page's HTML (or a JSON or Markdown URL) contains the report text. A page that only renders in the browser can't be read this way; the post then links to it and says so.
+2. **Fetched:** otherwise `INTEL_URL` is fetched at post time. This works when the page's HTML (or a JSON or Markdown URL) contains the report text. A page that only renders in the browser can't be read this way; the post then links to it and says so. In that case, point `INTEL_URL` at the data file the page loads, and set `INTEL_PAGE_URL` to the page itself for the link.
+
+**comp-intel (the Grok market-intel bot)** is a GitHub Pages site that renders in the browser from `data/today.json`, committed each morning around 9:00 PT. Set `INTEL_URL=https://vivekyarla.github.io/comp-intel/data/today.json` and `INTEL_PAGE_URL=https://vivekyarla.github.io/comp-intel/`. The digest recognizes that structure: market items come from `market_briefing.bullets` (each linked to its cited source) and trends from `market_direction`. No push or token is needed.
 
 Signed in as an admin, `POST /api/channel/run` posts now and `GET /api/channel/status` shows the setup and the last post or error. The first post goes out as soon as the archetype's first report exists.
 

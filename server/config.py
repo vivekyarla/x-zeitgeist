@@ -61,6 +61,7 @@ class Config:
     channel_preset: str = "gtm_marketing"
     channel_keys: dict | None = None
     intel_url: str = ""
+    intel_page_url: str = ""
     intel_push_token: str = ""
 
     @property
@@ -174,5 +175,6 @@ def load() -> Config:
         channel_preset=_env_value("CHANNEL_PRESET") or "gtm_marketing",
         channel_keys=ck if all(ck.values()) else None,
         intel_url=_env_value("INTEL_URL"),
+        intel_page_url=_env_value("INTEL_PAGE_URL"),
         intel_push_token=_env_value("INTEL_PUSH_TOKEN"),
     )

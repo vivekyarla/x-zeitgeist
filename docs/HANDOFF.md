@@ -206,6 +206,7 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
   - **How it's made:** one Claude call over the archetype's saved week (top tweets, with today's first) plus the intel text. `clean()` keeps only real tweet ids and drops the intel sections when there's no intel.
 - **Intel:** a pushed copy (`POST /api/intel`, Bearer `INTEL_PUSH_TOKEN`, stored at `DATA_DIR/intel/latest.json`) newer than 36h wins; otherwise `INTEL_URL` is fetched and turned into text (`html_text`).
   - A page that's only built in the browser yields almost no text. The post then links to it with a short reason.
+  - **comp-intel** (vivekyarla.github.io/comp-intel, the Grok bot's site) is that kind of page. It's configured as `INTEL_URL=.../comp-intel/data/today.json` plus `INTEL_PAGE_URL=.../comp-intel/`. `brief_text()` turns its `market_briefing` / `market_direction` / `competitive_moves` / `watch` / `biggest_ai_news` sections into compact text. Market items may carry a source URL, but only one cited in the JSON (`clean()` checks). A fixture lives in `tests/fixtures/comp_intel_today.json`.
 - **State** lives in `meta` (`channel_sent_date`, `channel_tried_at`, `channel_last_error`, `channel_force`). Logs go to `DATA_DIR/channel/last_run.log`, and the last post to `DATA_DIR/channel/last.json`.
 - **Admin routes:** `GET /api/channel/status` and `POST /api/channel/run`.
 - **Tests:** `tests/test_channel.py`.
@@ -261,7 +262,7 @@ All errors are JSON `{"error": "<a sentence for a person>"}`.
 ```bash
 pip install -r requirements.txt -r requirements-dev.txt
 TIMELINE_DEMO=1 uvicorn server.app:app --reload     # no keys needed: checks skipped, pages built from pipeline/demo_state.json
-pytest -q                                            # 69 tests; CI: .github/workflows/test.yml
+pytest -q                                            # 70 tests; CI: .github/workflows/test.yml
 python -m pipeline.run --demo                        # render one page from sample data into ./public
 ```
 

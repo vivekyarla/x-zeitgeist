@@ -341,7 +341,7 @@ class Worker:
                              "TIMELINE_OUT": str(p["out"]), "PAGE_URL": self.cfg.base_url + "/gtm/",
                              "AI_GATEWAY_API_KEY": keys.get("ai_gateway", ""), "SLACK_BOT_TOKEN": self.cfg.channel_slack_token,
                              "CHANNEL_SLACK_CHANNEL": self.cfg.channel_slack_channel, "CHANNEL_TIMEZONE": self.cfg.channel_tz,
-                             "INTEL_URL": self.cfg.intel_url, "INTEL_FILE": str(self.cfg.data_dir / "intel" / "latest.json"),
+                             "INTEL_URL": self.cfg.intel_url, "INTEL_PAGE_URL": self.cfg.intel_page_url, "INTEL_FILE": str(self.cfg.data_dir / "intel" / "latest.json"),
                              "CHANNEL_OUT": str(out)})
         code, text = self._exec(["--send"], env, ENGAGE_TIMEOUT, [*keys.values(), self.cfg.channel_slack_token],
                                 module="pipeline.channel")
