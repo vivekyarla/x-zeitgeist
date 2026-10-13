@@ -49,6 +49,7 @@ ENGAGE_TIMEOUT = 15 * 60
 ENGAGE_LEAD = 8 * 60
 ENGAGE_RETRY = 15 * 60
 ENGAGE_GIVE_UP_HOUR = 15
+CHANNEL_LEAD = 2 * 60  # the channel digest only summarizes saved reports, so it's quick
 RETRY_AFTER = 30 * 60
 TICK = 20
 LOG_MAX = 200_000
@@ -62,12 +63,13 @@ ENV_ALLOW = ("PATH", "HOME", "LANG", "PYTHONPATH", "LC_ALL", "TZ", "SSL_CERT_FIL
 class Worker:
     def __init__(self, cfg: Config, db: DB, box: Box):
         self._engage_lock = threading.Lock()
+        self.channel_uid: int | None = None  # set by the app once the GTM archetype exists
         self.cfg, self.db, self.box = cfg, db, box
         self.owner = f"{socket.gethostname()}:{os.getpid()}:{uuid.uuid4().hex[:8]}"
         self._stop = threading.Event()
         self._kick = threading.Event()
         self._thread: threading.Thread | None = None
-        self._pool = ThreadPoolExecutor(max_workers=cfg.max_concurrent_runs + 2, thread_name_prefix="run")
+        self._pool = ThreadPoolExecutor(max_workers=cfg.max_concurrent_runs + 3, thread_name_prefix="run")
         self._inflight: set[tuple[str, int]] = set()
         self._lock = threading.Lock()
 
@@ -257,7 +259,8 @@ class Worker:
 
         def job():
             try:
-                {"run": self.run_user, "deliver": self.deliver_user, "engage": lambda _: self.run_engage()}[kind](user_id)
+                {"run": self.run_user, "deliver": self.deliver_user, "engage": lambda _: self.run_engage(),
+                 "channel": lambda _: self.run_channel()}[kind](user_id)
             finally:
                 with self._lock:
                     self._inflight.discard((kind, user_id))
@@ -274,29 +277,87 @@ class Worker:
                 self._submit("run", uid)
         if self.cfg.engage and self.engage_due(now):
             self._submit("engage", 0)
+        if self.cfg.channel and self.channel_due(now):
+            self._submit("channel", 0)
         if not self.cfg.demo:
             for row in self.db.onboarded_users():
                 if self._delivery_due(row, now) and self.db.keys(row["id"]).get("slack_webhook"):
                     self._submit("deliver", row["id"])
 
     # -- the daily engagement DM ---------------------------------------------
-    def _engage_window(self, now: float) -> tuple[datetime, datetime]:
-        local = datetime.fromtimestamp(now, ZoneInfo(self.cfg.engage_tz))
-        h, m = (int(x) for x in self.cfg.engage_time.split(":"))
-        return local, local.replace(hour=h, minute=m, second=0, microsecond=0) - timedelta(seconds=ENGAGE_LEAD)
+    # Daily Slack jobs share one schedule: start `lead` seconds before the time, retry a failure
+    # every ENGAGE_RETRY, give up at ENGAGE_GIVE_UP_HOUR, and send once right after first setup.
+    def _window(self, now: float, at: str, tz: str, lead: int) -> tuple[datetime, datetime]:
+        local = datetime.fromtimestamp(now, ZoneInfo(tz))
+        h, m = (int(x) for x in at.split(":"))
+        return local, local.replace(hour=h, minute=m, second=0, microsecond=0) - timedelta(seconds=lead)
 
-    def engage_due(self, now: float) -> bool:
-        if self.db.meta("engage_force") == "1":
+    def _daily_due(self, prefix: str, now: float, at: str, tz: str, weekdays_only: bool, lead: int) -> bool:
+        if self.db.meta(prefix + "_force") == "1":
             return True
-        if now - float(self.db.meta("engage_tried_at") or 0) < ENGAGE_RETRY:
+        if now - float(self.db.meta(prefix + "_tried_at") or 0) < ENGAGE_RETRY:
             return False
-        sent = self.db.meta("engage_sent_date")
+        sent = self.db.meta(prefix + "_sent_date")
         if sent is None:
             return True  # first time it's set up: send one right away, so it can be checked
-        local, start = self._engage_window(now)
-        if sent == local.date().isoformat() or (self.cfg.engage_weekdays_only and local.weekday() >= 5):
+        local, start = self._window(now, at, tz, lead)
+        if sent == local.date().isoformat() or (weekdays_only and local.weekday() >= 5):
             return False
         return start <= local and local.hour < ENGAGE_GIVE_UP_HOUR
+
+    def _daily_done(self, prefix: str, at: str, tz: str, lead: int) -> None:
+        local, start = self._window(time.time(), at, tz, lead)
+        # A first send before today's window doesn't count as today's, so the scheduled one still goes out.
+        prev = self.db.meta(prefix + "_sent_date")
+        self.db.set_meta(prefix + "_sent_date", local.date().isoformat() if local >= start else (prev or "first"))
+        self.db.set_meta(prefix + "_last_error", "")
+
+    def engage_due(self, now: float) -> bool:
+        return self._daily_due("engage", now, self.cfg.engage_time, self.cfg.engage_tz,
+                               self.cfg.engage_weekdays_only, ENGAGE_LEAD)
+
+    def channel_due(self, now: float) -> bool:
+        if self.channel_uid is None or not self._has_read(self.channel_uid):
+            return False  # nothing to summarize until the archetype's first report exists
+        return self._daily_due("channel", now, self.cfg.channel_time, self.cfg.channel_tz,
+                               self.cfg.channel_weekdays_only, CHANNEL_LEAD)
+
+    def _job_env(self, extra: dict) -> dict:
+        env = {k: os.environ[k] for k in ENV_ALLOW if os.environ.get(k)}
+        env["PYTHONPATH"] = str(ROOT) + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
+        env["PYTHONUNBUFFERED"] = "1"
+        env.update({k: v for k, v in extra.items() if v})
+        return env
+
+    def run_channel(self) -> bool:
+        self.db.set_meta("channel_tried_at", str(time.time()))
+        self.db.set_meta("channel_force", "0")
+        uid = self.channel_uid
+        p = self.paths(uid)
+        out = self.cfg.data_dir / "channel"
+        out.mkdir(parents=True, exist_ok=True)
+        keys = self.cfg.channel_keys or {}
+        env = self._job_env({"TIMELINE_SETTINGS": str(p["settings"]), "TIMELINE_DATA": str(p["data"]),
+                             "TIMELINE_OUT": str(p["out"]), "PAGE_URL": self.cfg.base_url + "/gtm/",
+                             "AI_GATEWAY_API_KEY": keys.get("ai_gateway", ""), "SLACK_BOT_TOKEN": self.cfg.channel_slack_token,
+                             "CHANNEL_SLACK_CHANNEL": self.cfg.channel_slack_channel, "CHANNEL_TIMEZONE": self.cfg.channel_tz,
+                             "INTEL_URL": self.cfg.intel_url, "INTEL_FILE": str(self.cfg.data_dir / "intel" / "latest.json"),
+                             "CHANNEL_OUT": str(out)})
+        code, text = self._exec(["--send"], env, ENGAGE_TIMEOUT, [*keys.values(), self.cfg.channel_slack_token],
+                                module="pipeline.channel")
+        self._write_log(out / "last_run.log", text)
+        for ln in text.splitlines():
+            if ln.strip().startswith(("intel", "slack", "Traceback", "RuntimeError", "SystemExit", "model")):
+                log.info("channel: %s", ln.strip()[:300])
+        if code == 0:
+            self._daily_done("channel", self.cfg.channel_time, self.cfg.channel_tz, CHANNEL_LEAD)
+            log.info("channel: digest posted")
+            return True
+        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        err = "timed out" if code is None else (lines[-1][:300] if lines else "no output")
+        self.db.set_meta("channel_last_error", err)
+        log.warning("channel: failed: %s", err)
+        return False
 
     def run_engage(self) -> bool:
         now = time.time()
@@ -320,11 +381,7 @@ class Worker:
                                       "RuntimeError", "SystemExit")) or "eligible" in ln:
                 log.info("engage: %s", ln.strip()[:300])
         if code == 0:
-            local, start = self._engage_window(time.time())
-            # A first send before today's window doesn't count as today's, so 11am still goes out.
-            prev = self.db.meta("engage_sent_date")
-            self.db.set_meta("engage_sent_date", local.date().isoformat() if local >= start else (prev or "first"))
-            self.db.set_meta("engage_last_error", "")
+            self._daily_done("engage", self.cfg.engage_time, self.cfg.engage_tz, ENGAGE_LEAD)
             log.info("engage: DM sent")
             return True
         lines = [ln.strip() for ln in text.splitlines() if ln.strip()]

@@ -5,6 +5,7 @@ Run locally:  TIMELINE_DEMO=1 uvicorn server.app:app --reload
 from __future__ import annotations
 
 import collections
+import hmac
 import json
 import logging
 import re
@@ -43,6 +44,9 @@ APP_FILES = {"data.json": "application/json", "recap.json": "application/json",
 RECAP_FILES = {"recap.json": "application/json", "recap.md": "text/markdown; charset=utf-8"}
 RUN_COOLDOWN = 600
 PREVIEW_EMAIL = "preview@timeline.invalid"  # the public example page's profile; can never sign in
+CHANNEL_EMAIL = "gtm@timeline.invalid"      # the marketing channel's archetype; admins edit it at /gtm/
+PROFILE_HEADER = "X-Profile"                # "gtm": an admin editing the archetype instead of their own profile
+INTEL_MAX = 60_000
 NO_CACHE = {"Cache-Control": "no-cache"}
 
 
@@ -228,11 +232,27 @@ def create_app(cfg: Config | None = None) -> FastAPI:
             request.session.clear()
         return user
 
-    def require_user(request: Request):
+    def require_user(request: Request, profile: bool = False):
         user = session_user(request)
         if not user:
             raise ApiError(401, "Sign in first.")
+        if request.headers.get(PROFILE_HEADER) and not profile:
+            raise ApiError(403, "That isn't available for the GTM archetype.")
         return user
+
+    def is_admin(user) -> bool:
+        return bool(user) and user["email"].lower() in cfg.admin_emails
+
+    def acting(request: Request):
+        """The profile this request edits: the signed-in person's, or the GTM archetype for an admin."""
+        user = require_user(request, profile=True)
+        if request.headers.get(PROFILE_HEADER) != "gtm":
+            return user
+        if channel_uid is None:
+            raise ApiError(404, "The GTM archetype isn't set up on this server.")
+        if not is_admin(user):
+            raise ApiError(403, "Only admins can edit the GTM archetype.")
+        return db.user(channel_uid)
 
     def client_ip(request: Request) -> str:
         return request.client.host if request.client else "unknown"
@@ -274,7 +294,8 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         return {"email": user["email"], "demo": cfg.demo, "onboarded": bool(user["onboarded"]),
                 "auth": "password" if user["pw_hash"] else "google",
                 "settings": json.loads(user["settings"]), "keys": key_flags(uid), "status": status(uid),
-                "recap_url": recap_url(user), "page_url": cfg.page_url,
+                "recap_url": recap_url(user),
+                "page_url": cfg.base_url + "/gtm/" if user["email"] == CHANNEL_EMAIL else cfg.page_url,
                 "slack": {"last_post": ws.get("slack_last_post"), "last_error": ws.get("slack_last_error")}}
 
     def has_required_keys(uid: int) -> bool:
@@ -322,6 +343,33 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     db.cap_leases(LEASE)  # a run cut off by the last redeploy is picked up again within minutes
     preview_uid = ensure_preview()
+
+    # The marketing channel's archetype: created once from CHANNEL_PRESET, then edited by admins at
+    # /gtm/ (never re-applied, so tweaks stick). Runs on the owner's keys like the example page.
+    def ensure_channel() -> int | None:
+        user = db.user_by_email(CHANNEL_EMAIL)
+        if not cfg.channel:
+            if user:
+                for n in KEY_ENV:
+                    db.set_key(user["id"], n, None)
+            return None
+        if user:
+            uid = user["id"]
+        else:
+            p = next((x for x in presets if x["id"] == cfg.channel_preset), None) or \
+                next(x for x in presets if x["id"] == "gtm_marketing")
+            settings = validate({**p["settings"], "preset_id": p["id"]})
+            settings["slack"]["enabled"] = False
+            uid = db.create_user(CHANNEL_EMAIL, "", settings, recap_token())
+        db.set_onboarded(uid)
+        for n, v in (cfg.channel_keys or {}).items():
+            db.set_key(uid, n, box.seal(v))
+        if db.run(uid)["state"] in ("error", "new") or not worker._has_read(uid):
+            db.queue(uid)
+        return uid
+
+    channel_uid = ensure_channel()
+    worker.channel_uid = channel_uid
     preview_name = next((x["name"] for x in presets if x["id"] == cfg.preview_preset), "SF tech culture")
 
     # -- pages -----------------------------------------------------------------
@@ -515,7 +563,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     @app.get("/api/me")
     def get_me(request: Request):
-        return me(require_user(request))
+        return me(acting(request))
 
     @app.get("/api/presets")
     def get_presets():
@@ -524,7 +572,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
     # -- settings and keys -----------------------------------------------------
     @app.put("/api/settings")
     def put_settings(request: Request, body: SettingsIn):
-        user = require_user(request)
+        user = acting(request)
         try:
             settings = validate(body.settings)
         except SettingsError as e:
@@ -577,7 +625,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     @app.post("/api/run")
     def run_now(request: Request, body: RunIn = Body(default=RunIn())):
-        user = require_user(request)
+        user = acting(request)
         uid = user["id"]
         if not user["onboarded"]:
             raise ApiError(400, "Finish setting up your page first.")
@@ -603,6 +651,99 @@ def create_app(cfg: Config | None = None) -> FastAPI:
                                                   f"in about {max(1, round(wait / 60))} min."}
         queue_run(uid, body.slack)
         return {**status(uid), "message": "Your page rebuilds in a few minutes."}
+
+    # -- the GTM archetype page and the marketing channel digest -------------------
+    @app.get("/gtm")
+    def gtm_no_slash():
+        return RedirectResponse("/gtm/", 308)
+
+    @app.get("/gtm/")
+    def gtm_page():
+        if channel_uid is None:
+            raise StarletteHTTPException(404)
+        page = worker.paths(channel_uid)["out"] / "index.html"
+        if page.exists():
+            return FileResponse(page, media_type="text/html; charset=utf-8", headers=NO_CACHE)
+        return HTMLResponse(
+            "<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>"
+            "<meta http-equiv='refresh' content='20'><title>GTM report</title>"
+            "<body style='font:16px/1.5 system-ui;max-width:36em;margin:15vh auto;padding:0 20px'>"
+            "<p>The GTM report is being built for the first time. This takes a few minutes; "
+            "this page refreshes on its own.</p>", headers=NO_CACHE)
+
+    @app.get("/gtm/{name}")
+    def gtm_file(name: str):
+        if channel_uid is None or name not in APP_FILES:
+            raise ApiError(404, "Not found.")
+        f = worker.paths(channel_uid)["out"] / name
+        if not f.exists():
+            raise ApiError(404, "Not built yet.")
+        return FileResponse(f, media_type=APP_FILES[name], headers=NO_CACHE)
+
+    def require_admin(request: Request):
+        user = require_user(request)
+        if not is_admin(user):
+            raise ApiError(403, "Only admins can do that.")
+        return user
+
+    def intel_file():
+        return cfg.data_dir / "intel" / "latest.json"
+
+    def channel_status() -> dict:
+        missing = [n for n, ok in (("CHANNEL_SLACK_CHANNEL", cfg.channel_slack_channel),
+                                   ("a Slack bot token (CHANNEL_SLACK_BOT_TOKEN or ENGAGE_SLACK_BOT_TOKEN)", cfg.channel_slack_token),
+                                   ("twitterapi.io and AI Gateway keys (CHANNEL_*, ENGAGE_* or PREVIEW_*)", cfg.channel_keys)) if not ok]
+        sent = db.meta("channel_sent_date")
+        try:
+            pushed = json.loads(intel_file().read_text())
+            intel = {"pushed_at": pushed.get("received_at"), "chars": len(pushed.get("text", ""))}
+        except (OSError, ValueError):
+            intel = None
+        return {"enabled": cfg.channel, "missing": missing, "channel": cfg.channel_slack_channel,
+                "time": cfg.channel_time, "timezone": cfg.channel_tz, "weekdays_only": cfg.channel_weekdays_only,
+                "page_url": cfg.base_url + "/gtm/", "intel_url": cfg.intel_url or None, "intel_pushed": intel,
+                "last_sent_date": None if sent in (None, "first") else sent,
+                "last_error": db.meta("channel_last_error") or None,
+                "last_tried_at": _iso(float(db.meta("channel_tried_at") or 0) or None)}
+
+    @app.get("/api/channel/status")
+    def get_channel_status(request: Request):
+        require_admin(request)
+        return channel_status()
+
+    @app.post("/api/channel/run")
+    def channel_run(request: Request):
+        require_admin(request)
+        if not cfg.channel:
+            raise ApiError(400, "The channel digest isn't set up. Missing: " + ", ".join(channel_status()["missing"]) + ".")
+        db.set_meta("channel_force", "1")
+        worker.kick()
+        return {**channel_status(), "message": "Posting the digest now. It arrives in a minute or two."}
+
+    @app.post("/api/intel")
+    async def intel_push(request: Request):
+        """Another bot (e.g. the Grok market-intel bot) pushes its latest report here:
+        Authorization: Bearer $INTEL_PUSH_TOKEN, body JSON {text|markdown|html, url?, title?} or plain text."""
+        token = (request.headers.get("authorization") or "").removeprefix("Bearer ").strip()
+        if not cfg.intel_push_token or not hmac.compare_digest(token, cfg.intel_push_token):
+            raise ApiError(401, "Missing or wrong token.")
+        raw = (await request.body())[: INTEL_MAX * 4].decode("utf-8", "replace")
+        try:
+            body = json.loads(raw) if raw.lstrip().startswith("{") else {"text": raw}
+        except ValueError:
+            body = {"text": raw}
+        text = body.get("text") or body.get("markdown") or ""
+        if not text and body.get("html"):
+            from pipeline.channel import html_text
+            text = html_text(body["html"])
+        text = str(text).strip()[:INTEL_MAX]
+        if len(text) < 40:
+            raise ApiError(422, "Send the report's text (at least a few sentences).")
+        intel_file().parent.mkdir(parents=True, exist_ok=True)
+        intel_file().write_text(json.dumps({"received_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                                            "url": str(body.get("url") or "")[:500], "title": str(body.get("title") or "")[:200],
+                                            "text": text}, ensure_ascii=False))
+        return {"ok": True, "chars": len(text)}
 
     # -- the daily engagement DM (owner only) ----------------------------------
     def require_engage_owner(request: Request):
@@ -636,7 +777,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     @app.get("/api/status")
     def get_status(request: Request):
-        return status(require_user(request)["id"])
+        return status(acting(request)["id"])
 
     # -- portability -----------------------------------------------------------
     @app.get("/api/export")

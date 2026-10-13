@@ -196,6 +196,20 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
 - **Slack app manifest** (scopes `chat:write`, `im:write`, `users:read`, `users:read.email`): https://api.slack.com/apps?new_app=1&manifest_json=%7B%22display_information%22%3A%7B%22name%22%3A%22Engage%20digest%22%2C%22description%22%3A%22Daily%20picks%20of%20what%20the%20team%20should%20engage%20with%20on%20X%22%7D%2C%22features%22%3A%7B%22bot_user%22%3A%7B%22display_name%22%3A%22Engage%20digest%22%2C%22always_online%22%3Afalse%7D%2C%22app_home%22%3A%7B%22messages_tab_enabled%22%3Atrue%2C%22messages_tab_read_only_enabled%22%3Atrue%7D%7D%2C%22oauth_config%22%3A%7B%22scopes%22%3A%7B%22bot%22%3A%5B%22chat%3Awrite%22%2C%22im%3Awrite%22%2C%22users%3Aread%22%2C%22users%3Aread.email%22%5D%7D%7D%2C%22settings%22%3A%7B%22org_deploy_enabled%22%3Afalse%2C%22socket_mode_enabled%22%3Afalse%2C%22token_rotation_enabled%22%3Afalse%7D%7D
 - **People profiles** are seeded from public info and confirmed by the owner. Brian is Brian Xu (Stanford; works on agents with Gopal). Dan is Daniel Chen.
 
+### Marketing channel digest (`pipeline/channel.py`)
+- **The archetype:** a system profile `gtm@timeline.invalid`, created once from `CHANNEL_PRESET` (`gtm_marketing`, a merge of `gtm_sales` and `marketing_brand`) and never re-applied, so admin edits persist.
+  - It runs every 3h on `CHANNEL_*` keys, falling back to `ENGAGE_*` then `PREVIEW_*`.
+  - The page at `/gtm/` is public and read-only.
+  - **Admin editing:** admins (`ADMIN_EMAILS`, default `ENGAGE_DM_EMAIL`) edit it from that page. The page's JS sets `TL.profile = "gtm"`, which sends `X-Profile: gtm`, and `acting()` in `server/app.py` maps the request onto the archetype for `/api/me`, `PUT /api/settings`, `POST /api/run` and `/api/status`. Every other route rejects that header.
+- **The post:** each weekday at `CHANNEL_TIME` (09:30, starting 2 minutes early), it posts to `CHANNEL_SLACK_CHANNEL` with the engagement bot's token (or `CHANNEL_SLACK_BOT_TOKEN`). The bot must be invited to the channel.
+  - **Contents:** the thesis, 4–5 bullets with tweet links and a "Full report" link, then a "Market intel" section (2–3 items, and 1–2 "Also trending" items).
+  - **How it's made:** one Claude call over the archetype's saved week (top tweets, with today's first) plus the intel text. `clean()` keeps only real tweet ids and drops the intel sections when there's no intel.
+- **Intel:** a pushed copy (`POST /api/intel`, Bearer `INTEL_PUSH_TOKEN`, stored at `DATA_DIR/intel/latest.json`) newer than 36h wins; otherwise `INTEL_URL` is fetched and turned into text (`html_text`).
+  - A page that's only built in the browser yields almost no text. The post then links to it with a short reason.
+- **State** lives in `meta` (`channel_sent_date`, `channel_tried_at`, `channel_last_error`, `channel_force`). Logs go to `DATA_DIR/channel/last_run.log`, and the last post to `DATA_DIR/channel/last.json`.
+- **Admin routes:** `GET /api/channel/status` and `POST /api/channel/run`.
+- **Tests:** `tests/test_channel.py`.
+
 ---
 
 ## 5. HTTP surface (`server/app.py`)
@@ -221,6 +235,9 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
 | `GET /api/export[?keys=1]`, `POST /api/import {profile}` | session | `{"format":"timeline-profile","version":1,...}` |
 | `POST /api/recap/rotate`, `DELETE /api/account {password \| confirm}` | session | |
 | `POST /api/engage/run`, `GET /api/engage/status` | session, `ENGAGE_DM_EMAIL` only | Daily engagement DM |
+| `GET /gtm/`, `/gtm/{file}` | – | The GTM archetype's page (admins edit it via `X-Profile: gtm`) |
+| `GET /api/channel/status`, `POST /api/channel/run` | admin (`ADMIN_EMAILS`) | Marketing channel digest |
+| `POST /api/intel` | Bearer `INTEL_PUSH_TOKEN` | Another bot pushes its market-intel report |
 
 All errors are JSON `{"error": "<a sentence for a person>"}`.
 
@@ -244,7 +261,7 @@ All errors are JSON `{"error": "<a sentence for a person>"}`.
 ```bash
 pip install -r requirements.txt -r requirements-dev.txt
 TIMELINE_DEMO=1 uvicorn server.app:app --reload     # no keys needed: checks skipped, pages built from pipeline/demo_state.json
-pytest -q                                            # 57 tests; CI: .github/workflows/test.yml
+pytest -q                                            # 69 tests; CI: .github/workflows/test.yml
 python -m pipeline.run --demo                        # render one page from sample data into ./public
 ```
 

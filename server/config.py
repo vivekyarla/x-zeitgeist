@@ -50,6 +50,23 @@ class Config:
     engage_weekdays_only: bool = False
     engage_keys: dict | None = None
 
+    # The marketing channel digest (pipeline/channel.py): a separate, editable archetype profile
+    # (served at /gtm/) summarized in a Slack channel, plus market intel from another bot's site.
+    admin_emails: tuple[str, ...] = ()
+    channel_slack_token: str = ""
+    channel_slack_channel: str = ""
+    channel_time: str = "09:30"
+    channel_tz: str = "America/Los_Angeles"
+    channel_weekdays_only: bool = True
+    channel_preset: str = "gtm_marketing"
+    channel_keys: dict | None = None
+    intel_url: str = ""
+    intel_push_token: str = ""
+
+    @property
+    def channel(self) -> bool:
+        return bool(self.channel_slack_token and self.channel_slack_channel and self.channel_keys)
+
     @property
     def engage(self) -> bool:
         return bool(self.engage_slack_token and (self.engage_dm_email or self.engage_dm_user) and self.engage_keys)
@@ -117,8 +134,14 @@ def load() -> Config:
     ek = {"twitterapi_io": _env_value("ENGAGE_TWITTERAPI_IO_KEY") or pk["twitterapi_io"],
           "ai_gateway": _env_value("ENGAGE_AI_GATEWAY_API_KEY") or pk["ai_gateway"]}
     engage_time = _env_value("ENGAGE_TIME") or "11:00"
-    if not re.fullmatch(r"([01]?\d|2[0-3]):[0-5]\d", engage_time):
-        raise RuntimeError("ENGAGE_TIME should look like 11:00 (24-hour).")
+    channel_time = _env_value("CHANNEL_TIME") or "09:30"
+    for name, v in (("ENGAGE_TIME", engage_time), ("CHANNEL_TIME", channel_time)):
+        if not re.fullmatch(r"([01]?\d|2[0-3]):[0-5]\d", v):
+            raise RuntimeError(f"{name} should look like 11:00 (24-hour).")
+    ck = {"twitterapi_io": _env_value("CHANNEL_TWITTERAPI_IO_KEY") or ek["twitterapi_io"],
+          "ai_gateway": _env_value("CHANNEL_AI_GATEWAY_API_KEY") or ek["ai_gateway"]}
+    dm = _env_value("ENGAGE_DM_EMAIL").lower()
+    admins = tuple(e.strip().lower() for e in (_env_value("ADMIN_EMAILS") or dm).split(",") if e.strip())
     return Config(
         data_dir=data_dir,
         base_url=base_url,
@@ -142,4 +165,14 @@ def load() -> Config:
         engage_tz=_env_value("ENGAGE_TIMEZONE") or "America/Los_Angeles",
         engage_weekdays_only=_truthy(os.getenv("ENGAGE_WEEKDAYS_ONLY")),
         engage_keys=ek if all(ek.values()) else None,
+        admin_emails=admins,
+        channel_slack_token=_env_value("CHANNEL_SLACK_BOT_TOKEN") or _env_value("ENGAGE_SLACK_BOT_TOKEN"),
+        channel_slack_channel=_env_value("CHANNEL_SLACK_CHANNEL").lstrip("#"),
+        channel_time=channel_time,
+        channel_tz=_env_value("CHANNEL_TIMEZONE") or _env_value("ENGAGE_TIMEZONE") or "America/Los_Angeles",
+        channel_weekdays_only=_truthy(os.getenv("CHANNEL_WEEKDAYS_ONLY", "1")),
+        channel_preset=_env_value("CHANNEL_PRESET") or "gtm_marketing",
+        channel_keys=ck if all(ck.values()) else None,
+        intel_url=_env_value("INTEL_URL"),
+        intel_push_token=_env_value("INTEL_PUSH_TOKEN"),
     )

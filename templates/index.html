@@ -15,6 +15,10 @@
 </head>
 <body>
 {% if demo %}<div class="demo">Sample data. Real tweets appear once the pipeline runs with your API keys.</div>{% endif %}
+<div class="preview-bar" id="gtm-bar" hidden><div class="frame">
+  <span>The GTM &amp; marketing report. It powers the marketing channel's daily digest.</span>
+  <span id="gtm-admin" hidden>Admin: Settings here edit this report, not your own page.</span>
+</div></div>
 <div class="preview-bar" id="preview-bar" hidden><div class="frame">
   <span>This is a live example built from one of the starter feeds. Yours follows the topics you pick, on your own keys.</span>
   <a class="btn primary" href="/login?mode=signup">Make your own</a>
@@ -474,10 +478,16 @@
     $("preview-bar").hidden = false;
     return;
   }
+  var gtm = /^\/gtm(\/|$)/.test(location.pathname);  // the GTM archetype: read-only, editable by admins
+  if (gtm) {
+    TL.profile = "gtm"; $("gtm-bar").hidden = false;
+    ["daily", "keys", "profile"].forEach(function (t) { var b = document.querySelector('[data-tab="' + t + '"]'); if (b) b.hidden = true; });
+  }
   Promise.all([TL.api("GET", "/api/me"), TL.api("GET", "/api/presets").catch(function () { return []; })]).then(function (r) {
     me = r[0]; presets = r[1]; settings = me.settings;
     presets.forEach(function (p) { $("f-preset").append(h("option", { value: p.id, text: p.name + " · " + p.tagline })); });
     $("open-settings").hidden = false; $("open-settings").onclick = function () { open(); };
+    if (gtm) $("gtm-admin").hidden = false;
     drawRunState(me.status);
     if (me.status.state === "running" || me.status.state === "queued") watchRun(me.status.last_run_at);
     var q = new URLSearchParams(location.search).get("settings"); if (q) open(q);

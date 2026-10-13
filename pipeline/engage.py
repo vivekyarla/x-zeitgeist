@@ -284,6 +284,12 @@ SLACK_ERRORS = {
 }
 
 
+class SlackError(RuntimeError):
+    def __init__(self, method: str, code: str, explained: str):
+        super().__init__(f"slack {method}: {explained}")
+        self.code = code
+
+
 def _slack(method: str, token: str, **payload) -> dict:
     get = method == "users.lookupByEmail"
     r = requests.request("GET" if get else "POST", SLACK_API + method, timeout=30,
@@ -292,7 +298,7 @@ def _slack(method: str, token: str, **payload) -> dict:
     body = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
     if not body.get("ok"):
         err = body.get("error") or f"HTTP {r.status_code}"
-        raise RuntimeError(f"slack {method}: " + SLACK_ERRORS.get(err, err))
+        raise SlackError(method, err, SLACK_ERRORS.get(err, err))
     return body
 
 

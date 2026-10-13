@@ -1,0 +1,314 @@
+{
+  "preset": {
+    "id": "gtm_marketing",
+    "name": "GTM & marketing",
+    "tagline": "What's working in go-to-market and marketing right now",
+    "description": "The whole GTM archetype: outbound and signals, GTM engineering, AI SDRs and sales tools, plus launch videos, campaigns, positioning, and content. Powers the marketing channel digest."
+  },
+  "focus": {
+    "audience": "the marketing and GTM team at an AI sales startup (Rox)",
+    "care_about": [
+      "Signal-based selling and outbound playbooks with real results: sequences, reply rates, meetings booked",
+      "GTM engineering: Clay workflows, enrichment, data waterfalls, and automating the sales process",
+      "AI SDRs and AI sales agents: what actually works, what doesn't, and real numbers",
+      "Sales tools: launches, features, and pricing from Clay, Monaco, Gong, Attio, Apollo, Unify, Common Room, and others",
+      "Founder-led sales, pipeline building, win rates, and sales leadership takes backed by data",
+      "Pricing and packaging moves in B2B and AI software",
+      "Launch videos and product launches that were marketed well, and why they worked",
+      "Ad campaigns, billboards, stunts, and rebrands from tech companies",
+      "Positioning, messaging, landing pages, and copy, with real examples",
+      "Content and social strategy that's working: founder-led content, short video, newsletters, community"
+    ],
+    "skip": [
+      "Generic motivational sales content and engagement-bait lead magnets ('comment PLAYBOOK and I'll DM you')",
+      "Politics, regulation, macro, and stock moves",
+      "Big-lab model launches unless they change how sales teams work",
+      "Engagement bait ('comment TEMPLATE and I'll send it') and generic marketing platitudes",
+      "Infrastructure, chips, and technical AI research"
+    ]
+  },
+  "topics": [
+    {
+      "key": "outbound",
+      "label": "Outbound & signals",
+      "description": "Outbound and signal-based selling: cold email, calling, intent and buying signals, sequences, and what gets replies",
+      "include": true,
+      "share": 0.125
+    },
+    {
+      "key": "gtm_engineering",
+      "label": "GTM engineering",
+      "description": "GTM engineering: Clay tables, enrichment, data waterfalls, automation, and GTM ops",
+      "include": true,
+      "share": 0.1
+    },
+    {
+      "key": "ai_sdr",
+      "label": "AI SDRs & agents",
+      "description": "AI SDRs, AI BDRs, and AI sales agents: what works, what doesn't, and results",
+      "include": true,
+      "share": 0.075
+    },
+    {
+      "key": "sales_tools",
+      "label": "Sales tools",
+      "description": "Sales and GTM tools: launches, features, and news from Clay, Monaco, Gong, Attio, Apollo, Unify, Common Room, HeyReach, Instantly, Outreach",
+      "include": true,
+      "share": 0.1
+    },
+    {
+      "key": "sales_leadership",
+      "label": "Sales leadership",
+      "description": "Founder-led sales, pipeline, quotas, win rates, hiring sellers, RevOps, and sales leadership",
+      "include": true,
+      "share": 0.06
+    },
+    {
+      "key": "pricing",
+      "label": "Pricing & packaging",
+      "description": "Pricing and packaging in B2B and AI software: seat vs usage vs outcome pricing, price changes, and experiments",
+      "include": true,
+      "share": 0.04
+    },
+    {
+      "key": "launch_videos",
+      "label": "Launch videos",
+      "description": "Launch videos and product launches that were marketed well: films, demos, teasers, and launch-day playbooks",
+      "include": true,
+      "share": 0.1
+    },
+    {
+      "key": "campaigns",
+      "label": "Campaigns & stunts",
+      "description": "Ad campaigns, billboards, out-of-home, stunts, and rebrands from tech companies",
+      "include": true,
+      "share": 0.1
+    },
+    {
+      "key": "positioning",
+      "label": "Positioning",
+      "description": "Positioning, messaging, landing pages, homepages, naming, and copywriting",
+      "include": true,
+      "share": 0.075
+    },
+    {
+      "key": "content_social",
+      "label": "Content & social",
+      "description": "Content and social strategy: founder-led content, short video, newsletters, podcasts, community, and creators",
+      "include": true,
+      "share": 0.1
+    },
+    {
+      "key": "growth",
+      "label": "Growth & demand gen",
+      "description": "Growth and demand gen: paid, SEO, lifecycle, conversion, and B2B marketing playbooks with numbers",
+      "include": true,
+      "share": 0.065
+    },
+    {
+      "key": "ai_marketing",
+      "label": "AI for marketers",
+      "description": "How marketers use AI: tools, workflows, AI-generated creative and video, and what it changes",
+      "include": true,
+      "share": 0.06
+    },
+    {
+      "key": "marketing_brand",
+      "label": "Marketing & brand",
+      "description": "Marketing and brand in tech: launch videos, campaigns, positioning, and content",
+      "include": false,
+      "share": 0
+    },
+    {
+      "key": "policy",
+      "label": "Policy",
+      "description": "Politics, government, regulation, lawsuits, and AI safety incidents",
+      "include": false,
+      "share": 0
+    },
+    {
+      "key": "other",
+      "label": "Other",
+      "description": "Anything else",
+      "include": false,
+      "share": 0
+    },
+    {
+      "key": "industry_finance",
+      "label": "Infra & finance",
+      "description": "Infrastructure and markets: data centers, compute buildout, chips supply, power, bonds and debt, public-company earnings, stock moves, macro",
+      "include": false,
+      "share": 0
+    }
+  ],
+  "searches": [
+    "(\"signal-based\" OR \"intent data\" OR \"buying signals\" OR outbound OR \"cold email\" OR \"cold calling\") (sales OR pipeline OR reply OR meetings OR SDR) min_faves:75 lang:en -filter:replies",
+    "(\"GTM engineer\" OR \"GTM engineering\" OR \"Clay table\" OR waterfall OR enrichment OR \"GTM ops\") min_faves:50 lang:en -filter:replies",
+    "(\"AI SDR\" OR \"AI SDRs\" OR \"AI BDR\" OR \"sales agent\" OR \"AI sales\") min_faves:75 lang:en -filter:replies",
+    "(Clay OR Apollo OR Gong OR Monaco OR Attio OR HeyReach OR Instantly OR Outreach OR \"Common Room\" OR Unify) (sales OR GTM OR launch OR pricing OR outbound) min_faves:50 lang:en -filter:replies",
+    "(\"founder-led sales\" OR \"sales team\" OR quota OR \"win rate\" OR RevOps OR CRO OR \"pipeline\") (B2B OR SaaS OR startup) min_faves:150 lang:en -filter:replies",
+    "(pricing OR \"usage-based\" OR \"seat-based\" OR \"outcome-based\" OR packaging) (SaaS OR AI OR B2B) min_faves:150 lang:en -filter:replies",
+    "(\"launch video\" OR \"launch film\" OR \"our launch\" OR \"we just launched\" OR \"launch day\") (startup OR AI OR app OR SaaS OR product) min_faves:300 lang:en -filter:replies",
+    "(\"ad campaign\" OR billboard OR billboards OR stunt OR \"brand campaign\" OR rebrand OR \"new brand\" OR \"Super Bowl ad\") min_faves:300 lang:en -filter:replies",
+    "(positioning OR messaging OR \"landing page\" OR homepage OR copywriting) (startup OR SaaS OR B2B OR AI) min_faves:150 lang:en -filter:replies",
+    "(\"content strategy\" OR \"founder-led content\" OR \"short-form video\" OR UGC OR newsletter OR \"LinkedIn content\") (brand OR startup OR B2B OR marketing) min_faves:150 lang:en -filter:replies",
+    "(\"demand gen\" OR \"B2B marketing\" OR \"paid social\" OR SEO OR \"growth marketing\" OR CAC OR \"conversion rate\") min_faves:150 lang:en -filter:replies",
+    "(marketers OR marketing) (AI OR ChatGPT OR Claude OR Midjourney OR Veo OR Sora) (workflow OR tool OR prompt OR ad) min_faves:300 lang:en -filter:replies"
+  ],
+  "watchlist": [
+    "jasonlk",
+    "samdblond",
+    "RobHoffman_",
+    "codyschneider",
+    "antinertia",
+    "fivosaresti",
+    "kristaletz",
+    "lennysan",
+    "harrydry"
+  ],
+  "watchlist_min_faves": 20,
+  "thresholds": {
+    "min_signal": 1.7,
+    "min_relevance": 0.6,
+    "max_bait": 0.5,
+    "min_likes": 250
+  },
+  "writer_model": "anthropic/claude-sonnet-5",
+  "slack": {
+    "enabled": false,
+    "frequency": "daily",
+    "hour": 8,
+    "weekdays_only": true,
+    "top_tweets": 5
+  },
+  "timezone": "America/Los_Angeles",
+  "ranking": {
+    "per_author_max": 2,
+    "breakout_weight": 0.35,
+    "mainstream_penalty": 0.5,
+    "account_groups": {
+      "OpenAI": [
+        "OpenAI",
+        "OpenAIDevs",
+        "ChatGPTapp",
+        "sama",
+        "OpenAINewsroom"
+      ],
+      "Anthropic": [
+        "AnthropicAI",
+        "claudeai",
+        "ClaudeDevs",
+        "DarioAmodei"
+      ],
+      "Google": [
+        "Google",
+        "GoogleDeepMind",
+        "GoogleAIStudio",
+        "GeminiApp",
+        "GoogleAI",
+        "sundarpichai"
+      ],
+      "Meta": [
+        "Meta",
+        "AIatMeta",
+        "finkd"
+      ],
+      "xAI": [
+        "xai",
+        "grok",
+        "elonmusk"
+      ],
+      "Microsoft": [
+        "Microsoft",
+        "satyanadella",
+        "code",
+        "GitHub"
+      ],
+      "Nvidia": [
+        "nvidia",
+        "NVIDIAAI"
+      ]
+    },
+    "breadth_weight": 1.0
+  },
+  "tracked": {
+    "accounts": [
+      "clay",
+      "MonacoGTM",
+      "gong_io",
+      "attio",
+      "unifygtm",
+      "CommonRoomHQ",
+      "useapolloio",
+      "heyreach_io",
+      "InstantlyAI",
+      "outreach_io",
+      "figma",
+      "linear",
+      "vercel",
+      "NotionHQ",
+      "stripe"
+    ],
+    "beat_baseline_by": 3.0,
+    "min_signal": 1.4,
+    "min_likes": 75
+  },
+  "panel": {
+    "groups": [
+      {
+        "name": "GTM companies",
+        "share": 0.3,
+        "accounts": [
+          "clay",
+          "MonacoGTM",
+          "gong_io",
+          "attio",
+          "unifygtm",
+          "CommonRoomHQ",
+          "useapolloio",
+          "heyreach_io",
+          "InstantlyAI",
+          "outreach_io"
+        ]
+      },
+      {
+        "name": "GTM operators",
+        "share": 0.2,
+        "accounts": [
+          "jasonlk",
+          "samdblond",
+          "RobHoffman_"
+        ]
+      },
+      {
+        "name": "marketers",
+        "share": 0.35,
+        "accounts": [
+          "codyschneider",
+          "antinertia",
+          "fivosaresti",
+          "kristaletz",
+          "lennysan",
+          "harrydry"
+        ]
+      },
+      {
+        "name": "brands",
+        "share": 0.15,
+        "accounts": [
+          "figma",
+          "linear",
+          "vercel",
+          "NotionHQ",
+          "stripe"
+        ]
+      }
+    ],
+    "min_overlap": 2,
+    "max_accounts": 300,
+    "include": [],
+    "exclude": [],
+    "refresh_days": 7
+  },
+  "known_stories": []
+}

@@ -29,11 +29,13 @@ var TL = (function () {
 
   // JSON API. Throws an Error with the server's human message.
   TL.api = function (method, path, body) {
-    return fetch(path, { method: method, credentials: "same-origin", headers: body ? { "Content-Type": "application/json" } : {},
+    var headers = body ? { "Content-Type": "application/json" } : {};
+    if (TL.profile) headers["X-Profile"] = TL.profile;  // an admin editing the GTM archetype
+    return fetch(path, { method: method, credentials: "same-origin", headers: headers,
       body: body ? JSON.stringify(body) : undefined })
       .then(function (r) {
         return r.json().catch(function () { return null; }).then(function (j) {
-          if (r.status === 401 && path !== "/api/login") { location.href = "/login"; throw new Error("Signed out."); }
+          if (r.status === 401 && path !== "/api/login" && !TL.profile) { location.href = "/login"; throw new Error("Signed out."); }
           if (!r.ok) {
             var d = j && (j.error || j.detail);
             if (Array.isArray(d)) d = d.map(function (x) { return x.msg || String(x); }).join("; ");

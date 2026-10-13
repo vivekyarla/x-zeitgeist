@@ -126,6 +126,20 @@ Setup:
 
 Edit `engage.json` to change people, their profiles, sources, thresholds, or how many picks each gets. Cost: about 15 searches and one Claude call a day, a few dollars a month.
 
+## Marketing channel digest
+
+Every weekday at `CHANNEL_TIME` (9:30 Pacific by default), the bot posts to `CHANNEL_SLACK_CHANNEL`:
+- **GTM zeitgeist:** the thesis in one line, 4–5 bullets on what's moving today with tweet links, and a link to the full report.
+- **Market intel:** 2–3 market developments and 1–2 other trends from a market-intelligence bot's latest report, with a link to it.
+
+**The archetype** is its own profile, created once from `CHANNEL_PRESET` (`gtm_marketing`: GTM & sales plus marketing & brand) and served at `/gtm/`. Anyone can read the page. Admins (`ADMIN_EMAILS`) who are signed in see Settings there, and those Settings edit the archetype: Feed, Sources, Filtered out. Edits stick across deploys, and the digest always summarizes the archetype's latest report.
+
+**Market intel** comes from whichever of these is available:
+1. **Pushed:** the other bot POSTs its report to `/api/intel` with `Authorization: Bearer $INTEL_PUSH_TOKEN`. The body is JSON `{"markdown" | "text" | "html": ..., "url": "<its page>", "title": ...}`, or plain text. A copy pushed in the last 36 hours wins.
+2. **Fetched:** otherwise `INTEL_URL` is fetched at post time. This works when the page's HTML (or a JSON or Markdown URL) contains the report text. A page that only renders in the browser can't be read this way; the post then links to it and says so.
+
+Signed in as an admin, `POST /api/channel/run` posts now and `GET /api/channel/status` shows the setup and the last post or error. The first post goes out as soon as the archetype's first report exists.
+
 ## Presets
 
 Setup starts from a preset in `pipeline/presets/`. Each is a complete settings file plus a `"preset"` block (id, name, tagline, description):
