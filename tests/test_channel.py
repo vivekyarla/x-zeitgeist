@@ -73,7 +73,7 @@ def test_clean_and_message(monkeypatch):
     assert [b["ids"] for b in d["bullets"]] == [["1"], ["2"]] and len(d["bullets"][0]["text"].split()) <= 18
     msg = channel.message(d, REP, intel, "", NOW, "America/Los_Angeles")
     top = msg["blocks"][0]["text"]["text"]
-    assert top.startswith("*GTM zeitgeist · Tue Oct 13*  ·  <https://x.example/gtm/|Full report>")
+    assert top.startswith("*X zeitgeist · Tue Oct 13*  ·  <https://x.example/gtm/|Full report>")
     assert "<https://x.com/clay/status/1|@clay>" in top and "_Signal-based outbound" in top
     intel_block = msg["blocks"][2]["text"]["text"]
     assert "<https://grok.example/report|Full report>" in intel_block and "*Also trending*" in intel_block

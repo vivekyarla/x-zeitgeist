@@ -237,7 +237,7 @@ def message(d: dict, rep: dict, intel: dict | None, intel_note: str, now: dateti
     local = now.astimezone(ZoneInfo(tz))
     day = f"{local:%a %b} {local.day}"
     thesis = re.sub(r"\s+", " ", rep["thesis"] or "").strip()
-    lines = [f"*GTM zeitgeist · {day}*  ·  <{rep['page_url']}|Full report>"]
+    lines = [f"*X zeitgeist · {day}*  ·  <{rep['page_url']}|Full report>"]
     if thesis:
         lines.append(f"_{_esc(thesis if len(thesis) <= 240 else thesis[:239].rstrip() + '…')}_")
     for b in d["bullets"]:
@@ -255,7 +255,7 @@ def message(d: dict, rep: dict, intel: dict | None, intel_note: str, now: dateti
     elif intel_url:
         blocks += [{"type": "divider"}, {"type": "context", "elements": [
             {"type": "mrkdwn", "text": f"{head} (couldn't summarize today: {_esc(intel_note or 'no new report')})"}]}]
-    return {"text": f"GTM zeitgeist · {day}: {thesis[:150]}", "blocks": blocks,
+    return {"text": f"X zeitgeist · {day}: {thesis[:150]}", "blocks": blocks,
             "unfurl_links": False, "unfurl_media": False}
 
 

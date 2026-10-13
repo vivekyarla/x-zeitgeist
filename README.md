@@ -129,7 +129,7 @@ Edit `engage.json` to change people, their profiles, sources, thresholds, or how
 ## Marketing channel digest
 
 Every weekday at `CHANNEL_TIME` (9:30 Pacific by default), the bot posts to `CHANNEL_SLACK_CHANNEL`. That's a channel ID, or, to test it first, an email address, which sends it as a DM from the bot. Changing the destination posts once right away.
-- **GTM zeitgeist:** the thesis in one line, 4–5 bullets on what's moving today with tweet links, and a link to the full report.
+- **X zeitgeist:** the thesis in one line, 4–5 bullets on what's moving today with tweet links, and a link to the full report.
 - **Market intel:** 2–3 market developments and 1–2 other trends from a market-intelligence bot's latest report, with a link to it.
 
 **The archetype** is its own profile, created once from `CHANNEL_PRESET` (`gtm_marketing`: GTM & sales plus marketing & brand) and served at `/gtm/`. Anyone can read the page. Admins (`ADMIN_EMAILS`) who are signed in see Settings there, and those Settings edit the archetype: Feed, Sources, Filtered out. Edits stick across deploys, and the digest always summarizes the archetype's latest report. To save API costs it refreshes twice a day instead of every 3 hours: about 35 minutes before the post, and in the evening (`CHANNEL_EVENING_REFRESH`, 20:00 by default).
