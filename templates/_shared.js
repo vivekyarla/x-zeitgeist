@@ -361,12 +361,18 @@ var TL = (function () {
 
   // Instinct and Muse can't be pushed to, so each gets a recurring task that reads this
   // person's private recap URL. Set up per device; remembered locally.
-  TL.agentMessage = function (name, recapUrl, pageUrl, time, weekdays, tz) {
+  // what: "x" (the X recap), "both" (plus the competitive intel brief), or "intel" (the brief alone).
+  TL.agentMessage = function (name, recapUrl, pageUrl, time, weekdays, tz, what) {
     var parts = time.split(":"), hr = +parts[0], min = parts[1];
     var when = (hr % 12 || 12) + ":" + min + (hr < 12 ? " AM" : " PM");
-    return "Hi " + name + ". Please set up a recurring task: every " + (weekdays ? "weekday" : "day") + " at " + when + " (" + tz + ")" +
-      ", read " + recapUrl + " and send me a short recap with the week's X thesis in a sentence or two, the 2–3 most interesting items under “New today” with their links, " +
-      "and this link to the full page: " + pageUrl + "\nKeep it under 100 words. If nothing is marked new, just send the thesis and the link.";
+    var head = "Hi " + name + ". Please set up a recurring task: every " + (weekdays ? "weekday" : "day") + " at " + when + " (" + tz + ")" +
+      ", read " + recapUrl + " and send me ";
+    if (what === "intel") return head + "a short competitive intel brief: the market briefing's lede in a sentence, the 2–3 most important " +
+      "competitive moves or market items with their source links, and the “Full report” link.\nKeep it under 100 words.";
+    return head + "a short recap with the week's X thesis in a sentence or two, the 2–3 most interesting items under “New today” with their links, " +
+      (what === "both" ? "the 2 most important items under “Competitive intel” with their source links, " : "") +
+      "and this link to the full page: " + pageUrl + "\nKeep it under " + (what === "both" ? "150" : "100") +
+      " words. If nothing is marked new, just send the thesis" + (what === "both" ? ", the competitive intel" : "") + " and the link.";
   };
   function agentCard(kind, s, me, open) {
     var slot = (me.scope ? me.scope + ":" : "") + kind;  // a shared report's setup is remembered apart from your own
@@ -375,16 +381,25 @@ var TL = (function () {
       : { name: "Muse", logo: "Mu", sub: "Sends it through Meta's Muse, in WhatsApp or at muse.ai" };
     var all = TL.local("tl_deliver") || {}, saved = all[slot] || {};
     var c = card(A.logo, A.name, A.sub, open, []);
+    var reads = h("a", { href: me.recap_url, target: "_blank", rel: "noopener", text: "see what " + A.name + " reads" });
     var time = h("input", { class: "inp", type: "time", value: saved.time || "08:00", "aria-label": "Time" });
     var weekdays = h("input", { type: "checkbox", checked: saved.weekdays !== false });
     var num = kind === "instinct" ? h("input", { class: "inp", type: "tel", placeholder: "Instinct's number (optional)", value: saved.number || "", autocomplete: "off" }) : null;
     var preview = h("div", { class: "msg-preview" });
     var note = h("p", { class: "note", hidden: true });
+    // With a competitive intel source set up, choose what to get: the X recap, plus the intel, or the intel alone.
+    var what = me.intel_url ? h("select", { class: "inp", "aria-label": "What to send" }, [
+      h("option", { value: "x", text: "X recap" }),
+      h("option", { value: "both", text: "X recap + competitive intel" }),
+      h("option", { value: "intel", text: "Competitive intel only" })]) : null;
+    if (what) what.value = saved.what || (me.scope === "gtm" ? "both" : "x");
+    function kindOf() { return what ? what.value : "x"; }
+    function url() { var k = kindOf(); return k === "intel" ? me.intel_url : k === "both" ? me.recap_url + "?intel=1" : me.recap_url; }
     var primary = h("a", { class: "btn primary", target: kind === "muse" ? "_blank" : null, rel: "noopener" });
     var alt = kind === "muse" ? h("a", { class: "btn", target: "_blank", rel: "noopener", text: "Send in WhatsApp" }) : null;
-    function msg() { return TL.agentMessage(A.name, me.recap_url, me.page_url, time.value || "08:00", weekdays.checked, s.timezone); }
+    function msg() { return TL.agentMessage(A.name, url(), me.page_url, time.value || "08:00", weekdays.checked, s.timezone, kindOf()); }
     function render() {
-      var m = msg(); preview.textContent = m;
+      var m = msg(); preview.textContent = m; reads.href = url();
       if (kind === "instinct") { primary.textContent = "Text it to Instinct"; primary.href = "sms:" + num.value.replace(/[^\d+]/g, "") + "?&body=" + encodeURIComponent(m); }
       else { primary.textContent = "Open Muse ↗"; primary.href = "https://muse.ai/"; alt.href = "https://wa.me/?text=" + encodeURIComponent(m); }
       var x = (TL.local("tl_deliver") || {})[slot];
@@ -392,11 +407,11 @@ var TL = (function () {
     }
     function remember(done) {
       var a = TL.local("tl_deliver") || {};
-      a[slot] = Object.assign({}, a[slot], { time: time.value, weekdays: weekdays.checked, number: num ? num.value : undefined }, done ? { at: new Date().toISOString() } : {});
+      a[slot] = Object.assign({}, a[slot], { time: time.value, weekdays: weekdays.checked, number: num ? num.value : undefined, what: what ? what.value : undefined }, done ? { at: new Date().toISOString() } : {});
       TL.local("tl_deliver", a); render();
     }
     function done(m) { remember(true); note.hidden = false; note.className = "note ok"; note.textContent = m; }
-    [time, weekdays, num].forEach(function (x) { if (x) { x.addEventListener("input", function () { remember(false); }); x.addEventListener("change", render); } });
+    [time, weekdays, num, what].forEach(function (x) { if (x) { x.addEventListener("input", function () { remember(false); }); x.addEventListener("change", render); } });
     primary.addEventListener("click", function () {
       TL.copy(msg()).catch(function () {});
       done(kind === "instinct" ? "Opening your messages app with the text filled in. On a computer? It's copied, so paste it into your Instinct thread." : "Message copied. Paste it into Muse and send it.");
@@ -407,11 +422,12 @@ var TL = (function () {
       h("ol", null, [h("li", { text: "Pick when you want it." }),
         h("li", { text: "Send this message to " + A.name + ". It sets up a daily task that reads " +
           (me.scope ? "this report's daily recap" : "your private recap") + " and sends it to you." })]),
+      what ? h("div", { style: "margin-bottom:8px" }, [what]) : "",
       h("div", { class: "row3", style: "margin-bottom:12px" }, [time, h("label", { class: "check" }, [weekdays, " Weekdays only"]), num]),
       preview, h("div", { class: "btn-row" }, [primary, alt, copyBtn]), note,
       h("p", { class: "hint", style: "margin-top:12px" }, [me.scope
           ? "This report's recap is public and updates twice a day (" : "Your recap link is private to you and updates every three hours (",
-        h("a", { href: me.recap_url, target: "_blank", rel: "noopener", text: "see what " + A.name + " reads" }),
+        reads,
         "). To stop, tell " + A.name + " to cancel the timeline recap."]));
     render();
     c.render = render;

@@ -227,6 +227,7 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
 - **State** lives in `meta` (`channel_sent_date`, `channel_tried_at`, `channel_last_error`, `channel_force`). Logs go to `DATA_DIR/channel/last_run.log`, and the last post to `DATA_DIR/channel/last.json`.
 - **Admin routes:** `GET /api/channel/status` and `POST /api/channel/run`.
 - **Instinct/Muse for shared reports:** `/gtm/` and `/preview/` show a "Get it daily" button. It opens `TL.agentCards()` pointed at that report's public `recap.md`, with no account needed, and setup state is stored per report in `localStorage`.
+- **Competitive intel for agents** (`server/intel_feed.py`): `IntelFeed` renders comp-intel's `today.json` as Markdown (`brief_markdown()`), cached 15 min, with a fresh pushed copy taking precedence. Routes: `GET|HEAD /intel/recap.md` (full brief) and `/intel/` (redirect to the page). Any `recap.md` (`/gtm/`, `/preview/`, `/r/<token>/`) with `?intel=1` gets the short version appended (`recap_response()`). `/api/me` returns `intel_url`; shared pages detect it with a HEAD request. `agentCard()` shows a "What to send" select (x / both / intel) that changes the URL and the setup message.
 - **Tests:** `tests/test_channel.py`.
 
 ### Asking the bot (`server/slackbot.py`)

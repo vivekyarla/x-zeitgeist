@@ -400,3 +400,32 @@ def test_adding_an_intel_channel(tmp_path, monkeypatch):
     env = seen["env"]
     assert env["INTEL_SLACK_CHANNEL"] == "comp-intel" and env["INTEL_SLACK_BOT_TOKEN"] == "xoxb-2"
     assert env["CHANNEL_FORCE"] == "1" and "xoxb-2" in seen["secrets"]
+
+
+def test_intel_feed_for_agents(tmp_path, monkeypatch):
+    from server import intel_feed
+    raw = (__import__("pathlib").Path(__file__).parent / "fixtures" / "comp_intel_today.json").read_text()
+    calls = []
+    monkeypatch.setattr(intel_feed.requests, "get", lambda *a, **k: calls.append(a) or Resp(raw, "application/json"))
+    app = make_app(tmp_path, monkeypatch, INTEL_URL="https://x.example/comp-intel/data/today.json",
+                   INTEL_PAGE_URL="https://x.example/comp-intel/")
+    c = TestClient(app)
+    r = c.get("/intel/recap.md")
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/markdown")
+    md = r.text
+    assert md.startswith("## Competitive intel") and "Full report: https://x.example/comp-intel/" in md
+    assert "### Market briefing" in md and "](https://www.prnewswire.com/" in md and "### Biggest AI news" in md
+    assert c.head("/intel/recap.md").status_code == 200 and len(calls) == 1  # cached
+    assert c.get("/intel/", follow_redirects=False).headers["location"] == "https://x.example/comp-intel/"
+    # appended to a report's recap on request, the short version
+    out = app.state.worker.paths(app.state.worker.channel_uid)["out"]; out.mkdir(parents=True, exist_ok=True)
+    (out / "recap.md").write_text("# X recap\n")
+    assert c.get("/gtm/recap.md").text == "# X recap\n"
+    both = c.get("/gtm/recap.md?intel=1").text
+    assert both.startswith("# X recap\n\n## Competitive intel") and "### Market briefing" in both
+    assert "### Biggest AI news" not in both
+
+
+def test_no_intel_feed_without_a_source(tmp_path, monkeypatch):
+    app = make_app(tmp_path, monkeypatch, INTEL_URL="")
+    assert TestClient(app).get("/intel/recap.md").status_code == 404

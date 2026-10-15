@@ -490,9 +490,11 @@
   var shared = (location.pathname.match(/^\/(preview|gtm)(\/|$)/) || [])[1];
   if (shared) {
     var base = location.origin + "/" + shared + "/";
+    var intelUrl = null;  // the competitive intel brief, if this server has one: offered as an add-on or on its own
+    fetch("/intel/recap.md", { method: "HEAD" }).then(function (r) { if (r.ok) intelUrl = location.origin + "/intel/recap.md"; }).catch(function () {});
     document.querySelectorAll("[data-get-daily]").forEach(function (b) {
       b.onclick = function () {
-        TL.agentCards($("daily-mount"), { recap_url: base + "recap.md", page_url: base, scope: shared });
+        TL.agentCards($("daily-mount"), { recap_url: base + "recap.md", page_url: base, scope: shared, intel_url: intelUrl });
         $("daily-dlg").showModal();
       };
     });

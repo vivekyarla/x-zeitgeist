@@ -14,6 +14,7 @@ import threading
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Literal, Optional
 from urllib.parse import urlencode
 
@@ -33,6 +34,7 @@ from .config import ROOT, SITE_TITLE, Config
 from .db import DB
 from .security import Box, fernet_key, hash_password, recap_token, verify_password
 from .settings_schema import SettingsError, default_settings, load_presets, validate
+from .intel_feed import IntelFeed
 from .worker import KEY_ENV, LEASE, REQUIRED_KEYS, Worker
 
 log = logging.getLogger("timeline")
@@ -175,6 +177,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
     worker = Worker(cfg, db, box)
     limiter = RateLimiter(cfg.rate_limit)
     presets = load_presets()
+    intel = IntelFeed(cfg.intel_url, cfg.intel_page_url, cfg.data_dir / "intel" / "latest.json")
     templates = Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=select_autoescape())
     json_cache: dict[str, tuple[float, dict]] = {}
 
@@ -285,6 +288,14 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         json_cache[str(p)] = (mtime, small)
         return small
 
+    def recap_response(f: Path, name: str, request: Request) -> Response:
+        """A recap file; recap.md?intel=1 also carries today's competitive intel brief."""
+        body = f.read_bytes()
+        if name == "recap.md" and request.query_params.get("intel") == "1":
+            md = intel.markdown(full=False)
+            body = body.rstrip() + ("\n\n" + (md or "## Competitive intel\nNo brief today.\n")).encode()
+        return Response(body, media_type=APP_FILES.get(name) or RECAP_FILES[name], headers=NO_CACHE)
+
     def recap_url(user) -> str:
         return cfg.recap_base(user["recap_token"]) + "recap.md"
 
@@ -294,7 +305,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         return {"email": user["email"], "demo": cfg.demo, "onboarded": bool(user["onboarded"]),
                 "auth": "password" if user["pw_hash"] else "google",
                 "settings": json.loads(user["settings"]), "keys": key_flags(uid), "status": status(uid),
-                "recap_url": recap_url(user),
+                "recap_url": recap_url(user), "intel_url": cfg.base_url + "/intel/recap.md" if intel.enabled else None,
                 "page_url": cfg.base_url + "/gtm/" if user["email"] == CHANNEL_EMAIL else cfg.page_url,
                 "slack": {"last_post": ws.get("slack_last_post"), "last_error": ws.get("slack_last_error")}}
 
@@ -415,13 +426,13 @@ def create_app(cfg: Config | None = None) -> FastAPI:
             headers=NO_CACHE)
 
     @app.get("/preview/{name}")
-    def preview_file(name: str):
+    def preview_file(name: str, request: Request):
         if preview_uid is None or name not in APP_FILES:
             raise ApiError(404, "Not found.")
         f = worker.paths(preview_uid)["out"] / name
         if not f.exists():
             raise ApiError(404, "Not built yet.")
-        return FileResponse(f, media_type=APP_FILES[name], headers=NO_CACHE)
+        return recap_response(f, name, request)
 
     @app.get("/login", response_class=HTMLResponse)
     def login_page(request: Request):
@@ -464,7 +475,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         return FileResponse(f, media_type=APP_FILES[name], headers=NO_CACHE)
 
     @app.get("/r/{token}/{name}")
-    def recap_file(token: str, name: str):
+    def recap_file(token: str, name: str, request: Request):
         if name not in RECAP_FILES or not TOKEN.match(token):
             raise ApiError(404, "Not found.")
         user = db.user_by_token(token)
@@ -473,7 +484,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         f = worker.paths(user["id"])["out"] / name
         if not f.exists():
             raise ApiError(404, "The first recap lands after the first update.")
-        return Response(f.read_bytes(), media_type=RECAP_FILES[name], headers=NO_CACHE)
+        return recap_response(f, name, request)
 
     # -- auth ------------------------------------------------------------------
     def start_session(request: Request, uid: int) -> None:
@@ -673,13 +684,28 @@ def create_app(cfg: Config | None = None) -> FastAPI:
             "this page refreshes on its own.</p>", headers=NO_CACHE)
 
     @app.get("/gtm/{name}")
-    def gtm_file(name: str):
+    def gtm_file(name: str, request: Request):
         if channel_uid is None or name not in APP_FILES:
             raise ApiError(404, "Not found.")
         f = worker.paths(channel_uid)["out"] / name
         if not f.exists():
             raise ApiError(404, "Not built yet.")
-        return FileResponse(f, media_type=APP_FILES[name], headers=NO_CACHE)
+        return recap_response(f, name, request)
+
+    # The competitive intel brief on its own, public like /gtm/, for anyone's Instinct or Muse.
+    @app.get("/intel")
+    @app.get("/intel/")
+    def intel_page():
+        if not intel.page_url:
+            raise ApiError(404, "No competitive intel source is set up.")
+        return RedirectResponse(intel.page_url, 307)
+
+    @app.api_route("/intel/recap.md", methods=["GET", "HEAD"])
+    def intel_recap():
+        md = intel.markdown() if intel.enabled else None
+        if md is None:
+            raise ApiError(404, "No competitive intel brief right now.")
+        return Response(md, media_type=RECAP_FILES["recap.md"], headers=NO_CACHE)
 
     def require_admin(request: Request):
         user = require_user(request)

@@ -146,6 +146,8 @@ Every weekday at `CHANNEL_TIME` (9:30 Pacific by default), the bot posts to `CHA
 
 **Anyone can get it daily in Instinct or Muse:** `/gtm/` (and the example page `/preview/`) has a **Get it daily** button with the same one-tap setup as personal pages. It points the agent at the report's public recap, `/gtm/recap.md` (or `/preview/recap.md`), which needs no account. It's the shared report, not one tuned to the reader.
 
+**Competitive intel in Instinct or Muse.** When `INTEL_URL` is set, every Instinct/Muse setup card (on `/gtm/`, `/preview/`, and each person's **Daily recap** tab) has a **What to send** choice: *X recap*, *X recap + competitive intel* (the default on `/gtm/`), or *Competitive intel only*. The first reads `recap.md`, the second the same recap with `?intel=1` (today's market briefing, competitive moves and market direction appended, with source links), and the third reads `/intel/recap.md`, the full comp-intel brief as Markdown. All are public and need no account, except a personal recap's private link. The brief is fetched from `INTEL_URL` at most every 15 minutes (a fresh copy pushed to `/api/intel` wins). `/intel/` redirects to `INTEL_PAGE_URL`.
+
 Signed in as an admin, `POST /api/channel/run` posts now and `GET /api/channel/status` shows the setup and the last post or error. The first post goes out as soon as the archetype's first report exists.
 
 ## Asking the bot
