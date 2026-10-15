@@ -43,6 +43,7 @@ Browser ──► FastAPI (server/app.py) ── SQLite (DATA_DIR/timeline.db: u
 
 - **One container, one process.** The scheduler lives inside the web server, so the machine must stay up. Run exactly one instance; SQLite is local to the volume.
 - **Per-user isolation:** each run is a separate subprocess. Its environment is built from an allowlist (PATH, HOME, LANG, PYTHONPATH, TZ, CA and proxy vars) plus that user's own keys, so a run can never see another user's keys or server secrets.
+- **Deploys re-render every page:** pages are static files built by the pipeline, so on startup `Worker.rebuild_pages()` re-renders each built page from its saved `week.json` (`--build-only --slack skip`: no API keys, no Slack, under the user's lease). Template changes therefore show up on deploy, not at the next scheduled run.
 - **Leases:** each run or delivery takes a lease on the user's `runs` row. Leases last 3 minutes and are renewed every 60 seconds while the subprocess runs. On startup, the server shortens any longer leftover lease, so a run cut off by a redeploy is picked up again within minutes.
 - **Scheduling rules:**
   - A successful run schedules the next one `REFRESH_HOURS` (3h) later.

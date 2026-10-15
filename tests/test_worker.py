@@ -148,3 +148,28 @@ def test_lease_is_renewed_while_a_run_is_going(app, monkeypatch):
     with worker._holding(uid):
         time.sleep(0.2)
     assert db.run(uid)["lease_until"] > time.time() + 900
+
+
+def test_deploy_rebuilds_pages_without_api_calls(app, monkeypatch):
+    import json as _json
+    from datetime import datetime, timedelta, timezone
+    db, worker = app.state.db, app.state.worker
+    uid = db.user_by_email("preview@timeline.invalid")["id"]
+    p = worker.paths(uid)
+    p["data"].mkdir(parents=True, exist_ok=True); p["out"].mkdir(parents=True, exist_ok=True)
+    now = datetime.now(timezone.utc)
+    # this week's Monday 00:00 PT, as the pipeline computes it
+    from zoneinfo import ZoneInfo
+    local = now.astimezone(ZoneInfo("America/Los_Angeles"))
+    ws = (local - timedelta(days=local.weekday())).replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
+    (p["data"] / "week.json").write_text(_json.dumps({"week_start": ws.isoformat(), "tweets": {}, "thesis_history": [], "latest": None}))
+    (p["out"] / "index.html").write_text("old page")
+    calls = []
+    real = worker._exec
+    monkeypatch.setattr(worker, "_exec", lambda args, env, timeout, secrets_, module="pipeline.run":
+                        calls.append((args, env)) or real(args, env, timeout, secrets_, module))
+    assert worker.rebuild_pages() == 1
+    args, env = calls[0]
+    assert args == ["--build-only", "--slack", "skip"]
+    assert "TWITTERAPI_IO_KEY" not in env and "AI_GATEWAY_API_KEY" not in env and "SLACK_WEBHOOK_URL" not in env
+    assert "old page" not in (p["out"] / "index.html").read_text() and "data-get-daily" in (p["out"] / "index.html").read_text()

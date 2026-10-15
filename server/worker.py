@@ -488,10 +488,36 @@ class Worker:
             self._kick.wait(TICK)
             self._kick.clear()
 
+    def rebuild_pages(self) -> int:
+        """Re-render every built page from its saved week (no API calls, no Slack), so a deploy's
+        template changes show up right away instead of at each page's next scheduled run."""
+        done = 0
+        for uid in self.db.user_ids():
+            p = self.paths(uid)
+            if not (p["data"] / "week.json").exists() or not (p["out"] / "index.html").exists():
+                continue
+            if not self.db.claim(uid, self.owner, LEASE, start_run=False):
+                continue  # a run is going; it builds the page itself
+            try:
+                user = self.db.user(uid)
+                if not user:
+                    continue
+                self.write_settings(uid, user["settings"])
+                code, text = self._exec(["--build-only", "--slack", "skip"], self.env_for(uid, {}, user["recap_token"]), 120, [])
+                if code == 0:
+                    done += 1
+                else:
+                    log.warning("rebuild of user %s's page failed: %s", uid, (text.strip().splitlines() or ["?"])[-1][:200])
+            finally:
+                self.db.release(uid, self.owner)
+        log.info("rebuilt %d pages with the current templates", done)
+        return done
+
     def start(self) -> None:
         if self._thread is None:
             self._thread = threading.Thread(target=self._loop, name="scheduler", daemon=True)
             self._thread.start()
+            threading.Thread(target=self.rebuild_pages, name="rebuild", daemon=True).start()
 
     def stop(self) -> None:
         self._stop.set()
