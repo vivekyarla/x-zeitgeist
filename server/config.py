@@ -67,6 +67,8 @@ class Config:
     channel_keys: dict | None = None
     intel_url: str = ""
     intel_page_url: str = ""
+    intel_slack_channel: str = ""   # set: the competitive intel posts here, separately from the X zeitgeist
+    intel_slack_token: str = ""     # optional second bot for it; defaults to the channel digest's bot
     intel_push_token: str = ""
     slack_signing_secret: str = ""  # lets the bot answer @mentions and DMs (POST /slack/events)
 
@@ -200,6 +202,8 @@ def load() -> Config:
         channel_keys=ck if all(ck.values()) else None,
         intel_url=_env_value("INTEL_URL"),
         intel_page_url=_env_value("INTEL_PAGE_URL"),
+        intel_slack_channel=_env_value("INTEL_SLACK_CHANNEL").lstrip("#"),
+        intel_slack_token=_env_value("INTEL_SLACK_BOT_TOKEN"),
         intel_push_token=_env_value("INTEL_PUSH_TOKEN"),
         slack_signing_secret=_env_value("SLACK_SIGNING_SECRET"),
     )

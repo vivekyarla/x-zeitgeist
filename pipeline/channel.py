@@ -232,7 +232,32 @@ def clean(out: dict, rep: dict, intel: dict | None) -> dict:
             "trends": [{"text": words(x.get("text"), 20)} for x in out.get("trends", [])[:2] if has and x.get("text")]}
 
 
-def message(d: dict, rep: dict, intel: dict | None, intel_note: str, now: datetime, tz: str) -> dict:
+def intel_lines(d: dict, intel: dict | None, intel_note: str, head: str) -> tuple[list[str], bool]:
+    """The market-intel section: (lines, has_items)."""
+    if d["market"] or d["trends"]:
+        mi = [head] + [f"• {_esc(x['text'])}" + (f"  <{x['url']}|source>" if x.get("url") else "") for x in d["market"]]
+        if d["trends"]:
+            mi.append("*Also trending*")
+            mi += [f"• {_esc(x['text'])}" for x in d["trends"]]
+        return mi, True
+    return [f"{head} (couldn't summarize today: {_esc(intel_note or 'no new report')})"], False
+
+
+def intel_message(d: dict, intel: dict | None, intel_note: str, now: datetime, tz: str) -> dict:
+    """The competitive-intel post on its own, for a separate channel (INTEL_SLACK_CHANNEL)."""
+    local = now.astimezone(ZoneInfo(tz))
+    day = f"{local:%a %b} {local.day}"
+    url = (intel or {}).get("url") or page_url()
+    head = f"*Competitive intel · {day}*" + (f"  ·  <{url}|Full report>" if url else "")
+    lines, _ = intel_lines(d, intel, intel_note, head)
+    first = (d["market"] or [{"text": "no brief today"}])[0]["text"]
+    return {"text": f"Competitive intel · {day}: {first[:150]}",
+            "blocks": [{"type": "section", "text": {"type": "mrkdwn", "text": "\n".join(lines)[:2990]}}],
+            "unfurl_links": False, "unfurl_media": False}
+
+
+def message(d: dict, rep: dict, intel: dict | None, intel_note: str, now: datetime, tz: str,
+            with_intel: bool = True) -> dict:
     by_id = {t["id"]: t for t in rep["tweets"]}
     local = now.astimezone(ZoneInfo(tz))
     day = f"{local:%a %b} {local.day}"
@@ -246,13 +271,10 @@ def message(d: dict, rep: dict, intel: dict | None, intel_note: str, now: dateti
     blocks = [{"type": "section", "text": {"type": "mrkdwn", "text": "\n".join(lines)[:2990]}}]
     intel_url = (intel or {}).get("url") or page_url()
     head = "*Market intel*" + (f"  ·  <{intel_url}|Full report>" if intel_url else "")
-    if d["market"] or d["trends"]:
-        mi = [head] + [f"• {_esc(x['text'])}" + (f"  <{x['url']}|source>" if x.get("url") else "") for x in d["market"]]
-        if d["trends"]:
-            mi.append("*Also trending*")
-            mi += [f"• {_esc(x['text'])}" for x in d["trends"]]
+    if with_intel and (d["market"] or d["trends"]):
+        mi, _ = intel_lines(d, intel, intel_note, head)
         blocks += [{"type": "divider"}, {"type": "section", "text": {"type": "mrkdwn", "text": "\n".join(mi)[:2990]}}]
-    elif intel_url:
+    elif with_intel and intel_url:
         blocks += [{"type": "divider"}, {"type": "context", "elements": [
             {"type": "mrkdwn", "text": f"{head} (couldn't summarize today: {_esc(intel_note or 'no new report')})"}]}]
     return {"text": f"X zeitgeist · {day}: {thesis[:150]}", "blocks": blocks,
@@ -267,11 +289,11 @@ CHANNEL_ERRORS = {
 }
 
 
-def post(msg: dict) -> None:
-    """Post to CHANNEL_SLACK_CHANNEL: a channel id (C…) or name, or, for testing, an email address or
-    user id (U…), which DMs that person from the bot instead."""
-    token = os.environ["SLACK_BOT_TOKEN"].strip()
-    channel = os.environ["CHANNEL_SLACK_CHANNEL"].strip().lstrip("#")
+def post(msg: dict, channel: str | None = None, token: str | None = None) -> None:
+    """Post to a channel id (C…) or name, or, for testing, an email address or user id (U…), which DMs
+    that person from the bot instead. Defaults: CHANNEL_SLACK_CHANNEL with SLACK_BOT_TOKEN."""
+    token = (token or os.environ["SLACK_BOT_TOKEN"]).strip()
+    channel = (channel or os.environ["CHANNEL_SLACK_CHANNEL"]).strip().lstrip("#")
     try:
         if "@" in channel:
             channel = _slack("users.lookupByEmail", token, email=channel)["user"]["id"]
@@ -293,15 +315,43 @@ def main() -> None:
     d = clean(ask_model(rep, intel), rep, intel)
     if not d["bullets"]:
         raise SystemExit("the model didn't return any usable bullets")
-    msg = message(d, rep, intel, note, now, os.getenv("CHANNEL_TIMEZONE", "America/Los_Angeles"))
+    tz = os.getenv("CHANNEL_TIMEZONE", "America/Los_Angeles")
+    # With INTEL_SLACK_CHANNEL set, the X zeitgeist and the competitive intel go to separate channels
+    # (optionally from a separate bot, INTEL_SLACK_BOT_TOKEN); otherwise one combined post.
+    intel_channel = os.getenv("INTEL_SLACK_CHANNEL", "").strip()
+    posts = {"zeitgeist": (message(d, rep, intel, note, now, tz, with_intel=not intel_channel), None, None)}
+    if intel_channel:
+        posts["intel"] = (intel_message(d, intel, note, now, tz), intel_channel,
+                          os.getenv("INTEL_SLACK_BOT_TOKEN", "").strip() or None)
     out = Path(os.getenv("CHANNEL_OUT") or Path(os.environ["TIMELINE_DATA"]) / "channel")
     out.mkdir(parents=True, exist_ok=True)
     (out / "last.json").write_text(json.dumps({"at": now.isoformat(), "digest": d, "intel_source": intel and intel["source"],
-                                               "intel_note": note, "message": msg}, ensure_ascii=False, indent=1))
-    if args.send:
-        post(msg)
-    else:
-        print(json.dumps(msg, ensure_ascii=False, indent=1))
+                                               "intel_note": note, "messages": {k: v[0] for k, v in posts.items()}},
+                                              ensure_ascii=False, indent=1))
+    if not args.send:
+        print(json.dumps({k: v[0] for k, v in posts.items()}, ensure_ascii=False, indent=1))
+        return
+    # A retry after one post failed doesn't repeat the one that went out (per day, per destination).
+    done_file = out / "posted.json"
+    try:
+        done = json.loads(done_file.read_text())
+    except (OSError, ValueError):
+        done = {}
+    today = now.astimezone(ZoneInfo(tz)).date().isoformat()
+    errors = []
+    for name, (msg, channel, token) in posts.items():
+        key = f"{today}:{name}:{channel or os.environ['CHANNEL_SLACK_CHANNEL']}"
+        if done.get(key) and not os.getenv("CHANNEL_FORCE"):
+            print(f"slack: {name} already posted today")
+            continue
+        try:
+            post(msg, channel, token)
+            done[key] = now.isoformat()
+        except RuntimeError as e:
+            errors.append(f"{name}: {e}")
+    done_file.write_text(json.dumps({k: v for k, v in done.items() if k >= today}, indent=1))
+    if errors:
+        raise RuntimeError("; ".join(errors))
 
 
 if __name__ == "__main__":

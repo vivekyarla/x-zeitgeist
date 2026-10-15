@@ -701,6 +701,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
         except (OSError, ValueError):
             intel = None
         return {"enabled": cfg.channel, "missing": missing, "channel": cfg.channel_slack_channel,
+                "intel_channel": cfg.intel_slack_channel or None, "intel_separate_bot": bool(cfg.intel_slack_token),
                 "time": cfg.channel_time, "timezone": cfg.channel_tz, "weekdays_only": cfg.channel_weekdays_only,
                 "page_url": cfg.base_url + "/gtm/", "intel_url": cfg.intel_url or None,
                 "intel_page_url": cfg.intel_page_url or cfg.intel_url or None, "intel_pushed": intel,

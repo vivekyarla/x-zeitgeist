@@ -368,9 +368,10 @@ class Worker:
     def channel_due(self, now: float) -> bool:
         if self.channel_uid is None or not self._has_read(self.channel_uid):
             return False  # nothing to summarize until the archetype's first report exists
-        if self.db.meta("channel_target") != self.cfg.channel_slack_channel:
+        target = self.cfg.channel_slack_channel + ("|" + self.cfg.intel_slack_channel if self.cfg.intel_slack_channel else "")
+        if self.db.meta("channel_target") != target:
             # A new destination (e.g. from a test DM to the team channel): post there right away once.
-            self.db.set_meta("channel_target", self.cfg.channel_slack_channel)
+            self.db.set_meta("channel_target", target)
             self.db.set_meta("channel_sent_date", None)
             self.db.set_meta("channel_tried_at", None)
         return self._daily_due("channel", now, self.cfg.channel_time, self.cfg.channel_tz,
@@ -416,6 +417,7 @@ class Worker:
         return env
 
     def run_channel(self) -> bool:
+        forced = self.db.meta("channel_force") == "1"  # "post now": repeat today's posts if they already went out
         self.db.set_meta("channel_tried_at", str(time.time()))
         self.db.set_meta("channel_force", "0")
         uid = self.channel_uid
@@ -427,9 +429,12 @@ class Worker:
                              "TIMELINE_OUT": str(p["out"]), "PAGE_URL": self.cfg.base_url + "/gtm/",
                              "AI_GATEWAY_API_KEY": keys.get("ai_gateway", ""), "SLACK_BOT_TOKEN": self.cfg.channel_slack_token,
                              "CHANNEL_SLACK_CHANNEL": self.cfg.channel_slack_channel, "CHANNEL_TIMEZONE": self.cfg.channel_tz,
+                             "INTEL_SLACK_CHANNEL": self.cfg.intel_slack_channel, "INTEL_SLACK_BOT_TOKEN": self.cfg.intel_slack_token,
+                             "CHANNEL_FORCE": "1" if forced else "",
                              "INTEL_URL": self.cfg.intel_url, "INTEL_PAGE_URL": self.cfg.intel_page_url, "INTEL_FILE": str(self.cfg.data_dir / "intel" / "latest.json"),
                              "CHANNEL_OUT": str(out)})
-        code, text = self._exec(["--send"], env, ENGAGE_TIMEOUT, [*keys.values(), self.cfg.channel_slack_token],
+        code, text = self._exec(["--send"], env, ENGAGE_TIMEOUT,
+                                [*keys.values(), self.cfg.channel_slack_token, self.cfg.intel_slack_token],
                                 module="pipeline.channel")
         self._write_log(out / "last_run.log", text)
         for ln in text.splitlines():

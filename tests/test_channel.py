@@ -327,3 +327,76 @@ def test_switching_destination_posts_right_away(tmp_path, monkeypatch):
     app2 = make_app(tmp_path, monkeypatch, CHANNEL_SLACK_CHANNEL="C0123")   # switch to the team channel
     assert app2.state.worker.channel_due(at(15, 5))   # posts there right away, once
     assert db.meta("channel_target") == "C0123"
+
+
+def _split_digest():
+    raw = {"bullets": [{"text": "Clay ships signals", "ids": ["1"]}, {"text": "SDR teams shrink", "ids": ["2"]}],
+           "market": [{"text": "HubSpot cuts AI seat pricing 30%", "url": "https://news.example/hs"}],
+           "trends": [{"text": "Buyers want usage pricing"}]}
+    intel = {"text": "...", "url": "https://grok.example/report", "source": "fetched"}
+    return channel.clean(raw, REP, intel), intel
+
+
+def test_split_messages(monkeypatch):
+    monkeypatch.setenv("INTEL_URL", "https://grok.example/report")
+    d, intel = _split_digest()
+    z = channel.message(d, REP, intel, "", NOW, "America/Los_Angeles", with_intel=False)
+    assert len(z["blocks"]) == 1 and "HubSpot" not in json.dumps(z)
+    i = channel.intel_message(d, intel, "", NOW, "America/Los_Angeles")
+    body = i["blocks"][0]["text"]["text"]
+    assert body.startswith("*Competitive intel · Tue Oct 13*  ·  <https://grok.example/report|Full report>")
+    assert "HubSpot cuts AI seat pricing" in body and "*Also trending*" in body and "Clay ships" not in body
+
+
+def test_two_channels_two_bots_and_no_repeat_on_retry(tmp_path, monkeypatch):
+    d, intel = _split_digest()
+    monkeypatch.setattr(channel, "report", lambda now: REP)
+    monkeypatch.setattr(channel, "load_intel", lambda now: (intel, ""))
+    monkeypatch.setattr(channel, "ask_model", lambda rep, intel: {"bullets": [{"text": "Clay ships signals", "ids": ["1"]}],
+                                                                  "market": [{"text": "HubSpot cuts"}], "trends": []})
+    sent, fail = [], {"intel": True}
+
+    def fake_post(msg, ch=None, token=None):
+        if fail["intel"] and ch == "C_INTEL":
+            raise RuntimeError("slack: not in channel")
+        sent.append((msg["text"].split(" · ")[0], ch or "C_X", token))
+    monkeypatch.setattr(channel, "post", fake_post)
+    for k, v in {"CHANNEL_OUT": str(tmp_path), "CHANNEL_SLACK_CHANNEL": "C_X", "INTEL_SLACK_CHANNEL": "C_INTEL",
+                 "INTEL_SLACK_BOT_TOKEN": "xoxb-intel"}.items():
+        monkeypatch.setenv(k, v)
+    monkeypatch.delenv("CHANNEL_FORCE", raising=False)
+    monkeypatch.setattr("sys.argv", ["channel", "--send"])
+    with pytest.raises(RuntimeError, match="intel: slack: not in channel"):
+        channel.main()
+    assert sent == [("X zeitgeist", "C_X", None)]
+    fail["intel"] = False
+    channel.main()  # the retry posts only the intel, with its own bot
+    assert sent[1:] == [("Competitive intel", "C_INTEL", "xoxb-intel")]
+    channel.main()  # nothing left to post today
+    assert len(sent) == 2
+    monkeypatch.setenv("CHANNEL_FORCE", "1")
+    channel.main()
+    assert len(sent) == 4
+
+
+def test_adding_an_intel_channel(tmp_path, monkeypatch):
+    from zoneinfo import ZoneInfo
+    app = make_app(tmp_path, monkeypatch)
+    w, db = app.state.worker, app.state.db
+    d = w.paths(w.channel_uid)["data"]; d.mkdir(parents=True, exist_ok=True)
+    (d / "week.json").write_text(json.dumps({"latest": {"thesis": "x"}}))
+    at = lambda h, m=0: datetime(2026, 10, 13, h, m, tzinfo=ZoneInfo("America/Los_Angeles")).timestamp()
+    assert w.channel_due(at(14))
+    db.set_meta("channel_sent_date", "2026-10-13"); db.set_meta("channel_tried_at", str(at(14)))
+    assert not w.channel_due(at(15))
+    app2 = make_app(tmp_path, monkeypatch, INTEL_SLACK_CHANNEL="#comp-intel", INTEL_SLACK_BOT_TOKEN="xoxb-2")
+    w2 = app2.state.worker
+    assert w2.channel_due(at(15, 5))  # the new intel channel gets today's brief right away
+    seen = {}
+    monkeypatch.setattr(w2, "_exec", lambda args, env, timeout, secrets_, module="pipeline.run":
+                        (seen.update(env=env, secrets=secrets_) or (0, "slack: posted\n")))
+    db.set_meta("channel_force", "1")
+    assert w2.run_channel()
+    env = seen["env"]
+    assert env["INTEL_SLACK_CHANNEL"] == "comp-intel" and env["INTEL_SLACK_BOT_TOKEN"] == "xoxb-2"
+    assert env["CHANNEL_FORCE"] == "1" and "xoxb-2" in seen["secrets"]

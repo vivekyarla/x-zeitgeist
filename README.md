@@ -131,6 +131,8 @@ Edit `engage.json` to change people, their profiles, sources, thresholds, or how
 ## Marketing channel digest
 
 Every weekday at `CHANNEL_TIME` (9:30 Pacific by default), the bot posts to `CHANNEL_SLACK_CHANNEL`. That's a channel ID, or, to test it first, an email address, which sends it as a DM from the bot. Changing the destination posts once right away.
+
+**Separate competitive-intel channel.** Set `INTEL_SLACK_CHANNEL` (a channel ID, or an email to test) and the post splits in two: the X zeitgeist goes to `CHANNEL_SLACK_CHANNEL` and the competitive intel brief (from `INTEL_URL`) goes to `INTEL_SLACK_CHANNEL`. Both use the same bot unless `INTEL_SLACK_BOT_TOKEN` names a second Slack app for the intel. Invite the posting bot to each channel. If one post fails, the retry sends only the missing one; **Send now** repeats both.
 - **X zeitgeist:** the thesis in one line, 4–5 bullets on what's moving today with tweet links, and a link to the full report.
 - **Market intel:** 2–3 market developments and 1–2 other trends from a market-intelligence bot's latest report, with a link to it.
 
