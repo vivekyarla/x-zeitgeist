@@ -366,13 +366,14 @@ var TL = (function () {
     var when = (hr % 12 || 12) + ":" + min + (hr < 12 ? " AM" : " PM");
     return "Hi " + name + ". Please set up a recurring task: every " + (weekdays ? "weekday" : "day") + " at " + when + " (" + tz + ")" +
       ", read " + recapUrl + " and send me a short recap with the week's X thesis in a sentence or two, the 2–3 most interesting items under “New today” with their links, " +
-      "and this link to my full page: " + pageUrl + "\nKeep it under 100 words. If nothing is marked new, just send the thesis and the link.";
+      "and this link to the full page: " + pageUrl + "\nKeep it under 100 words. If nothing is marked new, just send the thesis and the link.";
   };
   function agentCard(kind, s, me, open) {
+    var slot = (me.scope ? me.scope + ":" : "") + kind;  // a shared report's setup is remembered apart from your own
     var A = kind === "instinct"
       ? { name: "Instinct", logo: "In", sub: "Texts it to you from your Instinct thread" }
       : { name: "Muse", logo: "Mu", sub: "Sends it through Meta's Muse, in WhatsApp or at muse.ai" };
-    var all = TL.local("tl_deliver") || {}, saved = all[kind] || {};
+    var all = TL.local("tl_deliver") || {}, saved = all[slot] || {};
     var c = card(A.logo, A.name, A.sub, open, []);
     var time = h("input", { class: "inp", type: "time", value: saved.time || "08:00", "aria-label": "Time" });
     var weekdays = h("input", { type: "checkbox", checked: saved.weekdays !== false });
@@ -386,12 +387,12 @@ var TL = (function () {
       var m = msg(); preview.textContent = m;
       if (kind === "instinct") { primary.textContent = "Text it to Instinct"; primary.href = "sms:" + num.value.replace(/[^\d+]/g, "") + "?&body=" + encodeURIComponent(m); }
       else { primary.textContent = "Open Muse ↗"; primary.href = "https://muse.ai/"; alt.href = "https://wa.me/?text=" + encodeURIComponent(m); }
-      var x = (TL.local("tl_deliver") || {})[kind];
+      var x = (TL.local("tl_deliver") || {})[slot];
       setPill(c.pill, x && x.at ? "Set up · " + new Date(x.at).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "Not set up", x && x.at ? "ok" : "");
     }
     function remember(done) {
       var a = TL.local("tl_deliver") || {};
-      a[kind] = Object.assign({}, a[kind], { time: time.value, weekdays: weekdays.checked, number: num ? num.value : undefined }, done ? { at: new Date().toISOString() } : {});
+      a[slot] = Object.assign({}, a[slot], { time: time.value, weekdays: weekdays.checked, number: num ? num.value : undefined }, done ? { at: new Date().toISOString() } : {});
       TL.local("tl_deliver", a); render();
     }
     function done(m) { remember(true); note.hidden = false; note.className = "note ok"; note.textContent = m; }
@@ -404,10 +405,12 @@ var TL = (function () {
     var copyBtn = h("button", { class: "btn", type: "button", text: "Copy message", onclick: function () { TL.copy(msg()).then(function () { done("Copied. Paste it into " + A.name + " and send it."); }); } });
     c.body.append(
       h("ol", null, [h("li", { text: "Pick when you want it." }),
-        h("li", { text: "Send this message to " + A.name + ". It sets up a daily task that reads your private recap and sends it to you." })]),
+        h("li", { text: "Send this message to " + A.name + ". It sets up a daily task that reads " +
+          (me.scope ? "this report's daily recap" : "your private recap") + " and sends it to you." })]),
       h("div", { class: "row3", style: "margin-bottom:12px" }, [time, h("label", { class: "check" }, [weekdays, " Weekdays only"]), num]),
       preview, h("div", { class: "btn-row" }, [primary, alt, copyBtn]), note,
-      h("p", { class: "hint", style: "margin-top:12px" }, ["Your recap link is private to you and updates every three hours (",
+      h("p", { class: "hint", style: "margin-top:12px" }, [me.scope
+          ? "This report's recap is public and updates twice a day (" : "Your recap link is private to you and updates every three hours (",
         h("a", { href: me.recap_url, target: "_blank", rel: "noopener", text: "see what " + A.name + " reads" }),
         "). To stop, tell " + A.name + " to cancel the timeline recap."]));
     render();
@@ -415,6 +418,12 @@ var TL = (function () {
     return c;
   }
   // Mounts timezone + the three delivery cards. s is the profile being edited; me from /api/me.
+  // Instinct and Muse only, for a shared report anyone can read (no account): me = {recap_url, page_url, scope}.
+  TL.agentCards = function (box, me) {
+    box.innerHTML = "";
+    var s = { timezone: TL.localTz() };
+    box.append(agentCard("instinct", s, me, true).el, agentCard("muse", s, me, false).el);
+  };
   TL.deliveries = function (box, s, me, o) {
     o = o || {};
     box.innerHTML = "";

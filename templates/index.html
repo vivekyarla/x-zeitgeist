@@ -18,11 +18,22 @@
 <div class="preview-bar" id="gtm-bar" hidden><div class="frame">
   <span>The GTM &amp; marketing report. It powers the marketing channel's daily digest.</span>
   <span id="gtm-admin" hidden>Admin: Settings here edit this report, not your own page.</span>
+  <button class="btn" type="button" data-get-daily>Get it daily</button>
 </div></div>
 <div class="preview-bar" id="preview-bar" hidden><div class="frame">
   <span>This is a live example built from one of the starter feeds. Yours follows the topics you pick, on your own keys.</span>
-  <a class="btn primary" href="/login?mode=signup">Make your own</a>
+  <span class="btn-row"><button class="btn" type="button" data-get-daily>Get it daily</button>
+  <a class="btn primary" href="/login?mode=signup">Make your own</a></span>
 </div></div>
+<dialog id="daily-dlg" aria-labelledby="daily-title">
+  <div class="dlg">
+    <div class="dlg-head"><h2 id="daily-title">Get this report daily</h2><button class="x-close" type="button" data-close-daily aria-label="Close">×</button></div>
+    <div class="dlg-body">
+      <p class="hint" style="margin:0 0 14px" id="daily-lede">Have Instinct or Muse send you this report's thesis, what's new today, and a link every morning. It's the same report everyone sees here, not one tuned to you, and you don't need an account.</p>
+      <div id="daily-mount"></div>
+    </div>
+  </div>
+</dialog>
 <div class="frame">
   <header class="bar">
     <p class="brand">{{ title }}</p>
@@ -474,11 +485,25 @@
   dlg.querySelector("[data-close]").onclick = function () { dlg.close(); };
   dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
   $("open-settings").hidden = true;
-  if (/^\/preview(\/|$)/.test(location.pathname)) {  // the public example page: no account, no settings
+  // A shared report (the example page or the GTM archetype): anyone can have Instinct or Muse send its
+  // daily recap, from the report's own public recap.md, without an account.
+  var shared = (location.pathname.match(/^\/(preview|gtm)(\/|$)/) || [])[1];
+  if (shared) {
+    var base = location.origin + "/" + shared + "/";
+    document.querySelectorAll("[data-get-daily]").forEach(function (b) {
+      b.onclick = function () {
+        TL.agentCards($("daily-mount"), { recap_url: base + "recap.md", page_url: base, scope: shared });
+        $("daily-dlg").showModal();
+      };
+    });
+    $("daily-dlg").querySelector("[data-close-daily]").onclick = function () { $("daily-dlg").close(); };
+    $("daily-dlg").addEventListener("click", function (e) { if (e.target === $("daily-dlg")) $("daily-dlg").close(); });
+  }
+  if (shared === "preview") {  // the public example page: no account, no settings
     $("preview-bar").hidden = false;
     return;
   }
-  var gtm = /^\/gtm(\/|$)/.test(location.pathname);  // the GTM archetype: read-only, editable by admins
+  var gtm = shared === "gtm";  // the GTM archetype: read-only, editable by admins
   if (gtm) {
     TL.profile = "gtm"; $("gtm-bar").hidden = false;
     ["daily", "keys", "profile"].forEach(function (t) { var b = document.querySelector('[data-tab="' + t + '"]'); if (b) b.hidden = true; });

@@ -142,6 +142,8 @@ Every weekday at `CHANNEL_TIME` (9:30 Pacific by default), the bot posts to `CHA
 
 **comp-intel (the Grok market-intel bot)** is a GitHub Pages site that renders in the browser from `data/today.json`, committed each morning around 9:00 PT. Set `INTEL_URL=https://vivekyarla.github.io/comp-intel/data/today.json` and `INTEL_PAGE_URL=https://vivekyarla.github.io/comp-intel/`. The digest recognizes that structure: market items come from `market_briefing.bullets` (each linked to its cited source) and trends from `market_direction`. No push or token is needed.
 
+**Anyone can get it daily in Instinct or Muse:** `/gtm/` (and the example page `/preview/`) has a **Get it daily** button with the same one-tap setup as personal pages. It points the agent at the report's public recap, `/gtm/recap.md` (or `/preview/recap.md`), which needs no account. It's the shared report, not one tuned to the reader.
+
 Signed in as an admin, `POST /api/channel/run` posts now and `GET /api/channel/status` shows the setup and the last post or error. The first post goes out as soon as the archetype's first report exists.
 
 ## Asking the bot

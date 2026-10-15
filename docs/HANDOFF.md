@@ -224,6 +224,7 @@ Profiles **copy** a preset when it's applied, so later preset edits don't reach 
   - **comp-intel** (vivekyarla.github.io/comp-intel, the Grok bot's site) is that kind of page. It's configured as `INTEL_URL=.../comp-intel/data/today.json` plus `INTEL_PAGE_URL=.../comp-intel/`. `brief_text()` turns its `market_briefing` / `market_direction` / `competitive_moves` / `watch` / `biggest_ai_news` sections into compact text. Market items may carry a source URL, but only one cited in the JSON (`clean()` checks). A fixture lives in `tests/fixtures/comp_intel_today.json`.
 - **State** lives in `meta` (`channel_sent_date`, `channel_tried_at`, `channel_last_error`, `channel_force`). Logs go to `DATA_DIR/channel/last_run.log`, and the last post to `DATA_DIR/channel/last.json`.
 - **Admin routes:** `GET /api/channel/status` and `POST /api/channel/run`.
+- **Instinct/Muse for shared reports:** `/gtm/` and `/preview/` show a "Get it daily" button. It opens `TL.agentCards()` pointed at that report's public `recap.md`, with no account needed, and setup state is stored per report in `localStorage`.
 - **Tests:** `tests/test_channel.py`.
 
 ### Asking the bot (`server/slackbot.py`)
