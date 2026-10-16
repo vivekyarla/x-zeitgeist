@@ -237,7 +237,7 @@ def main() -> None:
     (out / "follow_last.json").write_text(json.dumps({"at": now.isoformat(), "recs": recs, "message": msg},
                                                      ensure_ascii=False, indent=1))
     if args.send:
-        send(msg)
+        send(msg, os.getenv("FOLLOW_SLACK_CHANNEL") or None)
         (out / "follow_history.json").write_text(json.dumps(history, indent=1))
     else:
         print(json.dumps(msg, ensure_ascii=False, indent=1))

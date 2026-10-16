@@ -46,6 +46,8 @@ class Config:
     engage_slack_token: str = ""
     engage_dm_email: str = ""
     engage_dm_user: str = ""
+    engage_slack_channel: str = ""  # set: the engagement message posts here instead of DMing ENGAGE_DM_EMAIL
+    follow_slack_channel: str = ""  # the weekly follow recommendations; defaults to engage_slack_channel
     engage_time: str = "11:00"
     engage_tz: str = "America/Los_Angeles"
     engage_weekdays_only: bool = False
@@ -78,7 +80,8 @@ class Config:
 
     @property
     def engage(self) -> bool:
-        return bool(self.engage_slack_token and (self.engage_dm_email or self.engage_dm_user) and self.engage_keys)
+        return bool(self.engage_slack_token and (self.engage_slack_channel or self.engage_dm_email or self.engage_dm_user)
+                    and self.engage_keys)
 
     @property
     def google(self) -> bool:
@@ -184,6 +187,8 @@ def load() -> Config:
         engage_slack_token=_env_value("ENGAGE_SLACK_BOT_TOKEN"),
         engage_dm_email=_env_value("ENGAGE_DM_EMAIL").lower(),
         engage_dm_user=_env_value("ENGAGE_DM_USER"),
+        engage_slack_channel=_env_value("ENGAGE_SLACK_CHANNEL").lstrip("#"),
+        follow_slack_channel=(_env_value("FOLLOW_SLACK_CHANNEL") or _env_value("ENGAGE_SLACK_CHANNEL")).lstrip("#"),
         engage_time=engage_time,
         engage_tz=_env_value("ENGAGE_TIMEZONE") or "America/Los_Angeles",
         engage_weekdays_only=_truthy(os.getenv("ENGAGE_WEEKDAYS_ONLY")),

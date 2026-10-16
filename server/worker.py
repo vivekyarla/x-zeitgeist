@@ -329,6 +329,14 @@ class Worker:
         self.db.set_meta(prefix + "_last_error", "")
 
     def engage_due(self, now: float) -> bool:
+        target = self.cfg.engage_slack_channel or self.cfg.engage_dm_user or self.cfg.engage_dm_email
+        if self.db.meta("engage_target") != target:
+            # A new destination (e.g. from the DM to a channel): post there right away once. The first deploy
+            # with this check only records the current destination.
+            if self.db.meta("engage_target") is not None:
+                self.db.set_meta("engage_sent_date", None)
+                self.db.set_meta("engage_tried_at", None)
+            self.db.set_meta("engage_target", target)
         return self._daily_due("engage", now, self.cfg.engage_time, self.cfg.engage_tz,
                                self.cfg.engage_weekdays_only, ENGAGE_LEAD)
 
@@ -346,7 +354,7 @@ class Worker:
         env = self._job_env({"TWITTERAPI_IO_KEY": keys.get("twitterapi_io", ""), "AI_GATEWAY_API_KEY": keys.get("ai_gateway", ""),
                              "SLACK_BOT_TOKEN": self.cfg.engage_slack_token, "ENGAGE_DM_EMAIL": self.cfg.engage_dm_email,
                              "ENGAGE_DM_USER": self.cfg.engage_dm_user, "ENGAGE_TIMEZONE": self.cfg.engage_tz,
-                             "ENGAGE_OUT": str(out)})
+                             "FOLLOW_SLACK_CHANNEL": self.cfg.follow_slack_channel, "ENGAGE_OUT": str(out)})
         with self._engage_lock:
             code, text = self._exec(["--send"], env, ENGAGE_TIMEOUT,
                                     [*keys.values(), self.cfg.engage_slack_token], module="pipeline.follow")
@@ -462,6 +470,7 @@ class Worker:
         env.update({"PYTHONUNBUFFERED": "1", "TWITTERAPI_IO_KEY": keys.get("twitterapi_io", ""),
                     "AI_GATEWAY_API_KEY": keys.get("ai_gateway", ""), "SLACK_BOT_TOKEN": self.cfg.engage_slack_token,
                     "ENGAGE_DM_EMAIL": self.cfg.engage_dm_email, "ENGAGE_DM_USER": self.cfg.engage_dm_user,
+                    "ENGAGE_SLACK_CHANNEL": self.cfg.engage_slack_channel,
                     "ENGAGE_TIMEZONE": self.cfg.engage_tz, "ENGAGE_OUT": str(out)})
         with self._engage_lock:
             code, text = self._exec(["--send"], env, ENGAGE_TIMEOUT,

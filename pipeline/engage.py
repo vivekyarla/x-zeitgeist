@@ -280,7 +280,10 @@ SLACK_ERRORS = {
     "token_revoked": "The Slack app was uninstalled or its token revoked. Reinstall it and copy the new token.",
     "missing_scope": "The Slack app is missing a scope. It needs chat:write, im:write, and users:read.email; reinstall after adding them.",
     "users_not_found": "No Slack user has that email. Check ENGAGE_DM_EMAIL.",
-    "channel_not_found": "Slack couldn't open the DM. Reinstall the app to the workspace.",
+    "channel_not_found": "Slack can't find that channel. Use the channel ID (channel details → bottom, starts with C) "
+                         "and invite the bot to it.",
+    "not_in_channel": "The bot isn't in that channel. In Slack, open the channel and type /invite @Engage digest.",
+    "is_archived": "That channel is archived.",
 }
 
 
@@ -302,13 +305,17 @@ def _slack(method: str, token: str, **payload) -> dict:
     return body
 
 
-def send(msg: dict) -> None:
+def send(msg: dict, dest: str | None = None) -> None:
+    """Post to `dest` or ENGAGE_SLACK_CHANNEL: a channel ID (C…), or an email / user ID (U…) to DM.
+    Neither set: DM ENGAGE_DM_USER or ENGAGE_DM_EMAIL."""
     token = os.environ["SLACK_BOT_TOKEN"].strip()
-    user = os.getenv("ENGAGE_DM_USER", "").strip()
-    if not user:
-        user = _slack("users.lookupByEmail", token, email=os.environ["ENGAGE_DM_EMAIL"].strip())["user"]["id"]
-    channel = _slack("conversations.open", token, users=user)["channel"]["id"]
-    _slack("chat.postMessage", token, channel=channel, **msg)
+    dest = (dest or os.getenv("ENGAGE_SLACK_CHANNEL", "")).strip().lstrip("#") \
+        or os.getenv("ENGAGE_DM_USER", "").strip() or os.environ["ENGAGE_DM_EMAIL"].strip()
+    if "@" in dest:
+        dest = _slack("users.lookupByEmail", token, email=dest)["user"]["id"]
+    if dest[:1] in ("U", "W"):
+        dest = _slack("conversations.open", token, users=dest)["channel"]["id"]
+    _slack("chat.postMessage", token, channel=dest, **msg)
     print("slack: sent")
 
 

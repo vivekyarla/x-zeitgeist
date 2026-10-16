@@ -186,3 +186,35 @@ def test_off_until_configured(tmp_path, monkeypatch):
     me.post("/api/signup", json={"email": "vivek@rox.com", "password": "long enough pw"})
     r = me.post("/api/engage/run")
     assert r.status_code == 400 and "ENGAGE_SLACK_BOT_TOKEN" in r.json()["error"]
+
+
+def test_send_to_a_channel(monkeypatch):
+    calls = []
+
+    class R:
+        status_code, headers = 200, {"content-type": "application/json"}
+        def json(self): return {"ok": True}
+    monkeypatch.setattr(engage.requests, "request", lambda m, url, **kw: calls.append((url.rsplit("/", 1)[1], kw["json"])) or R())
+    monkeypatch.setenv("SLACK_BOT_TOKEN", "xoxb-test")
+    monkeypatch.setenv("ENGAGE_DM_EMAIL", "vivek@rox.com")
+    monkeypatch.setenv("ENGAGE_SLACK_CHANNEL", "#C0ENGAGE")
+    engage.send({"text": "hi", "blocks": []})
+    assert calls == [("chat.postMessage", {"channel": "C0ENGAGE", "text": "hi", "blocks": []})]
+    calls.clear()
+    engage.send({"text": "hi", "blocks": []}, "C0FOLLOW")  # the follow recommendations' own channel
+    assert calls[0][1]["channel"] == "C0FOLLOW"
+
+
+def test_switching_to_a_channel_posts_right_away(tmp_path, monkeypatch):
+    app = make_app(tmp_path, monkeypatch)
+    w, db = app.state.worker, app.state.db
+    db.set_meta("engage_sent_date", "2026-10-12"); db.set_meta("engage_tried_at", str(at(11)))
+    assert not w.engage_due(at(14))  # first check only records the destination
+    app2 = make_app(tmp_path, monkeypatch, ENGAGE_SLACK_CHANNEL="C0ENGAGE")
+    assert app2.state.cfg.follow_slack_channel == "C0ENGAGE"
+    assert app2.state.worker.engage_due(at(14, 5))
+    seen = {}
+    monkeypatch.setattr(app2.state.worker, "_exec", lambda args, env, timeout, secrets_, module="pipeline.run":
+                        (seen.update(env=env) or (0, "slack: sent\n")))
+    app2.state.worker.run_engage()
+    assert seen["env"]["ENGAGE_SLACK_CHANNEL"] == "C0ENGAGE"
