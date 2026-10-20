@@ -173,3 +173,43 @@ def test_deploy_rebuilds_pages_without_api_calls(app, monkeypatch):
     assert args == ["--build-only", "--slack", "skip"]
     assert "TWITTERAPI_IO_KEY" not in env and "AI_GATEWAY_API_KEY" not in env and "SLACK_WEBHOOK_URL" not in env
     assert "old page" not in (p["out"] / "index.html").read_text() and "data-get-daily" in (p["out"] / "index.html").read_text()
+
+
+def test_new_week_carries_over_the_weekend(tmp_path, monkeypatch):
+    import json as _json
+    from datetime import datetime, timezone
+    from pipeline import run
+    monkeypatch.setattr(run, "STATE", tmp_path / "week.json")
+    monkeypatch.setattr(run, "DATA", tmp_path)
+    old_ws = datetime(2026, 10, 12, 7, tzinfo=timezone.utc)
+    ws = datetime(2026, 10, 19, 7, tzinfo=timezone.utc)
+    tw = lambda i, when, judged=True: {"id": i, "created_at": when, "story": i, **({"jev": {"v": 1}} if judged else {})}
+    (tmp_path / "week.json").write_text(_json.dumps({
+        "week_start": old_ws.isoformat(), "thesis_history": [{"thesis": "old"}], "latest": {"thesis": "old"},
+        "baselines": {"clay": {"median": 40}}, "reach": {"sat": ["a"], "tue": ["b"], "url:x": ["c"]},
+        "tweets": {"tue": tw("tue", "Tue Oct 13 18:00:00 +0000 2026"), "sat": tw("sat", "Sat Oct 17 18:00:00 +0000 2026"),
+                   "raw": tw("raw", "Sun Oct 18 18:00:00 +0000 2026", judged=False)}}))
+    s = run.load_state(ws)
+    assert s["week_start"] == ws.isoformat() and list(s["tweets"]) == ["sat"]
+    assert s["latest"] is None and s["thesis_history"] == [] and s["baselines"] == {"clay": {"median": 40}}
+    assert s["reach"] == {"sat": ["a"], "url:x": ["c"]}
+    assert (tmp_path / "archive" / "2026-10-12.json").exists()
+
+
+def test_a_week_already_under_way_is_backfilled_once(tmp_path, monkeypatch):
+    import json as _json
+    from datetime import datetime, timezone
+    from pipeline import run
+    monkeypatch.setattr(run, "STATE", tmp_path / "week.json")
+    monkeypatch.setattr(run, "DATA", tmp_path)
+    ws = datetime(2026, 10, 19, 7, tzinfo=timezone.utc)  # Monday 00:00 Pacific
+    (tmp_path / "archive").mkdir()
+    (tmp_path / "archive" / "2026-10-12.json").write_text(_json.dumps({"week_start": "2026-10-12T07:00:00+00:00", "tweets": {
+        "sat": {"id": "sat", "created_at": "Sat Oct 17 18:00:00 +0000 2026", "jev": {"v": 1}}}, "reach": {"sat": ["a"]}}))
+    (tmp_path / "week.json").write_text(_json.dumps({"week_start": ws.isoformat(), "thesis_history": [], "latest": None,
+        "tweets": {"mon": {"id": "mon", "created_at": "Mon Oct 19 18:00:00 +0000 2026", "jev": {"v": 1}}}}))
+    s = run.load_state(ws)
+    assert set(s["tweets"]) == {"sat", "mon"} and s["reach"] == {"sat": ["a"]} and s["carried"]
+    del s["tweets"]["sat"]
+    (tmp_path / "week.json").write_text(_json.dumps(s))
+    assert set(run.load_state(ws)["tweets"]) == {"mon"}  # only once

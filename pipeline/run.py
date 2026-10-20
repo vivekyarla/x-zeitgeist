@@ -30,11 +30,38 @@ def load_state(ws: datetime) -> dict:
     if STATE.exists():
         state = json.loads(STATE.read_text())
         if state["week_start"] == ws.isoformat():
+            prev = DATA / "archive" / f"{(ws - timedelta(days=7)).astimezone(ZoneInfo(config.TIMEZONE)).date()}.json"
+            if "carried" not in state and prev.exists():  # a week that began before carry-over existed
+                try:
+                    old = carry_over(json.loads(prev.read_text()), ws)
+                except (OSError, ValueError, KeyError):
+                    old = {"tweets": {}, "reach": {}, "baselines": {}}
+                state["tweets"] = {**old["tweets"], **state["tweets"]}
+                reach = state.setdefault("reach", {})
+                for k, v in old["reach"].items():
+                    reach[k] = sorted(set(reach.get(k, [])) | set(v))
+                state.setdefault("baselines", old["baselines"])
+                state["carried"] = True
             return state
         # New week: archive last week's state.
         (DATA / "archive").mkdir(parents=True, exist_ok=True)
         shutil.move(STATE, DATA / "archive" / f"{state['week_start'][:10]}.json")
+        return carry_over(state, ws)
     return {"week_start": ws.isoformat(), "tweets": {}, "thesis_history": [], "latest": None}
+
+
+CARRY_DAYS = 2  # matches fetch(): originals up to 2 days before the week still count
+
+
+def carry_over(old: dict, ws: datetime) -> dict:
+    """A new week starts from the weekend's judged tweets (and the accounts' baselines and reach),
+    so Monday's page isn't one or two posts thin while the week fills in."""
+    since = ws - timedelta(days=CARRY_DAYS)
+    tweets = {i: t for i, t in old.get("tweets", {}).items() if "jev" in t and (_posted(t) or ws) >= since}
+    keep = {t.get("story") or i for i, t in tweets.items()}
+    reach = {k: v for k, v in old.get("reach", {}).items() if k in keep or k.startswith("url:")}
+    return {"week_start": ws.isoformat(), "tweets": tweets, "thesis_history": [], "latest": None,
+            "baselines": old.get("baselines", {}), "reach": reach, "carried": True}
 
 
 def _posted(t: dict) -> datetime | None:

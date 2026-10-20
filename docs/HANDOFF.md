@@ -60,7 +60,9 @@ DATA_DIR/                      (/data on Railway)
   .secret_key                  only when running locally without SECRET_KEY
   users/<id>/settings.json     written from the DB before each run
   users/<id>/data/week.json    this week's tweets, Jev verdicts, thesis history, Slack status
-  users/<id>/data/archive/     previous weeks
+  users/<id>/data/archive/     previous weeks (a new week starts with the last 2 days' judged tweets,
+                               baselines and reach: run.carry_over(); a week already under way is
+                               backfilled once from the archive, flagged `carried`)
   users/<id>/data/panel.json   cached "timeline panel" of accounts
   users/<id>/data/last_run.log redacted output of the last run
   users/<id>/public/           index.html, data.json, recap.json, recap.md
