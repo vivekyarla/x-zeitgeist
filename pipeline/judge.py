@@ -148,8 +148,10 @@ def _tracked_baseline(t: dict, baselines: dict) -> float | None:
     return b.get("median") if b.get("n", 0) >= 5 else None
 
 
-def why_not(t: dict, baselines: dict) -> str | None:
-    """None if the tweet makes the cut, otherwise a short reason."""
+def why_not(t: dict, baselines: dict, min_likes: int | None = None) -> str | None:
+    """None if the tweet makes the cut, otherwise a short reason. min_likes overrides the like floor
+    for accounts that aren't tracked companies (see score(): a thin week relaxes it)."""
+    floor = config.MIN_LIKES if min_likes is None else min_likes
     j = t["jev"]
     if j["topic"] in config.EXCLUDED_TOPICS:
         return f"topic: {config.TOPIC_LABELS.get(j['topic'], j['topic'])}"
@@ -168,8 +170,8 @@ def why_not(t: dict, baselines: dict) -> str | None:
         if j["signal"] < config.TRACKED_MIN_SIGNAL:
             return f"signal {j['signal']:.2f}"
         return None
-    if t["likes"] < config.MIN_LIKES:
-        return f"{t['likes']:,} likes, under {config.MIN_LIKES:,}"
+    if t["likes"] < floor:
+        return f"{t['likes']:,} likes, under {floor:,}"
     if j["signal"] < config.MIN_SIGNAL:
         return f"signal {j['signal']:.2f}"
     return None

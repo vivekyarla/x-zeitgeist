@@ -213,3 +213,19 @@ def test_a_week_already_under_way_is_backfilled_once(tmp_path, monkeypatch):
     del s["tweets"]["sat"]
     (tmp_path / "week.json").write_text(_json.dumps(s))
     assert set(run.load_state(ws)["tweets"]) == {"mon"}  # only once
+
+
+def test_thin_week_relaxes_the_like_floor(monkeypatch):
+    from pipeline import config, judge, run
+    monkeypatch.setattr(config, "MIN_LIKES", 250); monkeypatch.setattr(config, "FILL_TO", 3)
+    monkeypatch.setattr(config, "MIN_RELEVANCE", 0.6); monkeypatch.setattr(config, "MIN_SIGNAL", 1.7)
+    monkeypatch.setattr(config, "MAX_BAIT", 0.5); monkeypatch.setattr(config, "EXCLUDED_TOPICS", set())
+    monkeypatch.setattr(judge, "rank_all", lambda ts, b, r=None: [t.__setitem__("rank", t["likes"]) for t in ts])
+    monkeypatch.setattr(judge, "select", lambda kept, n: kept)
+    t = lambda i, likes, rel=0.9: {"id": i, "likes": likes, "author": {"handle": "someone"},
+                                   "jev": {"topic": "pricing", "bait": 0.1, "relevant": rel, "signal": 2.5}}
+    state = {"tweets": {x["id"]: x for x in [t("big", 600), t("mid", 120), t("low", 90), t("tiny", 30),
+                                              t("offtopic", 500, rel=0.2), t("smaller", 70)]}}
+    kept, top, near = run.score(state)
+    assert [x["id"] for x in kept] == ["big", "mid", "low"]  # filled to 3 with the best that only missed on likes
+    assert {m["id"] for m in near} >= {"offtopic", "tiny", "smaller"}

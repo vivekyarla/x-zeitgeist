@@ -61,6 +61,9 @@ MIN_SIGNAL = float(_th["min_signal"])        # 0-4 rubric score; ~2 = "notable"
 # Likes a tweet needs to count at all, however on-topic, unless it's from a tracked company
 # (they're held to their own usual instead). Keeps small accounts' 100-like posts out.
 MIN_LIKES = int(_th.get("min_likes", 0))
+FILL_TO = 20            # under this many kept tweets, the like floor relaxes...
+RELAX_LIKES_TO = 0.25   # ...to this fraction of min_likes,
+MIN_LIKES_FLOOR = 20    # but never below this many likes
 
 # Share of the tweets sent to the writer that each topic should get (they sum to ~1).
 TOPIC_SHARES = {t["key"]: float(t.get("share", 0)) for t in _topics if t.get("include", True)}

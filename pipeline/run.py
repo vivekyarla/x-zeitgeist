@@ -194,6 +194,15 @@ def score(state: dict) -> tuple[list[dict], list[dict], list[dict]]:
     rank_all(judged, baselines, state.get("reach", {}))
     reasons = {t["id"]: why_not(t, baselines) for t in judged}
     kept = [t for t in judged if reasons[t["id"]] is None]
+    if len(kept) < config.FILL_TO:
+        # A thin week (early in it, or a niche feed): let in the best-ranked posts that only missed
+        # the like floor, down to a fraction of it. Relevance, signal, bait and company bars still apply.
+        relaxed = max(config.MIN_LIKES_FLOOR, int(config.MIN_LIKES * config.RELAX_LIKES_TO))
+        extra = sorted((t for t in judged if reasons[t["id"]] is not None and why_not(t, baselines, relaxed) is None),
+                       key=lambda t: t["rank"], reverse=True)[:config.FILL_TO - len(kept)]
+        for t in extra:
+            reasons[t["id"]] = None
+        kept += extra
     top = select(kept, config.TWEETS_FOR_THESIS)
     top_ids = {t["id"] for t in top}
     misses = sorted((t for t in judged if t["id"] not in top_ids), key=lambda t: t["rank"], reverse=True)[:40]

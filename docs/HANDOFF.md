@@ -89,6 +89,7 @@ DATA_DIR/                      (/data on Railway)
    - Its topic is excluded (`include: false`), or it's over `max_bait`, or under `min_relevance`.
    - **Tracked company accounts:** they must beat `beat_baseline_by` (3×) their median likes **and** reach `tracked.min_likes` **and** `tracked.min_signal`.
    - **Everyone else:** they must reach `thresholds.min_likes` (the floor that keeps small accounts' 100-like posts out) and `min_signal`.
+   - **Thin weeks:** if fewer than `FILL_TO` (20) tweets pass, `score()` lets in the best-ranked ones that only missed the like floor, down to 25% of `min_likes` (never under 20). Company-account bars, relevance, signal and bait don't relax.
 4. **Rank and select:**
    - **Rank:** Jev's scores, times engagement (blending raw likes with likes relative to follower count by `breakout_weight`), times panel reach (`breadth_weight`), minus `mainstream_penalty` for big-lab news.
    - **Select** 60 tweets: one per story, at most `per_author_max` per account (`account_groups` treats @OpenAI, @sama and so on as one), with each topic filled toward its `share`.
