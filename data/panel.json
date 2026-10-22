@@ -1,5 +1,5 @@
 {
- "built_at": "2026-10-22T17:10:57.971749+00:00",
+ "built_at": "2026-10-22T21:36:12.375853+00:00",
  "settings": [
   [
    [
@@ -67,133 +67,127 @@
    "handle": "elonmusk",
    "group": "tech culture",
    "overlap": 6,
-   "followers": 241518508
+   "followers": 241518322
   },
   {
    "handle": "sama",
    "group": "tech culture",
    "overlap": 6,
-   "followers": 6397603
+   "followers": 6397913
   },
   {
    "handle": "tbpn",
    "group": "tech culture",
    "overlap": 6,
-   "followers": 1642509
+   "followers": 1642610
   },
   {
    "handle": "nikitabier",
    "group": "tech culture",
    "overlap": 6,
-   "followers": 1355123
+   "followers": 1355282
   },
   {
    "handle": "JensenHuang",
    "group": "tech culture",
    "overlap": 6,
-   "followers": 1140127
+   "followers": 1140335
   },
   {
    "handle": "apoorva_mehta",
    "group": "tech culture",
    "overlap": 6,
-   "followers": 449719
+   "followers": 449733
   },
   {
    "handle": "pmarca",
    "group": "tech culture",
    "overlap": 5,
-   "followers": 6663595
+   "followers": 6663748
   },
   {
    "handle": "OpenAI",
    "group": "tech culture",
    "overlap": 5,
-   "followers": 5464219
+   "followers": 5464622
   },
   {
    "handle": "karpathy",
    "group": "tech culture",
    "overlap": 5,
-   "followers": 4386466
+   "followers": 4387105
   },
   {
    "handle": "demishassabis",
    "group": "tech culture",
    "overlap": 5,
-   "followers": 1955469
+   "followers": 1955496
   },
   {
    "handle": "alexandr_wang",
    "group": "tech culture",
    "overlap": 5,
-   "followers": 829240
+   "followers": 829451
   },
   {
    "handle": "bcherny",
    "group": "tech culture",
    "overlap": 5,
-   "followers": 607894
+   "followers": 608017
   },
   {
    "handle": "MTSlive",
    "group": "tech culture",
    "overlap": 5,
-   "followers": 565339
+   "followers": 565544
   },
   {
    "handle": "jesslivingston",
    "group": "tech culture",
    "overlap": 5,
-   "followers": 442834
-  },
-  {
-   "handle": "alexrkonrad",
-   "group": "tech culture",
-   "overlap": 5,
-   "followers": 91289
+   "followers": 442841
   },
   {
    "handle": "t_blom",
    "group": "tech culture",
    "overlap": 5,
-   "followers": 89838
+   "followers": 89848
   },
   {
    "handle": "jack",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 12531070
+   "followers": 12531127
   },
   {
    "handle": "Benioff",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 6363102
+   "followers": 6362735
   },
   {
    "handle": "brian_armstrong",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 4010808
+   "followers": 4010842
   },
   {
    "handle": "finkd",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 2511671
+   "followers": 2511738
   },
   {
    "handle": "patrickc",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 1840810
+   "followers": 1840838
   },
   {
    "handle": "bchesky",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 1703546
+   "followers": 1703768
   },
   {
    "handle": "AravSrinivas",
@@ -205,73 +199,73 @@
    "handle": "garrytan",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 1142625
+   "followers": 1142659
   },
   {
    "handle": "alexisohanian",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 988161
+   "followers": 989728
   },
   {
    "handle": "cdixon",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 957225
+   "followers": 957511
   },
   {
    "handle": "thsottiaux",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 915721
+   "followers": 916499
   },
   {
    "handle": "rauchg",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 914548
+   "followers": 914695
   },
   {
    "handle": "bgurley",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 812756
+   "followers": 812766
   },
   {
    "handle": "bhorowitz",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 767513
+   "followers": 767539
   },
   {
    "handle": "typesfast",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 755593
+   "followers": 755604
   },
   {
    "handle": "steipete",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 609373
+   "followers": 609702
   },
   {
    "handle": "msuster",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 403413
+   "followers": 403411
   },
   {
    "handle": "eastdakota",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 354334
+   "followers": 354950
   },
   {
    "handle": "mwseibel",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 306063
+   "followers": 306080
   },
   {
    "handle": "travisk",
@@ -283,97 +277,103 @@
    "handle": "kirstenagreen",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 280055
+   "followers": 280040
   },
   {
    "handle": "signulll",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 272213
+   "followers": 272241
   },
   {
    "handle": "im_roy_lee",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 257457
+   "followers": 257464
   },
   {
    "handle": "jgebbia",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 254284
+   "followers": 254277
   },
   {
    "handle": "collision",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 251766
+   "followers": 251843
   },
   {
    "handle": "ashleevance",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 204268
+   "followers": 204338
   },
   {
    "handle": "zephyr_z9",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 174831
+   "followers": 174876
   },
   {
    "handle": "CompleteSkeptic",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 156466
+   "followers": 156476
   },
   {
    "handle": "MatthewBerman",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 152290
+   "followers": 152342
   },
   {
    "handle": "scottbelsky",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 151617
+   "followers": 151618
   },
   {
    "handle": "alexia",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 146978
+   "followers": 146977
   },
   {
    "handle": "davidu",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 131020
+   "followers": 131013
   },
   {
    "handle": "boztank",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 124607
+   "followers": 124609
   },
   {
    "handle": "PJaccetturo",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 99321
+   "followers": 99342
   },
   {
    "handle": "ericzakariasson",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 96946
+   "followers": 96956
+  },
+  {
+   "handle": "alexrkonrad",
+   "group": "tech culture",
+   "overlap": 4,
+   "followers": 91291
   },
   {
    "handle": "kvogt",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 61394
+   "followers": 61417
   },
   {
    "handle": "KateClarkTweets",
@@ -385,25 +385,25 @@
    "handle": "Katie_Roof",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 56725
+   "followers": 56727
   },
   {
    "handle": "nmasc_",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 56373
+   "followers": 56383
   },
   {
    "handle": "willcb",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 53651
+   "followers": 53663
   },
   {
    "handle": "harjtaggar",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 39618
+   "followers": 39620
   },
   {
    "handle": "dflieb",
@@ -415,499 +415,499 @@
    "handle": "gustaf",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 36766
+   "followers": 36778
   },
   {
    "handle": "awxjack",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 33953
+   "followers": 33954
   },
   {
    "handle": "mati",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 33667
+   "followers": 33771
   },
   {
    "handle": "BrendanFoody",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 30486
+   "followers": 30493
   },
   {
    "handle": "jasonkwon",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 30331
+   "followers": 30332
   },
   {
    "handle": "pedroh96",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 27824
+   "followers": 27827
   },
   {
    "handle": "luke_metro",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 19394
+   "followers": 19390
   },
   {
    "handle": "ChaseLochmiller",
    "group": "tech culture",
    "overlap": 4,
-   "followers": 16713
+   "followers": 16716
   },
   {
    "handle": "BillGates",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 65257559
+   "followers": 65257654
   },
   {
    "handle": "Google",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 31898436
+   "followers": 31898520
   },
   {
    "handle": "Tesla",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 24925325
+   "followers": 24925402
   },
   {
    "handle": "sundarpichai",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 11925226
+   "followers": 11925288
   },
   {
    "handle": "MeekMill",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 10394250
+   "followers": 10394215
   },
   {
    "handle": "JeffBezos",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 10317770
+   "followers": 10317632
   },
   {
    "handle": "satyanadella",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 9648377
+   "followers": 9648239
   },
   {
    "handle": "MichaelDell",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 8576665
+   "followers": 8576126
   },
   {
    "handle": "mcuban",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 8556463
+   "followers": 8556733
   },
   {
    "handle": "paulg",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 5441824
+   "followers": 5441850
   },
   {
    "handle": "unusual_whales",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 5424617
+   "followers": 5424876
   },
   {
    "handle": "t_xu",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 4903375
+   "followers": 4903136
   },
   {
    "handle": "naval",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 4128845
+   "followers": 4129235
   },
   {
    "handle": "levie",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 3528326
+   "followers": 3528319
   },
   {
    "handle": "chamath",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 2467942
+   "followers": 2468255
   },
   {
    "handle": "mert",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 2379529
+   "followers": 2379323
   },
   {
    "handle": "claudeai",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1940398
+   "followers": 1941760
   },
   {
    "handle": "AndrewYNg",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1940170
+   "followers": 1940448
   },
   {
    "handle": "Jason",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1802753
+   "followers": 1803030
   },
   {
    "handle": "DavidSacks",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1772120
+   "followers": 1772166
   },
   {
    "handle": "litcapital",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1717733
+   "followers": 1717611
   },
   {
    "handle": "ycombinator",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1659074
+   "followers": 1659164
   },
   {
    "handle": "Dexerto",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1452394
+   "followers": 1452612
   },
   {
    "handle": "ylecun",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1341974
+   "followers": 1342197
   },
   {
    "handle": "marissamayer",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1320595
+   "followers": 1320770
   },
   {
    "handle": "a16z",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1099030
+   "followers": 1099107
   },
   {
    "handle": "drfeifei",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1095401
+   "followers": 1095453
   },
   {
    "handle": "gdb",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 1075335
+   "followers": 1075420
   },
   {
    "handle": "drewhouston",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 937723
+   "followers": 937741
   },
   {
    "handle": "lindayaX",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 847548
+   "followers": 847536
   },
   {
    "handle": "getpeid",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 836262
+   "followers": 836257
   },
   {
    "handle": "fchollet",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 749317
+   "followers": 749337
   },
   {
    "handle": "eladgil",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 738629
+   "followers": 738667
   },
   {
    "handle": "Gwynne_Shotwell",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 677815
+   "followers": 677850
   },
   {
    "handle": "justinkan",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 627476
+   "followers": 627497
   },
   {
    "handle": "tszzl",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 507003
+   "followers": 507035
   },
   {
    "handle": "amasad",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 500399
+   "followers": 500434
   },
   {
    "handle": "cursor_ai",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 491775
+   "followers": 491813
   },
   {
    "handle": "mikeyk",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 468485
+   "followers": 468505
   },
   {
    "handle": "lennysan",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 454404
+   "followers": 454445
   },
   {
    "handle": "Suhail",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 450853
+   "followers": 450871
   },
   {
    "handle": "annewoj23",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 440974
+   "followers": 440990
   },
   {
    "handle": "joshuareeves",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 423543
+   "followers": 423544
   },
   {
    "handle": "danielgross",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 406722
+   "followers": 406820
   },
   {
    "handle": "jaltma",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 403218
+   "followers": 403232
   },
   {
    "handle": "OfficialLoganK",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 382780
+   "followers": 382797
   },
   {
    "handle": "trq212",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 371558
+   "followers": 371577
   },
   {
    "handle": "jaredkushner",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 371233
+   "followers": 371386
   },
   {
    "handle": "Kimi_Moonshot",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 367635
+   "followers": 367645
   },
   {
    "handle": "JTLonsdale",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 341173
+   "followers": 341199
   },
   {
    "handle": "Jessicalessin",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 322822
+   "followers": 322838
   },
   {
    "handle": "beffjezos",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 310303
+   "followers": 310296
   },
   {
    "handle": "ericries",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 301088
+   "followers": 301090
   },
   {
    "handle": "leerob",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 298987
+   "followers": 299019
   },
   {
    "handle": "kul",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 286876
+   "followers": 286879
   },
   {
    "handle": "davidsenra",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 285946
+   "followers": 285969
   },
   {
    "handle": "deedydas",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 259175
+   "followers": 259242
   },
   {
    "handle": "mlevchin",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 256478
+   "followers": 256477
   },
   {
    "handle": "mntruell",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 234393
+   "followers": 234406
   },
   {
    "handle": "sporadica",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 222565
+   "followers": 222599
   },
   {
    "handle": "jukan05",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 217643
+   "followers": 217647
   },
   {
    "handle": "FoundersPodcast",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 215027
+   "followers": 215018
   },
   {
    "handle": "emilychangtv",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 208638
+   "followers": 208636
   },
   {
    "handle": "bscholl",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 202411
+   "followers": 202448
   },
   {
    "handle": "MikeIsaac",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 193667
+   "followers": 193668
   },
   {
    "handle": "buccocapital",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 189267
+   "followers": 189284
   },
   {
    "handle": "thinkymachines",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 184335
+   "followers": 184343
   },
   {
    "handle": "KTmBoyle",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 171955
+   "followers": 171951
   },
   {
    "handle": "eriktorenberg",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 168117
+   "followers": 168159
   },
   {
    "handle": "dylan522p",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 166975
+   "followers": 166985
   },
   {
    "handle": "danprimack",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 163799
+   "followers": 164004
   },
   {
    "handle": "rohanpaul_ai",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 160173
+   "followers": 160179
   },
   {
    "handle": "ScottWu46",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 151444
+   "followers": 151566
   },
   {
    "handle": "laserboat999",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 139629
+   "followers": 139627
   },
   {
    "handle": "gabriel1",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 132322
+   "followers": 132343
   },
   {
    "handle": "eshear",
@@ -919,91 +919,91 @@
    "handle": "kevinweil",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 122241
+   "followers": 122683
   },
   {
    "handle": "AndrewCurran_",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 110209
+   "followers": 110299
   },
   {
    "handle": "ElizabethHolmes",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 107310
+   "followers": 107517
   },
   {
    "handle": "esthercrawford",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 106718
+   "followers": 106722
   },
   {
    "handle": "alex",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 106305
+   "followers": 106306
   },
   {
    "handle": "StevenLevy",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 102353
+   "followers": 102354
   },
   {
    "handle": "felixrieseberg",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 100714
+   "followers": 100769
   },
   {
    "handle": "ryolu_",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 98659
+   "followers": 98656
   },
   {
    "handle": "martin_casado",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 97663
+   "followers": 97672
   },
   {
    "handle": "TheGregYang",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 94674
+   "followers": 94673
   },
   {
    "handle": "jaminball",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 93480
+   "followers": 93483
   },
   {
    "handle": "iannuttall",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 81899
+   "followers": 81895
   },
   {
    "handle": "jietang",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 77598
+   "followers": 77601
   },
   {
    "handle": "MollySOShea",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 77501
+   "followers": 77500
   },
   {
    "handle": "deanwball",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 76388
+   "followers": 76398
   },
   {
    "handle": "snowmaker",
@@ -1015,55 +1015,55 @@
    "handle": "msquinn",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 63645
+   "followers": 63642
   },
   {
    "handle": "kimmaicutler",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 58542
+   "followers": 58544
   },
   {
    "handle": "mrexits",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 52031
+   "followers": 52028
   },
   {
    "handle": "c_valenzuelab",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 51497
+   "followers": 51503
   },
   {
    "handle": "pronounced_kyle",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 51390
+   "followers": 51388
   },
   {
    "handle": "joannejang",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 51376
+   "followers": 51380
   },
   {
    "handle": "paularambles",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 49496
+   "followers": 49522
   },
   {
    "handle": "klarnaseb",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 49402
+   "followers": 49404
   },
   {
    "handle": "EricNewcomer",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 48473
+   "followers": 48471
   },
   {
    "handle": "NotTomBrown",
@@ -1081,121 +1081,121 @@
    "handle": "sundeep",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 44951
+   "followers": 44950
   },
   {
    "handle": "amir",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 42976
+   "followers": 42973
   },
   {
    "handle": "parmita",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 41499
+   "followers": 41512
   },
   {
    "handle": "btibor91",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 40541
+   "followers": 40544
   },
   {
    "handle": "quxiaoyin",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 38966
+   "followers": 38969
   },
   {
    "handle": "alexolegimas",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 38136
+   "followers": 38143
   },
   {
    "handle": "edwinarbus",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 37080
+   "followers": 37097
   },
   {
    "handle": "noahzweben",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 35751
+   "followers": 35750
   },
   {
    "handle": "MilksandMatcha",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 34125
+   "followers": 34137
   },
   {
    "handle": "aliansarinik",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 31795
+   "followers": 31803
   },
   {
    "handle": "katgleason",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 31174
+   "followers": 31172
   },
   {
    "handle": "jiratickets",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 30851
+   "followers": 30853
   },
   {
    "handle": "matanSF",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 29656
+   "followers": 29659
   },
   {
    "handle": "yuris",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 29239
+   "followers": 29241
   },
   {
    "handle": "ROWGHANI",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 28402
+   "followers": 28403
   },
   {
    "handle": "soundboy",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 27546
+   "followers": 27547
   },
   {
    "handle": "jpatel41",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 27124
+   "followers": 27125
   },
   {
    "handle": "brendaniribe",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 27080
+   "followers": 27082
   },
   {
    "handle": "crystalsssup",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 27005
+   "followers": 27004
   },
   {
    "handle": "dps",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 26789
+   "followers": 26819
   },
   {
    "handle": "wadefoster",
@@ -1207,55 +1207,55 @@
    "handle": "ti_morse",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 24817
+   "followers": 24815
   },
   {
    "handle": "collinmathilde",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 24366
+   "followers": 24368
   },
   {
    "handle": "SinaHartung",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 24309
+   "followers": 24311
   },
   {
    "handle": "Keller",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 23851
+   "followers": 23856
   },
   {
    "handle": "sourceryy",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 23553
+   "followers": 23555
   },
   {
    "handle": "zatlyn",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 23171
+   "followers": 23183
   },
   {
    "handle": "kirbyman01",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 23164
+   "followers": 23171
   },
   {
    "handle": "Basti",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 22225
+   "followers": 22223
   },
   {
    "handle": "RaghuRaghuram",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 22079
+   "followers": 22076
   },
   {
    "handle": "Willob",
@@ -1273,37 +1273,37 @@
    "handle": "theojaffee",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 21145
+   "followers": 21156
   },
   {
    "handle": "8en",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 20873
+   "followers": 20874
   },
   {
    "handle": "pk_iv",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 20639
+   "followers": 20637
   },
   {
    "handle": "sarahdingwang",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 19675
+   "followers": 19676
   },
   {
    "handle": "Konstantine",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 18996
+   "followers": 19000
   },
   {
    "handle": "lizwessel",
    "group": "tech culture",
    "overlap": 3,
-   "followers": 18152
+   "followers": 18163
   },
   {
    "handle": "lutherlowe",
@@ -1327,55 +1327,55 @@
    "handle": "HubSpot",
    "group": "GTM",
    "overlap": 4,
-   "followers": 781997
+   "followers": 781995
   },
   {
    "handle": "salesforce",
    "group": "GTM",
    "overlap": 4,
-   "followers": 582030
+   "followers": 582026
   },
   {
    "handle": "fivosaresti",
    "group": "GTM",
    "overlap": 4,
-   "followers": 4729
+   "followers": 4731
   },
   {
    "handle": "figma",
    "group": "GTM",
    "overlap": 3,
-   "followers": 578924
+   "followers": 578955
   },
   {
    "handle": "NotionHQ",
    "group": "GTM",
    "overlap": 3,
-   "followers": 532609
+   "followers": 532623
   },
   {
    "handle": "SlackHQ",
    "group": "GTM",
    "overlap": 3,
-   "followers": 434541
+   "followers": 434549
   },
   {
    "handle": "codyschneider",
    "group": "GTM",
    "overlap": 3,
-   "followers": 66786
+   "followers": 66787
   },
   {
    "handle": "itsalexvacca",
    "group": "GTM",
    "overlap": 3,
-   "followers": 36428
+   "followers": 36434
   },
   {
    "handle": "G2dotcom",
    "group": "GTM",
    "overlap": 3,
-   "followers": 32912
+   "followers": 32913
   },
   {
    "handle": "GTMnow_",
@@ -1387,7 +1387,7 @@
    "handle": "TechSalesGuy",
    "group": "GTM",
    "overlap": 3,
-   "followers": 22726
+   "followers": 22725
   },
   {
    "handle": "Salesloft",
@@ -1399,7 +1399,7 @@
    "handle": "MichLieben",
    "group": "GTM",
    "overlap": 3,
-   "followers": 13333
+   "followers": 13335
   },
   {
    "handle": "HackItMax",
@@ -1417,7 +1417,7 @@
    "handle": "ENowoslawski",
    "group": "GTM",
    "overlap": 3,
-   "followers": 5344
+   "followers": 5345
   },
   {
    "handle": "A0ddo",
@@ -1441,49 +1441,49 @@
    "handle": "YourVibeGuy",
    "group": "GTM",
    "overlap": 3,
-   "followers": 369
+   "followers": 370
   },
   {
    "handle": "AnthropicAI",
    "group": "GTM",
    "overlap": 2,
-   "followers": 1830804
+   "followers": 1831241
   },
   {
    "handle": "AlexHormozi",
    "group": "GTM",
    "overlap": 2,
-   "followers": 1082598
+   "followers": 1082668
   },
   {
    "handle": "reidhoffman",
    "group": "GTM",
    "overlap": 2,
-   "followers": 1069120
+   "followers": 1069143
   },
   {
    "handle": "LeadToday",
    "group": "GTM",
    "overlap": 2,
-   "followers": 988100
+   "followers": 988092
   },
   {
    "handle": "gregisenberg",
    "group": "GTM",
    "overlap": 2,
-   "followers": 748932
+   "followers": 749333
   },
   {
    "handle": "thejustinwelsh",
    "group": "GTM",
    "overlap": 2,
-   "followers": 592573
+   "followers": 592594
   },
   {
    "handle": "jasonlk",
    "group": "GTM",
    "overlap": 2,
-   "followers": 253914
+   "followers": 254052
   },
   {
    "handle": "Timothy_Hughes",
@@ -1495,13 +1495,13 @@
    "handle": "askOkara",
    "group": "GTM",
    "overlap": 2,
-   "followers": 78483
+   "followers": 78480
   },
   {
    "handle": "waynesutton",
    "group": "GTM",
    "overlap": 2,
-   "followers": 68346
+   "followers": 68355
   },
   {
    "handle": "NathanLatka",
@@ -1513,37 +1513,37 @@
    "handle": "saastr",
    "group": "GTM",
    "overlap": 2,
-   "followers": 65191
+   "followers": 65194
   },
   {
    "handle": "akothari",
    "group": "GTM",
    "overlap": 2,
-   "followers": 63990
+   "followers": 63989
   },
   {
    "handle": "smoothsale",
    "group": "GTM",
    "overlap": 2,
-   "followers": 55018
+   "followers": 55017
   },
   {
    "handle": "M_3jr",
    "group": "GTM",
    "overlap": 2,
-   "followers": 53626
+   "followers": 53627
   },
   {
    "handle": "sujanpatel",
    "group": "GTM",
    "overlap": 2,
-   "followers": 51879
+   "followers": 51878
   },
   {
    "handle": "fin_ai",
    "group": "GTM",
    "overlap": 2,
-   "followers": 45243
+   "followers": 45241
   },
   {
    "handle": "TunstallAsc",
@@ -1579,13 +1579,13 @@
    "handle": "coldemailchris",
    "group": "GTM",
    "overlap": 2,
-   "followers": 21610
+   "followers": 21612
   },
   {
    "handle": "Laraacostar",
    "group": "GTM",
    "overlap": 2,
-   "followers": 20599
+   "followers": 20606
   },
   {
    "handle": "TomPick",
@@ -1597,7 +1597,7 @@
    "handle": "apify",
    "group": "GTM",
    "overlap": 2,
-   "followers": 19978
+   "followers": 20003
   },
   {
    "handle": "kathylayne",
@@ -1615,7 +1615,7 @@
    "handle": "attio",
    "group": "GTM",
    "overlap": 2,
-   "followers": 17621
+   "followers": 17617
   },
   {
    "handle": "6senseInc",
@@ -1633,13 +1633,13 @@
    "handle": "PhilGerb",
    "group": "GTM",
    "overlap": 2,
-   "followers": 16537
+   "followers": 16536
   },
   {
    "handle": "CaseyCRL",
    "group": "GTM",
    "overlap": 2,
-   "followers": 16234
+   "followers": 16233
   },
   {
    "handle": "DigitalKeith",
@@ -1657,7 +1657,7 @@
    "handle": "xavier_coiffard",
    "group": "GTM",
    "overlap": 2,
-   "followers": 14526
+   "followers": 14527
   },
   {
    "handle": "B2B_SalesTips",
@@ -1681,25 +1681,25 @@
    "handle": "RetentionAdam",
    "group": "GTM",
    "overlap": 2,
-   "followers": 10869
+   "followers": 10868
   },
   {
    "handle": "Chris_Orlob",
    "group": "GTM",
    "overlap": 2,
-   "followers": 10757
+   "followers": 10760
   },
   {
    "handle": "GS_Social",
    "group": "GTM",
    "overlap": 2,
-   "followers": 10533
+   "followers": 10532
   },
   {
    "handle": "vxanand",
    "group": "GTM",
    "overlap": 2,
-   "followers": 9985
+   "followers": 9986
   },
   {
    "handle": "jeannieywalden",
@@ -1729,31 +1729,31 @@
    "handle": "natolisnuggets",
    "group": "GTM",
    "overlap": 2,
-   "followers": 7568
+   "followers": 7566
   },
   {
    "handle": "close",
    "group": "GTM",
    "overlap": 2,
-   "followers": 6621
+   "followers": 6622
   },
   {
    "handle": "poyark",
    "group": "GTM",
    "overlap": 2,
-   "followers": 6311
+   "followers": 6312
   },
   {
    "handle": "majavoje",
    "group": "GTM",
    "overlap": 2,
-   "followers": 6242
+   "followers": 6243
   },
   {
    "handle": "cleodotxyz",
    "group": "GTM",
    "overlap": 2,
-   "followers": 6170
+   "followers": 6171
   },
   {
    "handle": "Benson_Mwaura",
@@ -1765,13 +1765,13 @@
    "handle": "dan__rosenthal",
    "group": "GTM",
    "overlap": 2,
-   "followers": 5781
+   "followers": 5782
   },
   {
    "handle": "clay",
    "group": "GTM",
    "overlap": 2,
-   "followers": 5753
+   "followers": 5756
   },
   {
    "handle": "GoModernSelling",
@@ -1819,7 +1819,7 @@
    "handle": "MitchellKeller_",
    "group": "GTM",
    "overlap": 2,
-   "followers": 5052
+   "followers": 5055
   },
   {
    "handle": "my6cess",
@@ -1831,7 +1831,7 @@
    "handle": "WillAllred117",
    "group": "GTM",
    "overlap": 2,
-   "followers": 4654
+   "followers": 4655
   },
   {
    "handle": "ifeellikemacmac",
@@ -1843,7 +1843,7 @@
    "handle": "PCinTheCloud",
    "group": "GTM",
    "overlap": 2,
-   "followers": 3951
+   "followers": 3952
   },
   {
    "handle": "sudhirjhs",
@@ -1867,7 +1867,7 @@
    "handle": "TechCrunch",
    "group": "tech culture",
    "overlap": 0,
-   "followers": 11067229
+   "followers": 11067349
   },
   {
    "handle": "cgtwts",
@@ -1879,7 +1879,7 @@
    "handle": "RoundtableSpace",
    "group": "tech culture",
    "overlap": 0,
-   "followers": 269538
+   "followers": 269552
   },
   {
    "handle": "MonacoGTM",
@@ -1921,7 +1921,7 @@
    "handle": "InstantlyAI",
    "group": "GTM",
    "overlap": 0,
-   "followers": 3118
+   "followers": 3119
   }
  ]
 }
