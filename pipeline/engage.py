@@ -320,6 +320,14 @@ def send(msg: dict, dest: str | None = None) -> None:
 
 
 # ---------------------------------------------------------------------------
+def one_person(cfg: dict, name: str, picks: int) -> dict:
+    """The config narrowed to one person, asking for `picks` tweets and a couple of topics."""
+    p = [x for x in cfg["people"] if name.lower() in (x["name"].lower(), (x.get("x") or "").lower())]
+    if not p:
+        raise SystemExit(f"no one called {name} in engage.json")
+    return {**cfg, "people": p, "picks_per_person": picks, "topics_per_person": 2}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--send", action="store_true", help="DM the result on Slack")
@@ -328,11 +336,21 @@ def main() -> None:
     cfg = load_config(args.config)
     tz = os.getenv("ENGAGE_TIMEZONE", "America/Los_Angeles")
     now = datetime.now(timezone.utc)
-    cands = candidates(fetch(cfg, now), cfg, now)
+    only = os.getenv("ENGAGE_ONLY", "").strip()  # a one-off: more picks for one person
+    if only:
+        cfg["window_hours"] = float(os.getenv("ENGAGE_HOURS") or cfg.get("window_hours", 24))
+        cfg["candidates_for_model"] = max(int(cfg.get("candidates_for_model", 120)), 200)
+    cands = candidates(fetch(cfg, now), cfg, now)  # the whole team is still excluded as authors
     if not cands:
         raise SystemExit("no candidate tweets today (every search failed, or nothing passed the filters)")
+    if only:
+        cfg = one_person(cfg, only, int(os.getenv("ENGAGE_PICKS") or 10))
     picks = clean(ask_model(cfg, cands, now), cfg, cands)
     msg = message(picks, cands, cfg, now, tz)
+    if only:
+        msg["blocks"][0]["text"]["text"] = msg["blocks"][0]["text"]["text"].replace(
+            "What to engage with", f"More for {cfg['people'][0]['name']}", 1)
+        msg["text"] = msg["text"].replace("What to engage with", f"More for {cfg['people'][0]['name']}", 1)
     out = Path(os.getenv("ENGAGE_OUT") or ROOT / "public" / "engage")
     out.mkdir(parents=True, exist_ok=True)
     (out / "last.json").write_text(json.dumps({"at": now.isoformat(), "picks": picks, "message": msg,

@@ -267,6 +267,7 @@ class Worker:
         def job():
             try:
                 {"run": self.run_user, "deliver": self.deliver_user, "engage": lambda _: self.run_engage(),
+                 "engage_oneoff": lambda _: self.run_engage(oneoff=True),
                  "channel": lambda _: self.run_channel(), "follow": lambda _: self.run_follow()}[kind](user_id)
             finally:
                 with self._lock:
@@ -284,6 +285,8 @@ class Worker:
                 self._submit("run", uid)
         if self.cfg.engage and self.engage_due(now):
             self._submit("engage", 0)
+        if self.cfg.engage and self.db.meta("engage_oneoff"):
+            self._submit("engage_oneoff", 0)
         if self.cfg.engage and self.cfg.follow_enabled and self.follow_due(now):
             self._submit("follow", 0)
         if self.preview_uid is not None and self.cfg.preview_times:
@@ -458,10 +461,23 @@ class Worker:
         log.warning("channel: failed: %s", err)
         return False
 
-    def run_engage(self) -> bool:
+    def run_engage(self, oneoff: bool = False) -> bool:
+        """The daily picks, or (oneoff) more picks for one person, DMed to ENGAGE_DM_EMAIL, outside the schedule."""
         now = time.time()
-        self.db.set_meta("engage_tried_at", str(now))
-        self.db.set_meta("engage_force", "0")
+        extra = {}
+        if oneoff:
+            try:
+                req = json.loads(self.db.meta("engage_oneoff") or "{}")
+            except ValueError:
+                req = {}
+            self.db.set_meta("engage_oneoff", None)
+            if not req.get("person"):
+                return False
+            extra = {"ENGAGE_ONLY": req["person"], "ENGAGE_PICKS": str(req.get("picks", 10)),
+                     "ENGAGE_HOURS": str(req.get("hours", 24)), "ENGAGE_SLACK_CHANNEL": ""}
+        else:
+            self.db.set_meta("engage_tried_at", str(now))
+            self.db.set_meta("engage_force", "0")
         out = self.cfg.data_dir / "engage"
         out.mkdir(parents=True, exist_ok=True)
         env = {k: os.environ[k] for k in ENV_ALLOW if os.environ.get(k)}
@@ -471,15 +487,22 @@ class Worker:
                     "AI_GATEWAY_API_KEY": keys.get("ai_gateway", ""), "SLACK_BOT_TOKEN": self.cfg.engage_slack_token,
                     "ENGAGE_DM_EMAIL": self.cfg.engage_dm_email, "ENGAGE_DM_USER": self.cfg.engage_dm_user,
                     "ENGAGE_SLACK_CHANNEL": self.cfg.engage_slack_channel,
-                    "ENGAGE_TIMEZONE": self.cfg.engage_tz, "ENGAGE_OUT": str(out)})
+                    "ENGAGE_TIMEZONE": self.cfg.engage_tz, "ENGAGE_OUT": str(out / "oneoff" if oneoff else out)})
+        env.update(extra)
         with self._engage_lock:
             code, text = self._exec(["--send"], env, ENGAGE_TIMEOUT,
                                     [*keys.values(), self.cfg.engage_slack_token], module="pipeline.engage")
-        self._write_log(out / "last_run.log", text)
+        self._write_log(out / ("last_oneoff.log" if oneoff else "last_run.log"), text)
         for ln in text.splitlines():
             if ln.strip().startswith(("fetched", "search failed", "  search failed", "slack", "Traceback",
                                       "RuntimeError", "SystemExit")) or "eligible" in ln:
                 log.info("engage: %s", ln.strip()[:300])
+        if oneoff:
+            lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+            self.db.set_meta("engage_oneoff_result", json.dumps(
+                {"at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "person": req["person"], "ok": code == 0,
+                 "error": None if code == 0 else ("timed out" if code is None else (lines[-1][:300] if lines else "no output"))}))
+            return code == 0
         if code == 0:
             self._daily_done("engage", self.cfg.engage_time, self.cfg.engage_tz, ENGAGE_LEAD)
             log.info("engage: DM sent")

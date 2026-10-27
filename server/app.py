@@ -60,6 +60,14 @@ class ApiError(Exception):
 # ---------------------------------------------------------------------------
 # Request bodies
 # ---------------------------------------------------------------------------
+class EngageRun(BaseModel):
+    """POST /api/engage/run: no body for today's picks now; person for a one-off, DMed to the owner."""
+    model_config = ConfigDict(extra="forbid")
+    person: Optional[str] = Field(None, max_length=40)
+    picks: int = Field(10, ge=1, le=20)
+    hours: int = Field(24, ge=6, le=72)
+
+
 class _Body(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -813,7 +821,8 @@ def create_app(cfg: Config | None = None) -> FastAPI:
                 "destination": cfg.engage_slack_channel or cfg.engage_dm_user or cfg.engage_dm_email,
                 "follow_destination": cfg.follow_slack_channel or cfg.engage_dm_user or cfg.engage_dm_email,
                 "last_sent_date": None if sent in (None, "first") else sent, "last_error": err,
-                "last_tried_at": _iso(float(db.meta("engage_tried_at") or 0) or None)}
+                "last_tried_at": _iso(float(db.meta("engage_tried_at") or 0) or None),
+                "last_oneoff": json.loads(db.meta("engage_oneoff_result") or "null")}
 
     @app.get("/api/engage/status")
     def get_engage_status(request: Request):
@@ -831,10 +840,21 @@ def create_app(cfg: Config | None = None) -> FastAPI:
                 "last_sent_date": db.meta("follow_sent_date"), "last_error": db.meta("follow_last_error") or None}
 
     @app.post("/api/engage/run")
-    def engage_run(request: Request):
+    def engage_run(request: Request, body: Optional[EngageRun] = Body(None)):
         require_engage_owner(request)
         if not cfg.engage:
             raise ApiError(400, "The engagement DM isn't set up. Missing: " + ", ".join(engage_status()["missing"]) + ".")
+        if body and body.person:
+            people = json.loads((ROOT / "engage.json").read_text())["people"]
+            match = next((p for p in people if body.person.strip().lstrip("@").lower()
+                          in (p["name"].lower(), (p.get("x") or "").lower())), None)
+            if not match:
+                raise ApiError(400, "No one by that name in engage.json: " + ", ".join(p["name"] for p in people) + ".")
+            db.set_meta("engage_oneoff", json.dumps({"person": match["name"], "picks": body.picks, "hours": body.hours}))
+            worker.kick()
+            return {"message": f"Finding {body.picks} more tweets for {match['name']} from the last {body.hours} hours. "
+                               "The DM arrives in a few minutes; the daily send is unchanged.",
+                    "last_oneoff": json.loads(db.meta("engage_oneoff_result") or "null")}
         db.set_meta("engage_force", "1")
         worker.kick()
         return {**engage_status(), "message": "Building today's picks now. The DM arrives in a few minutes."}

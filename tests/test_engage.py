@@ -218,3 +218,31 @@ def test_switching_to_a_channel_posts_right_away(tmp_path, monkeypatch):
                         (seen.update(env=env) or (0, "slack: sent\n")))
     app2.state.worker.run_engage()
     assert seen["env"]["ENGAGE_SLACK_CHANNEL"] == "C0ENGAGE"
+
+
+def test_one_off_for_one_person(tmp_path, monkeypatch):
+    app = make_app(tmp_path, monkeypatch, ENGAGE_SLACK_CHANNEL="C0ENGAGE")
+    w, db = app.state.worker, app.state.db
+    me = TestClient(app)
+    me.post("/api/signup", json={"email": "vivek@rox.com", "password": "long enough pw"})
+    assert me.post("/api/engage/run", json={"person": "nobody"}).status_code == 400
+    assert me.post("/api/engage/run", json={"person": "Shriram", "picks": 50}).status_code == 422
+    r = me.post("/api/engage/run", json={"person": "@shriram_s", "picks": 12, "hours": 48})
+    assert r.status_code == 200 and "Shriram" in r.json()["message"] and db.meta("engage_force") != "1"
+    seen = {}
+    monkeypatch.setattr(w, "_exec", lambda args, env, timeout, secrets_, module="pipeline.run":
+                        (seen.update(env=env) or (0, "slack: sent\n")))
+    db.set_meta("engage_sent_date", "2026-10-12")
+    assert w.run_engage(oneoff=True)
+    env = seen["env"]
+    assert (env["ENGAGE_ONLY"], env["ENGAGE_PICKS"], env["ENGAGE_HOURS"]) == ("Shriram", "12", "48")
+    assert env["ENGAGE_SLACK_CHANNEL"] == "" and env["ENGAGE_DM_EMAIL"] == "vivek@rox.com"  # DMed to you
+    assert db.meta("engage_oneoff") is None and db.meta("engage_sent_date") == "2026-10-12"  # daily untouched
+    assert me.get("/api/engage/status").json()["last_oneoff"]["ok"]
+
+
+def test_one_person_config(cfg):
+    one = engage.one_person(cfg, "shriram", 10)
+    assert [p["name"] for p in one["people"]] == ["Shriram"] and one["picks_per_person"] == 10
+    with pytest.raises(SystemExit):
+        engage.one_person(cfg, "nobody", 10)
