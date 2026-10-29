@@ -1,4 +1,5 @@
 import json
+import pytest
 
 from fastapi.testclient import TestClient
 
@@ -199,3 +200,24 @@ def test_head_healthz_and_token_log_filter(client):
     rec = logging.LogRecord("uvicorn.access", logging.INFO, "", 0, '%s - "%s %s"', ("1.2.3.4", "GET", "/r/SECRETTOKEN123/recap.md"), None)
     _HideRecapTokens().filter(rec)
     assert "SECRETTOKEN123" not in rec.getMessage()
+
+
+def test_paused_makes_no_api_calls(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+    from server import checks, config, slackbot
+    from server.app import create_app
+    for k, v in {"DATA_DIR": str(tmp_path / "data"), "TIMELINE_DEMO": "1", "SECRET_KEY": "test-secret-key-that-is-long-enough",
+                 "PAUSED": "1", "ENGAGE_SLACK_BOT_TOKEN": "xoxb-1", "ENGAGE_DM_EMAIL": "vivek@rox.com",
+                 "PREVIEW_TWITTERAPI_IO_KEY": "tw", "PREVIEW_AI_GATEWAY_API_KEY": "gw"}.items():
+        monkeypatch.setenv(k, v)
+    monkeypatch.delenv("TIMELINE_WORKER", raising=False)
+    cfg = config.load()
+    assert cfg.paused and not cfg.worker
+    monkeypatch.setattr(checks, "check_twitterapi", lambda *a, **k: pytest.fail("called twitterapi"))
+    monkeypatch.setattr(slackbot, "dispatch", lambda *a, **k: pytest.fail("bot answered"))
+    app = create_app(cfg)
+    with TestClient(app) as c:
+        c.post("/api/signup", json={"email": "vivek@rox.com", "password": "long enough pw"})
+        for path in ("/api/run", "/api/engage/run", "/api/keys/check"):
+            r = c.post(path, json={})
+            assert r.status_code == 503 and "paused" in r.json()["error"]

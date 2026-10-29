@@ -308,6 +308,8 @@ python -m pipeline.run --demo                        # render one page from samp
 
 ---
 
+**Pausing everything:** `PAUSED=1` turns the scheduler off, refuses every run-now route and key checks with 503, and keeps the Slack bot silent, so no twitterapi.io or AI Gateway calls happen; existing pages and recaps still serve. As of 2026-10-29 the old GitHub Actions workflows on `main` (`update.yml`, `preview.yml`, `debug-search.yml`) are disabled in the repo's Actions settings (re-enable there). comp-intel's daily routine runs as a Cursor agent outside both repos and is paused in Cursor.
+
 ## 8. Known gaps and unverified pieces
 
 - **Google sign-in** is untested against real Google, because the owner can't create the OAuth client yet. The flow is covered by tests with a mocked token exchange.

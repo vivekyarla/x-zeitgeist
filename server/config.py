@@ -34,6 +34,7 @@ class Config:
     refresh_hours: float
     demo: bool
     worker: bool
+    paused: bool  # PAUSED=1: no paid API calls at all (no scheduler, no bot answers, no key checks)
     rate_limit: int  # login/signup attempts per IP per 10 minutes
     google_client_id: str = ""
     google_client_secret: str = ""
@@ -175,7 +176,8 @@ def load() -> Config:
         max_concurrent_runs=max(1, int(os.getenv("MAX_CONCURRENT_RUNS", "3"))),
         refresh_hours=max(0.5, float(os.getenv("REFRESH_HOURS", "3"))),
         demo=demo,
-        worker=os.getenv("TIMELINE_WORKER", "1") != "0",
+        worker=os.getenv("TIMELINE_WORKER", "1") != "0" and not _truthy(os.getenv("PAUSED")),
+        paused=_truthy(os.getenv("PAUSED")),
         rate_limit=max(1, int(os.getenv("RATE_LIMIT", "20"))),
         google_client_id=google_id,
         google_client_secret=google_secret,

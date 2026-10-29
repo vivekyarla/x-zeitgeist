@@ -193,6 +193,8 @@ def create_app(cfg: Config | None = None) -> FastAPI:
     async def lifespan(app: FastAPI):
         if cfg.worker:
             worker.start()
+        elif cfg.paused:
+            log.warning("PAUSED=1: the scheduler is off and no paid API calls are made; pages serve as they are")
         yield
         worker.stop()
 
@@ -609,6 +611,8 @@ def create_app(cfg: Config | None = None) -> FastAPI:
     @app.post("/api/keys/check")
     def keys_check(request: Request, body: KeysCheckIn = Body(default=KeysCheckIn())):
         user = require_user(request)
+        if cfg.paused:
+            raise ApiError(503, "Updates are paused on this server right now, so keys can't be checked.")
         saved = worker.keys(user["id"])
         out = {}
         for name, fn in (("twitterapi_io", checks.check_twitterapi), ("ai_gateway", checks.check_gateway)):
@@ -636,6 +640,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
     # -- runs ------------------------------------------------------------------
     @app.post("/api/onboarding/complete")
     def onboarding_complete(request: Request):
+        not_paused()
         user = require_user(request)
         if not has_required_keys(user["id"]):
             raise ApiError(400, "Add your twitterapi.io and Vercel AI Gateway keys first.")
@@ -645,6 +650,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     @app.post("/api/run")
     def run_now(request: Request, body: RunIn = Body(default=RunIn())):
+        not_paused()
         user = acting(request)
         uid = user["id"]
         if not user["onboarded"]:
@@ -715,6 +721,10 @@ def create_app(cfg: Config | None = None) -> FastAPI:
             raise ApiError(404, "No competitive intel brief right now.")
         return Response(md, media_type=RECAP_FILES["recap.md"], headers=NO_CACHE)
 
+    def not_paused() -> None:
+        if cfg.paused:
+            raise ApiError(503, "Updates are paused on this server right now (PAUSED=1). Nothing new is fetched or sent.")
+
     def require_admin(request: Request):
         user = require_user(request)
         if not is_admin(user):
@@ -750,6 +760,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     @app.post("/api/channel/run")
     def channel_run(request: Request):
+        not_paused()
         require_admin(request)
         if not cfg.channel:
             raise ApiError(400, "The channel digest isn't set up. Missing: " + ", ".join(channel_status()["missing"]) + ".")
@@ -801,7 +812,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
             return {"ok": True}
         token = cfg.channel_slack_token or cfg.engage_slack_token
         key = (cfg.channel_keys or cfg.engage_keys or cfg.preview_keys or {}).get("ai_gateway")
-        if data.get("type") == "event_callback" and token:
+        if data.get("type") == "event_callback" and token and not cfg.paused:
             slackbot.dispatch(data.get("event") or {}, cfg, token, key)
         return {"ok": True}
 
@@ -831,6 +842,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     @app.post("/api/engage/follow/run")
     def follow_run(request: Request):
+        not_paused()
         require_engage_owner(request)
         if not cfg.engage:
             raise ApiError(400, "The engagement DM isn't set up. Missing: " + ", ".join(engage_status()["missing"]) + ".")
@@ -841,6 +853,7 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     @app.post("/api/engage/run")
     def engage_run(request: Request, body: Optional[EngageRun] = Body(None)):
+        not_paused()
         require_engage_owner(request)
         if not cfg.engage:
             raise ApiError(400, "The engagement DM isn't set up. Missing: " + ", ".join(engage_status()["missing"]) + ".")
