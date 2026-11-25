@@ -825,7 +825,8 @@ def create_app(cfg: Config | None = None) -> FastAPI:
 
     def engage_status() -> dict:
         sent, err = db.meta("engage_sent_date"), db.meta("engage_last_error") or None
-        missing = [n for n, ok in (("ENGAGE_SLACK_BOT_TOKEN", cfg.engage_slack_token),
+        missing = [n for n, ok in (("ENGAGE_ENABLED (it's set to 0)", cfg.engage_enabled),
+                                   ("ENGAGE_SLACK_BOT_TOKEN", cfg.engage_slack_token),
                                    ("ENGAGE_SLACK_CHANNEL or ENGAGE_DM_EMAIL", cfg.engage_slack_channel or cfg.engage_dm_email or cfg.engage_dm_user),
                                    ("twitterapi.io and AI Gateway keys (ENGAGE_* or PREVIEW_*)", cfg.engage_keys)) if not ok]
         return {"enabled": cfg.engage, "missing": missing, "time": cfg.engage_time, "timezone": cfg.engage_tz,

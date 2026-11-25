@@ -54,6 +54,7 @@ class Config:
     engage_weekdays_only: bool = False
     engage_keys: dict | None = None
     follow_enabled: bool = True     # weekly follow recommendations (pipeline/follow.py), same bot and DM
+    engage_enabled: bool = True     # ENGAGE_ENABLED=0 turns the engage digest (and follow recs) off
     follow_day: int = 0             # Monday
     follow_time: str = "11:15"
 
@@ -81,7 +82,7 @@ class Config:
 
     @property
     def engage(self) -> bool:
-        return bool(self.engage_slack_token and (self.engage_slack_channel or self.engage_dm_email or self.engage_dm_user)
+        return bool(self.engage_enabled and self.engage_slack_token and (self.engage_slack_channel or self.engage_dm_email or self.engage_dm_user)
                     and self.engage_keys)
 
     @property
@@ -196,6 +197,7 @@ def load() -> Config:
         engage_weekdays_only=_truthy(os.getenv("ENGAGE_WEEKDAYS_ONLY")),
         engage_keys=ek if all(ek.values()) else None,
         follow_enabled=_truthy(os.getenv("FOLLOW_ENABLED", "1")),
+        engage_enabled=_truthy(os.getenv("ENGAGE_ENABLED", "1")),
         follow_day=days.index(follow_day),
         follow_time=follow_time,
         admin_emails=admins,

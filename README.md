@@ -124,6 +124,8 @@ Setup:
 2. Set `ENGAGE_SLACK_BOT_TOKEN` and `ENGAGE_DM_EMAIL`. It uses the example page's `PREVIEW_*` keys unless `ENGAGE_*` keys are set.
 3. The first DM goes out right after the deploy, so you can check it; after that, daily. Signed in as `ENGAGE_DM_EMAIL`, `POST /api/engage/run` sends one now and `GET /api/engage/status` shows the last send or error. Locally: `python -m pipeline.engage` prints the message without sending.
 
+**Turning it off:** `ENGAGE_ENABLED=0` stops the daily digest, the Monday follow recommendations and one-offs, with no API calls for them. Other features that share the bot token keep working.
+
 **More for one person (one-off):** signed in as `ENGAGE_DM_EMAIL`, `POST /api/engage/run` with `{"person": "Shriram", "picks": 10, "hours": 24}` (picks 1–20, hours 6–72) DMs you a fresh, longer list for just that person. The daily send isn't affected; `/api/engage/status` shows the result under `last_oneoff`.
 
 **Post it to a channel instead:** set `ENGAGE_SLACK_CHANNEL` to a channel ID (`C…`) and invite the bot (`/invite @Engage digest`). The weekly follow recommendations go there too, unless `FOLLOW_SLACK_CHANNEL` names another channel. Changing the destination posts once right away. `ENGAGE_DM_EMAIL` still decides who can use `/api/engage/run` and `/api/engage/status`.

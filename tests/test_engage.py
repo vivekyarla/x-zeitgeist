@@ -246,3 +246,14 @@ def test_one_person_config(cfg):
     assert [p["name"] for p in one["people"]] == ["Shriram"] and one["picks_per_person"] == 10
     with pytest.raises(SystemExit):
         engage.one_person(cfg, "nobody", 10)
+
+
+def test_engage_can_be_turned_off(tmp_path, monkeypatch):
+    app = make_app(tmp_path, monkeypatch, ENGAGE_ENABLED="0")
+    cfg = app.state.cfg
+    assert not cfg.engage and cfg.channel_slack_token == "xoxb-1"  # the channel digest keeps its bot
+    me = TestClient(app)
+    me.post("/api/signup", json={"email": "vivek@rox.com", "password": "long enough pw"})
+    st = me.get("/api/engage/status").json()
+    assert not st["enabled"] and any("ENGAGE_ENABLED" in m for m in st["missing"])
+    assert me.post("/api/engage/run").status_code == 400
